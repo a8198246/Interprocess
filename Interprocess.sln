@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Express 2013 for Windows Desktop
+VisualStudioVersion = 12.0.30501.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Interprocess", "Interprocess\Interprocess.vcxproj", "{88FCB94C-586A-4BCC-93B2-9A4AA8BCEAC2}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Test App", "Test App\Test App.vcxproj", "{0A3E3266-F051-4ACD-9FF7-48AF5763A0EA}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{88FCB94C-586A-4BCC-93B2-9A4AA8BCEAC2}.Debug|Win32.ActiveCfg = Debug|Win32
+		{88FCB94C-586A-4BCC-93B2-9A4AA8BCEAC2}.Debug|Win32.Build.0 = Debug|Win32
+		{88FCB94C-586A-4BCC-93B2-9A4AA8BCEAC2}.Release|Win32.ActiveCfg = Release|Win32
+		{88FCB94C-586A-4BCC-93B2-9A4AA8BCEAC2}.Release|Win32.Build.0 = Release|Win32
+		{0A3E3266-F051-4ACD-9FF7-48AF5763A0EA}.Debug|Win32.ActiveCfg = Debug|Win32
+		{0A3E3266-F051-4ACD-9FF7-48AF5763A0EA}.Debug|Win32.Build.0 = Debug|Win32
+		{0A3E3266-F051-4ACD-9FF7-48AF5763A0EA}.Release|Win32.ActiveCfg = Release|Win32
+		{0A3E3266-F051-4ACD-9FF7-48AF5763A0EA}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
