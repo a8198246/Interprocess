@@ -43,7 +43,6 @@ namespace n_details
 		protected: ::boost::asio::io_service       m_output_service;
 		protected: ::boost::asio::io_service::work m_output_service_work;
 		//	TODO replace with stack or TLS?
-		protected: ::boost::mutex                  m_pending_output_chunk_sync;
 		protected: t_Chunk                         m_pending_output_chunk;
 		//	debug logging
 	//#ifdef _DEBUG
@@ -52,7 +51,6 @@ namespace n_details
 	//#endif
 		private: volatile t_ApplicationId          m_application_id = 0;
 		private: volatile bool                     m_application_set = false;
-		private: ::boost::mutex                    m_application_id_sync;
 
 		#pragma endregion
 
@@ -104,13 +102,9 @@ namespace n_details
 		{
 			if(!m_application_set)
 			{
-				::boost::lock_guard<decltype(m_application_id_sync)> lock(m_application_id_sync);
-				if(!m_application_set)
-				{
-					m_application_id = application_id;
-					m_application_set = true;
-					m_output_service_thread = ::boost::thread(::boost::bind(&t_Slave::Retrieve_Output_From_Master, this));
-				}
+				m_application_id = application_id;
+				m_application_set = true;
+				m_output_service_thread = ::boost::thread(::boost::bind(&t_Slave::Retrieve_Output_From_Master, this));
 			}
 			if(application_id != m_application_id)
 			{
@@ -127,7 +121,6 @@ namespace n_details
 			}
 			auto p_write_cursor = p_buffer;
 			{
-				::boost::lock_guard<::boost::mutex> lock(m_pending_output_chunk_sync);
 				auto const p_buffer_end = p_buffer + bc_buffer_capacity;
 				for(;;)
 				{
