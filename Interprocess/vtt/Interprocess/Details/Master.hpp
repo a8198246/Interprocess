@@ -65,12 +65,12 @@ namespace n_details
 			assert(nullptr != p_buffer);
 			assert(0 < bc_buffer_capacity);
 			size_t bc_written = 0;
-			Write_Chunk_To_Buffer(m_pending_output, p_buffer, bc_buffer_capacity, bc_written, m_pending_output);
-			if(0 < bc_written)
+			auto have_pending_output_from_prvious_call_to_this_function = m_pending_output.Is_Not_Empty();
+			if(have_pending_output_from_prvious_call_to_this_function)
 			{
-				return(bc_written);
+				Write_Chunk_To_Buffer(m_pending_output, p_buffer, bc_buffer_capacity, bc_written, m_pending_output);
 			}
-			if(bc_written < bc_buffer_capacity)
+			else
 			{
 				auto & pipe = m_Broker.Get_SlavesToMasterPipe();
 				Write_Chunk_To_Buffer(pipe.Read(), p_buffer, bc_buffer_capacity, bc_written, m_pending_output);
