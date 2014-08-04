@@ -7,6 +7,17 @@
     <ClInclude Include="vtt\Interprocess\Details\Precompiled.hpp" />
     <ClInclude Include="vtt\Interprocess\Details\Main Boost Control.hpp" />
     <ClInclude Include="vtt\Interprocess\Details\Main.hpp" />
+    <ClInclude Include="vtt\Interprocess\Details\Patron.hpp" />
+    <ClInclude Include="vtt\Interprocess\Details\Master.hpp" />
+    <ClInclude Include="vtt\Interprocess\Configuration.hpp" />
+    <ClInclude Include="vtt\Interprocess\Details\Chunk.hpp" />
+    <ClInclude Include="vtt\Interprocess\Details\Broker.hpp" />
+    <ClInclude Include="vtt\Interprocess\Details\Main Windows SDK Control.hpp" />
+    <ClInclude Include="vtt\Interprocess\Details\Slave.hpp" />
+    <ClInclude Include="vtt\Interprocess\Application Identifier.hpp" />
+    <ClInclude Include="vtt\Interprocess\Details\Fixed Buffer.hpp" />
+    <ClInclude Include="vtt\Interprocess\Details\Pipe.hpp" />
+    <ClInclude Include="vtt\Interprocess\Details\Static Instace.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="vtt\Interprocess\Details\Precompiled.cpp" />

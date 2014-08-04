@@ -48,7 +48,7 @@ class t_Worker
 	private: t_Mutex &  m_sync;             // sync for ::std::cout and rand
 	private: t_Buffer   m_buffer;
 	private: t_Thread   m_thread;
-
+	
 	#pragma endregion
 
 	private: t_Worker(void) = delete;
@@ -57,7 +57,7 @@ class t_Worker
 	:	m_is_master(is_master)
 	,	m_application_id(application_id)
 	,	m_sync(cout_sync)
-	,	m_buffer(VTT_INTERPROCESS_BC_MESSAGE_LIMIT)
+	,	m_buffer(VTT_INTERPROCESS_BC_MESSAGE_BUFFER_LIMIT)
 	{
 		m_thread = ::boost::thread([this](){Routine();});
 	}
@@ -96,7 +96,7 @@ class t_Worker
 
 	private: void Recieve(void)
 	{
-		m_buffer.resize(VTT_INTERPROCESS_BC_MESSAGE_LIMIT);
+		m_buffer.resize(VTT_INTERPROCESS_BC_MESSAGE_BUFFER_LIMIT);
 		size_t bc_recieved;
 		if(m_is_master)
 		{
@@ -104,13 +104,13 @@ class t_Worker
 		}
 		else
 		{
-			bc_recieved = static_cast<size_t>(interprocess_slave_recieve(m_buffer.data(), static_cast<int>(m_buffer.size())));
+			bc_recieved = static_cast<size_t>(interprocess_slave_recieve(m_application_id, m_buffer.data(), static_cast<int>(m_buffer.size())));
 		}
-		assert(bc_recieved <= VTT_INTERPROCESS_BC_MESSAGE_LIMIT);
+		assert(bc_recieved <= VTT_INTERPROCESS_BC_MESSAGE_BUFFER_LIMIT);
 		if(0 != bc_recieved)
 		{
 			t_Lock lock(m_sync);
-			::std::cout << "thread #" << ::boost::this_thread::get_id() << "recieved " << bc_recieved << " bytes:" << ::std::endl;
+			::std::cout << "\t << thread #" << ::boost::this_thread::get_id() << " recieved " << bc_recieved << " bytes:" << ::std::endl;
 			::std::cout.write(m_buffer.data(), bc_recieved);
 			::std::cout.flush();
 		}
@@ -119,19 +119,26 @@ class t_Worker
 	private: void Send(void)
 	{
 		Generate_Message();
-		{
-			t_Lock lock(m_sync);
-			::std::cout << "thread #" << ::boost::this_thread::get_id() << " sends " << m_buffer.size() << " bytes:" << ::std::endl;
-			::std::cout.write(m_buffer.data(), m_buffer.size());
-			::std::cout.flush();
-		}
 		if(m_is_master)
 		{
-			interprocess_master_send(0, m_buffer.data(), static_cast<int>(m_buffer.size()));
+			auto target_application_id = (rand() % 12);
+			{
+				t_Lock lock(m_sync);
+				::std::cout << "\t >> thread #" << ::boost::this_thread::get_id() << " sends " << m_buffer.size() << " bytes to " << target_application_id << ":" << ::std::endl;
+				::std::cout.write(m_buffer.data(), m_buffer.size());
+				::std::cout.flush();
+			}
+			interprocess_master_send(target_application_id, m_buffer.data(), static_cast<int>(m_buffer.size()));
 		}
 		else
 		{
-			interprocess_slave_send(m_application_id, m_buffer.data(), static_cast<int>(m_buffer.size()));
+			{
+				t_Lock lock(m_sync);
+				::std::cout << "\t >> thread #" << ::boost::this_thread::get_id() << " sends " << m_buffer.size() << " bytes to master:" << ::std::endl;
+				::std::cout.write(m_buffer.data(), m_buffer.size());
+				::std::cout.flush();
+			}
+			interprocess_slave_send(m_buffer.data(), static_cast<int>(m_buffer.size()));
 		}
 	}
 
@@ -168,7 +175,6 @@ int main(int argc, char * args[], char *[])
 	{
 		::std::cout << "slave process started" << ::std::endl;
 	}
-	
 	int application_id;
 	if(is_master)
 	{

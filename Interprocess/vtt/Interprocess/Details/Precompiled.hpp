@@ -4,6 +4,7 @@
 #pragma once
 
 #include "Main.hpp"
+#include "Main Windows SDK Control.hpp"
 #include "Main Boost Control.hpp"
 
 #include <intrin.h>
@@ -18,7 +19,7 @@
 #include <boost/cstdint.hpp>
 #include <boost/assert.hpp>
 #include <boost/static_assert.hpp>
-#include <boost/interprocess/containers/vector.hpp>
 #include <boost/thread.hpp>
+
 
 #endif
