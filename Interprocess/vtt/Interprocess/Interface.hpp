@@ -20,7 +20,7 @@ interprocess_master_send(_In_ const int application_id, _In_reads_bytes_(bc_data
 //	Метод блокирующий, до появления первого сообщения, которое можно забрать.
 //	В msgs суммарные данные передаваемых сообщений.
 int VTT_INTERPROCESS_DLL_API
-interprocess_master_recieve(_Out_writes_bytes_(bc_buffer) char * p_buffer, _In_ const int bc_buffer);
+interprocess_master_recieve(_Out_writes_bytes_(bc_buffer_capacity) char * p_buffer, _In_ const int bc_buffer_capacity);
 
 //	Методы, вызываемые в ведомом процессе
 
@@ -31,7 +31,7 @@ interprocess_slave_send(_In_reads_bytes_(bc_data) char const * p_data, _In_range
 //	Метод принимает раннее переданные сообщения, предназначенные процессу с идентификатором id.
 //	В msgs суммарные данные передаваемых сообщений.
 int VTT_INTERPROCESS_DLL_API
-interprocess_slave_recieve(_In_ const int application_id, _Out_writes_bytes_(bc_buffer) char * p_buffer, _In_ const int bc_buffer); 
+interprocess_slave_recieve(_In_ const int application_id, _Out_writes_bytes_(bc_buffer_capacity) char * p_buffer, _In_ const int bc_buffer_capacity); 
 
 VTT_EXTERN_C_ZONE_END
 

@@ -5,12 +5,11 @@
 
 #include "Chunk.hpp"
 #include "Broker.hpp"
+#include "Write Chunk To Buffer.hpp"
+
 #include "../Application Identifier.hpp"
 
-#include "../Configuration.hpp"
-
 #include <cassert>
-#include <memory.h>
 #include <stdexcept>
 
 #include <boost/thread.hpp>
@@ -42,8 +41,7 @@ namespace n_details
 		protected: ::boost::thread                 m_output_service_thread; // continiously reads data from master to slave pipe and sends it to output service
 		protected: ::boost::asio::io_service       m_output_service;
 		protected: ::boost::asio::io_service::work m_output_service_work;
-		//	TODO replace with stack or TLS?
-		protected: t_Chunk                         m_pending_output_chunk;
+		protected: t_Chunk                         m_pending_output;
 		//	debug logging
 	//#ifdef _DEBUG
 	//	protected: ::boost::mutex                  m_logger_sync;
@@ -72,7 +70,7 @@ namespace n_details
 		private: void Retrieve_Output_From_Master(void)
 		{
 			assert(m_application_set);
-			auto p_pipe = m_Broker.Get_MasterToSlavePipe(m_application_id);
+			auto p_pipe = m_Broker.Get_MasterToSlavePipePtr(m_application_id);
 			if(nullptr != p_pipe)
 			{
 				auto & pipe = *p_pipe;
@@ -87,18 +85,19 @@ namespace n_details
 		private: void Handle_Ouput_From_Master(_In_ t_Chunk chunk)
 		{
 			assert(m_application_set);
+			assert(m_pending_output.Is_Empty());
 		//#ifdef _DEBUG
 		//	{
 		//		::boost::lock_guard<::boost::mutex> lock(m_logger_sync);
 		//		m_logger << "slave got " << chunk.Get_Size() << " bytes of data from master process" << ::std::endl;
 		//	}
 		//#endif
-			m_pending_output_chunk = chunk;
+			m_pending_output = chunk;
 		}
 
 		//	Method to be called from user threads
 		//	Returns number of bytes written into the buffer.
-		public: auto Recieve_From_Master(_In_ const t_ApplicationId application_id, _Out_writes_bytes_(bc_buffer) char * p_buffer, _In_ const int bc_buffer_capacity) -> int
+		public: auto Recieve_From_Master(_In_ const t_ApplicationId application_id, _Out_writes_bytes_(bc_buffer_capacity) char * p_buffer, _In_ const size_t bc_buffer_capacity) -> size_t
 		{
 			if(!m_application_set)
 			{
@@ -119,35 +118,20 @@ namespace n_details
 					)
 				);
 			}
-			auto p_write_cursor = p_buffer;
+			size_t bc_written = 0;
+			for(;;)
 			{
-				auto const p_buffer_end = p_buffer + bc_buffer_capacity;
-				for(;;)
+				Write_Chunk_To_Buffer(m_pending_output, p_buffer, bc_buffer_capacity, bc_written, m_pending_output);
+				if(bc_written == bc_buffer_capacity)
 				{
-					m_pending_output_chunk.Clear();
-					m_output_service.poll_one();
-					if(m_pending_output_chunk.Is_Empty())
-					{
-						break;
-					}
-					auto p_write_end = p_write_cursor + m_pending_output_chunk.Get_Size();
-					if(p_write_end <= p_buffer_end)
-					{
-						memcpy(p_write_cursor, m_pending_output_chunk.Get_Data(), m_pending_output_chunk.Get_Size());
-						p_write_cursor = p_write_end;
-						if(p_write_end == p_buffer_end)
-						{
-							break;
-						}
-					}
-					else
-					{
-						m_output_service.dispatch(::boost::bind(&t_Slave::Handle_Ouput_From_Master, this, m_pending_output_chunk));
-						break;
-					}
+					break;
+				}
+				m_output_service.poll_one();
+				if(m_pending_output.Is_Empty())
+				{
+					break;
 				}
 			}
-			auto bc_written = static_cast<int>(p_write_cursor - p_buffer);
 			assert(bc_written <= bc_buffer_capacity);
 			return(bc_written);
 		}
@@ -160,8 +144,10 @@ namespace n_details
 		}
 
 		//	To be called from user threads
-		public: void Send_To_Master(_In_reads_bytes_(bc_data) char const * p_data, _In_ const int bc_data)
+		public: void Send_To_Master(_In_reads_bytes_(bc_data) char const * p_data, _In_ const size_t bc_data)
 		{
+			assert(nullptr != p_data);
+			assert(0 < bc_data);
 			m_input_service.post(::boost::bind(&t_Slave::Handle_Input_To_Master, this, t_Chunk(p_data, bc_data)));
 		}
 	};

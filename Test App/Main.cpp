@@ -8,7 +8,6 @@
 #include <vector>
 #include <algorithm>
 #include <iostream>
-#include <memory>
 #include <cassert>
 
 #include <boost/thread.hpp>
@@ -24,11 +23,11 @@
 #	pragma comment(lib, "boost_system-vc120-mt-1_55.lib")
 #endif
 
-#define EC_WORKERS_MAX    8
-#define WORK_TIME_SECONDS 10
-#define BC_MESSAGE_MAX    128
-#define SEND_RATE         5   // messages will be send once in m_send_rate times
-#define INTERVAL_MSECONDS 100 // interval between recive and send attempts
+#define APPLICATION_ID_MAX 12
+#define WORK_TIME_SECONDS  30
+#define BC_MESSAGE_MAX     128
+#define SEND_RATE          5   // messages will be send once in m_send_rate times
+#define INTERVAL_MSECONDS  100 // interval between recive and send attempts
 
 class t_Worker
 {
@@ -121,7 +120,7 @@ class t_Worker
 		Generate_Message();
 		if(m_is_master)
 		{
-			auto target_application_id = (rand() % 12);
+			auto target_application_id = (rand() % (APPLICATION_ID_MAX + 1));
 			{
 				t_Lock lock(m_sync);
 				::std::cout << "\t >> thread #" << ::boost::this_thread::get_id() << " sends " << m_buffer.size() << " bytes to " << target_application_id << ":" << ::std::endl;
@@ -160,10 +159,6 @@ class t_Worker
 
 int t_Worker::m_seed;
 
-typedef ::std::unique_ptr<t_Worker> t_pWorker;
-
-typedef ::std::vector<t_pWorker> t_Workers;
-
 int main(int argc, char * args[], char *[])
 {
 	auto is_master = (1 == argc);
@@ -189,7 +184,12 @@ int main(int argc, char * args[], char *[])
 		}
 		catch(::boost::bad_lexical_cast &)
 		{
-			::std::cout <<  "application_id is invalid" << args[1] << ::std::endl;
+			::std::cout <<  "application_id \"" << args[1] << "\" is invalid" << ::std::endl;
+			return(0);
+		}
+		if(APPLICATION_ID_MAX < application_id)
+		{
+			::std::cout <<  "application_id \"" << args[1] << "\" is invalid, must be within 0 - " << APPLICATION_ID_MAX << " range" << ::std::endl;
 			return(0);
 		}
 	}
@@ -198,12 +198,8 @@ int main(int argc, char * args[], char *[])
 	
 	::boost::mutex sync;
 	{
-		t_Workers workers;
-		auto const ec_workers = 1 + (rand() % EC_WORKERS_MAX);
-		workers.resize(ec_workers);
-		::std::generate(workers.begin(), workers.end(), [is_master, application_id, &sync](void) -> t_pWorker {return(t_pWorker(new t_Worker(is_master, application_id, sync)));});
+		t_Worker worker(is_master, application_id, sync);
 		::boost::this_thread::sleep(::boost::get_system_time() + ::boost::posix_time::milliseconds(WORK_TIME_SECONDS * 1000));
 	}
-	::std::getchar();
 	return(0);
 }

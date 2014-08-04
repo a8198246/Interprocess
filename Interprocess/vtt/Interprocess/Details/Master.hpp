@@ -5,16 +5,15 @@
 
 #include "Chunk.hpp"
 #include "Broker.hpp"
+#include "Write Chunk To Buffer.hpp"
 
-#include "../Configuration.hpp"
+#include "../Application Identifier.hpp"
 
 #include <cassert>
-#include <memory.h>
 
 #include <boost/thread.hpp>
 #include <boost/cstdint.hpp>
 #include <boost/asio.hpp>
-#include <boost/lexical_cast.hpp>
 #include <boost/bind.hpp>
 
 #ifdef _DEBUG
@@ -32,10 +31,12 @@ namespace n_details
 		#pragma region Fields
 
 		protected: t_Broker                        m_Broker;
-		//	master to slaves
-		protected: ::boost::thread                 m_input_service_thread; // runs input service loop which handles writing of data into master to slave pipes
+		//	master-to-slaves
+		protected: ::boost::thread                 m_input_service_thread; // runs input service loop which handles writing of data into master-to-slave pipes
 		protected: ::boost::asio::io_service       m_input_service;
 		protected: ::boost::asio::io_service::work m_input_service_work;
+		//	slaves-to-master
+		protected: t_Chunk                         m_pending_output;
 		//	debug logging
 	//#ifdef _DEBUG
 	//	protected: ::boost::mutex                  m_logger_sync;
@@ -59,34 +60,25 @@ namespace n_details
 
 		//	Method to be called from user threads
 		//	Returns number of bytes written into the buffer.
-		public: auto Recieve_From_Slaves(_Out_writes_bytes_(bc_buffer) char * p_buffer, _In_ const int bc_buffer_capacity) -> int
+		public: auto Recieve_From_Slaves(_Out_writes_bytes_(bc_buffer_capacity) char * p_buffer, _In_ const size_t bc_buffer_capacity) -> size_t
 		{
-			auto & pipe = m_Broker.Get_SlavesToMasterPipe();
-			auto recieved_block = pipe.Read();
-			int bc_written;
-			if(recieved_block.Get_Size() <= static_cast<size_t>(bc_buffer_capacity))
+			assert(nullptr != p_buffer);
+			assert(0 < bc_buffer_capacity);
+			size_t bc_written = 0;
+			Write_Chunk_To_Buffer(m_pending_output, p_buffer, bc_buffer_capacity, bc_written, m_pending_output);
+			if(bc_written < bc_buffer_capacity)
 			{
-				memcpy(p_buffer, recieved_block.Get_Data(), recieved_block.Get_Size());
-				bc_written = static_cast<int>(recieved_block.Get_Size());
+				auto & pipe = m_Broker.Get_SlavesToMasterPipe();
+				Write_Chunk_To_Buffer(pipe.Read(), p_buffer, bc_buffer_capacity, bc_written, m_pending_output);
 			}
-			else
-			{
-			//#ifdef _DEBUG
-			//	{
-			//		::boost::lock_guard<::boost::mutex> lock(m_logger_sync);
-			//		m_logger << "insufficient buffer size to read output from slave processes: "
-			//			<< bc_buffer_capacity << " bytes, reqired " << recieved_block.Get_Size() << ::std::endl;
-			//	}
-			//#endif
-				bc_written = 0;
-			}
+			assert(bc_written <= bc_buffer_capacity);
 			return(bc_written);
 		}
 
 		//	To be called from input service thread
 		private: void Handle_Input_To_Slave(_In_ const t_ApplicationId application_id, _In_ t_Chunk chunk)
 		{
-			auto p_pipe = m_Broker.Get_MasterToSlavePipe(application_id);
+			auto p_pipe = m_Broker.Get_MasterToSlavePipePtr(application_id);
 			if(nullptr != p_pipe)
 			{
 			//#ifdef _DEBUG
@@ -109,8 +101,10 @@ namespace n_details
 		}
 
 		//	To be called from user threads
-		public: void Send_To_Slave(_In_ const t_ApplicationId application_id, _In_reads_bytes_(bc_data) char const * p_data, _In_ const int bc_data)
+		public: void Send_To_Slave(_In_ const t_ApplicationId application_id, _In_reads_bytes_(bc_data) char const * p_data, _In_ const size_t bc_data)
 		{
+			assert(nullptr != p_data);
+			assert(0 < bc_data);
 			m_input_service.post(::boost::bind(&t_Master::Handle_Input_To_Slave, this, application_id, t_Chunk(p_data, bc_data)));
 		}
 	};

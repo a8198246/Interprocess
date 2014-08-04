@@ -18,6 +18,7 @@
     <ClInclude Include="vtt\Interprocess\Details\Fixed Buffer.hpp" />
     <ClInclude Include="vtt\Interprocess\Details\Pipe.hpp" />
     <ClInclude Include="vtt\Interprocess\Details\Static Instace.hpp" />
+    <ClInclude Include="vtt\Interprocess\Details\Write Chunk To Buffer.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="vtt\Interprocess\Details\Precompiled.cpp" />

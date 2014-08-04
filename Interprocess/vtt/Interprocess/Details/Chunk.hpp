@@ -40,19 +40,6 @@ namespace n_details
 			memcpy(m_p_data.get(), p_data, bc_data);
 		}
 
-		//	constructor for looped circular buffer
-		//public: t_Chunk
-		//(
-		//	_In_reads_bytes_(bc_data1) char const * p_data1, _In_ const size_t bc_data1
-		//,	_In_reads_bytes_(bc_data2) char const * p_data2, _In_ const size_t bc_data2
-		//)
-		//:	m_p_data(new char[bc_data1 + bc_data2])
-		//,	m_bc_data(bc_data1 + bc_data2)
-		//{
-		//	memcpy(m_p_data.get(), p_data1, bc_data1);
-		//	memcpy(m_p_data.get() + bc_data1, p_data2, bc_data2);
-		//}
-
 		public: t_Chunk(_Inout_ t_Chunk const & that)
 		{
 			auto & that_w = const_cast<t_Chunk &>(that);
@@ -60,7 +47,7 @@ namespace n_details
 			::std::swap(m_bc_data, that_w.m_bc_data);
 		}
 						
-		public: void operator = (t_Chunk const & that)
+		public: void operator = (_Inout_ t_Chunk const & that)
 		{
 			auto & that_w = const_cast<t_Chunk &>(that);
 			m_p_data.swap(that_w.m_p_data);

@@ -10,18 +10,13 @@
 
 #include <sal.h>
 
-#include <memory.h>
-
 #include <string>
+#include <map>
+#include <memory>
 
-#include <boost/cstdint.hpp>
-#include <boost/thread.hpp>
 #include <boost/lexical_cast.hpp>
 
 #include <boost/interprocess/managed_shared_memory.hpp>
-#include <boost/interprocess/shared_memory_object.hpp>
-#include <boost/interprocess/sync/named_mutex.hpp>
-#include <boost/interprocess/sync/interprocess_condition.hpp>
 
 namespace n_vtt
 {
@@ -61,22 +56,26 @@ namespace n_details
 			
 		}
 
+		private: t_Broker(t_Broker const &) = delete;
+
 		public: ~t_Broker(void)
 		{
-		
+			//	Do nothing
 		}
+
+		private: void operator = (t_Broker const &) = delete;
 
 		public: auto Get_SlavesToMasterPipe(void) -> t_SlavesToMasterPipe &
 		{
 			return(m_slaves_to_master_pipe);
 		}
 
-		public: auto Get_MasterToSlavePipe(t_ApplicationId application_id) -> t_MasterToSlavePipe *
+		public: auto Get_MasterToSlavePipePtr(_In_ const t_ApplicationId application_id) -> t_MasterToSlavePipe *
 		{
 			auto it_pair = m_master_to_slaves_pipes_map.find(application_id);
 			if(m_master_to_slaves_pipes_map.end() == it_pair)
 			{
-				if(m_master_to_slaves_pipes_map.size() == VTT_INTERPROCESS_EC_APPLICATIONS_MAX)
+				if(VTT_INTERPROCESS_EC_APPLICATIONS_MAX == m_master_to_slaves_pipes_map.size())
 				{
 					return(nullptr);
 				}
