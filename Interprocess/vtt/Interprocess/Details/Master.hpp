@@ -66,6 +66,10 @@ namespace n_details
 			assert(0 < bc_buffer_capacity);
 			size_t bc_written = 0;
 			Write_Chunk_To_Buffer(m_pending_output, p_buffer, bc_buffer_capacity, bc_written, m_pending_output);
+			if(0 < bc_written)
+			{
+				return(bc_written);
+			}
 			if(bc_written < bc_buffer_capacity)
 			{
 				auto & pipe = m_Broker.Get_SlavesToMasterPipe();

@@ -75,7 +75,7 @@
     <OutDir>$(SolutionDir)_Output\$(ProjectName)\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)_Output\$(ProjectName)\$(Platform)\$(Configuration)\Work items\</IntDir>
     <IncludePath>$(SolutionDir)..\boost\;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)..\boost\stage\lib\;$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(SolutionDir)..\boost\stage64\lib\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>$(SolutionDir)_Output\$(ProjectName)\$(Platform)\$(Configuration)\</OutDir>
@@ -87,7 +87,7 @@
     <OutDir>$(SolutionDir)_Output\$(ProjectName)\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)_Output\$(ProjectName)\$(Platform)\$(Configuration)\Work items\</IntDir>
     <IncludePath>$(SolutionDir)..\boost\;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)..\boost\stage\lib\;$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(SolutionDir)..\boost\stage64\lib\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -215,6 +215,7 @@ copy "$(OutDir)*.lib" "$(ProjectDir)x64\Release\"</Command>
     <ClInclude Include="vtt\Interprocess\Details\Precompiled.hpp" />
     <ClInclude Include="vtt\Interprocess\Details\Slave.hpp" />
     <ClInclude Include="vtt\Interprocess\Details\Static Instace.hpp" />
+    <ClInclude Include="vtt\Interprocess\Details\Write Chunk To Buffer.hpp" />
     <ClInclude Include="vtt\Interprocess\Export Control.hpp" />
     <ClInclude Include="vtt\Interprocess\Interface.hpp" />
     <ClInclude Include="vtt\Interprocess\Details\Main Boost Control.hpp" />
