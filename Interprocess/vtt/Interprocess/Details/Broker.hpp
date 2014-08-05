@@ -16,7 +16,7 @@
 
 #include <boost/lexical_cast.hpp>
 
-#include <boost/interprocess/managed_shared_memory.hpp>
+#define VTT_INTERPROCESS_MAPPED_OBJECTS_PREFIX "vtt interprocess "
 
 namespace n_vtt
 {
@@ -26,9 +26,7 @@ namespace n_details
 {
 	class t_Broker
 	{
-		protected: typedef ::boost::interprocess::managed_shared_memory t_SharedMemory;
-
-		protected: typedef t_Pipe<VTT_INTERPROCESS_BC_MESSAGE_BUFFER_LIMIT * VTT_INTERPROCESS_EC_APPLICATIONS_MAX> t_SlavesToMasterPipe;
+		protected: typedef t_Pipe<VTT_INTERPROCESS_BC_MESSAGE_BUFFER_LIMIT * VTT_INTERPROCESS_SLAVE_TO_MASTER_MESSAGE_BUFFER_SIZE_MAGNITUDE> t_SlavesToMasterPipe;
 
 		protected: typedef t_Pipe<VTT_INTERPROCESS_BC_MESSAGE_BUFFER_LIMIT> t_MasterToSlavePipe;
 
@@ -38,30 +36,18 @@ namespace n_details
 
 		#pragma region Fields
 
-		protected: t_SharedMemory          m_shared_buffer;
 		protected: t_SlavesToMasterPipe    m_slaves_to_master_pipe;
 		protected: t_MasterToSlavePipesMap m_master_to_slaves_pipes_map;
 
 		#pragma endregion
 
 		public: t_Broker(void)
-		:	m_shared_buffer
-			(
-				::boost::interprocess::open_or_create
-			,	"vtt interprocess"
-			,	VTT_INTERPROCESS_BC_MESSAGE_BUFFER_LIMIT * (VTT_INTERPROCESS_EC_APPLICATIONS_MAX + 1) * 2
-			)
-		,	m_slaves_to_master_pipe("s to m", m_shared_buffer)
-		{
-			
-		}
-
-		private: t_Broker(t_Broker const &) = delete;
-
-		public: ~t_Broker(void)
+		:	m_slaves_to_master_pipe(::std::string(VTT_INTERPROCESS_MAPPED_OBJECTS_PREFIX "s to m"))
 		{
 			//	Do nothing
 		}
+
+		private: t_Broker(t_Broker const &) = delete;
 
 		private: void operator = (t_Broker const &) = delete;
 
@@ -70,15 +56,11 @@ namespace n_details
 			return(m_slaves_to_master_pipe);
 		}
 
-		public: auto Get_MasterToSlavePipePtr(_In_ const t_ApplicationId application_id) -> t_MasterToSlavePipe *
+		public: auto Get_MasterToSlavePipe(_In_ const t_ApplicationId application_id) -> t_MasterToSlavePipe &
 		{
 			auto it_pair = m_master_to_slaves_pipes_map.find(application_id);
 			if(m_master_to_slaves_pipes_map.end() == it_pair)
 			{
-				if(VTT_INTERPROCESS_EC_APPLICATIONS_MAX == m_master_to_slaves_pipes_map.size())
-				{
-					return(nullptr);
-				}
 				it_pair = m_master_to_slaves_pipes_map.insert
 				(
 					t_MasterToSlavePipesMap::value_type
@@ -88,14 +70,13 @@ namespace n_details
 						(
 							new t_MasterToSlavePipe
 							(
-								"m to s" + ::boost::lexical_cast<::std::string>(application_id)
-							,	m_shared_buffer
+								VTT_INTERPROCESS_MAPPED_OBJECTS_PREFIX "m to s" + ::boost::lexical_cast<::std::string>(application_id)
 							)
 						)
 					)
 				).first;
 			}
-			return(it_pair->second.get());
+			return(*(it_pair->second.get()));
 		}
 	};
 }

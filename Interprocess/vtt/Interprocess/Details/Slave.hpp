@@ -70,14 +70,10 @@ namespace n_details
 		private: void Retrieve_Output_From_Master(void)
 		{
 			assert(m_application_set);
-			auto p_pipe = m_Broker.Get_MasterToSlavePipePtr(m_application_id);
-			if(nullptr != p_pipe)
+			auto & pipe = m_Broker.Get_MasterToSlavePipe(m_application_id);
+			for(;;)
 			{
-				auto & pipe = *p_pipe;
-				for(;;)
-				{
-					m_output_service.post(::boost::bind(&t_Slave::Handle_Ouput_From_Master, this, pipe.Read()));
-				}
+				m_output_service.post(::boost::bind(&t_Slave::Handle_Ouput_From_Master, this, pipe.Read()));
 			}
 		}
 

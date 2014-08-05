@@ -72,6 +72,7 @@ namespace n_details
 			}
 			else
 			{
+				assert(m_pending_output.Is_Empty());
 				auto & pipe = m_Broker.Get_SlavesToMasterPipe();
 				Write_Chunk_To_Buffer(pipe.Read(), p_buffer, bc_buffer_capacity, bc_written, m_pending_output);
 			}
@@ -82,26 +83,14 @@ namespace n_details
 		//	To be called from input service thread
 		private: void Handle_Input_To_Slave(_In_ const t_ApplicationId application_id, _In_ t_Chunk chunk)
 		{
-			auto p_pipe = m_Broker.Get_MasterToSlavePipePtr(application_id);
-			if(nullptr != p_pipe)
-			{
+			auto & pipe = m_Broker.Get_MasterToSlavePipe(application_id);
 			//#ifdef _DEBUG
 			//	{
 			//		::boost::lock_guard<::boost::mutex> lock(m_logger_sync);
 			//		m_logger << "written " << chunk.Get_Size() << "bytes of data for " << application_id << ::std::endl;
 			//	}
 			//#endif
-				p_pipe->Write(chunk);
-			}
-			else
-			{
-			//#ifdef _DEBUG
-			//	{
-			//		::boost::lock_guard<::boost::mutex> lock(m_logger_sync);
-			//		m_logger << "failed to write data for " << application_id << ": application cap reached" <<::std::endl;
-			//	}
-			//#endif
-			}
+			pipe.Write(chunk);
 		}
 
 		//	To be called from user threads

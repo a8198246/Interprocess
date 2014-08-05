@@ -1,4 +1,4 @@
-#ifndef HEADER_VTT_INTERPROCESS_INTERFACE
+п»ї#ifndef HEADER_VTT_INTERPROCESS_INTERFACE
 #define HEADER_VTT_INTERPROCESS_INTERFACE
 
 #pragma once
@@ -10,26 +10,26 @@
 
 VTT_EXTERN_C_ZONE_BEGIN
 
-//	Методы, вызываемые в ведущем процессе
+//	РњРµС‚РѕРґС‹, РІС‹Р·С‹РІР°РµРјС‹Рµ РІ РІРµРґСѓС‰РµРј РїСЂРѕС†РµСЃСЃРµ:
 
-//	Метод вызывается ведущим процессом, чтобы передать msg рабочему процессу с идентификатором приложения id.
+//	РњРµС‚РѕРґ РІС‹Р·С‹РІР°РµС‚СЃСЏ РІРµРґСѓС‰РёРј РїСЂРѕС†РµСЃСЃРѕРј, С‡С‚РѕР±С‹ РїРµСЂРµРґР°С‚СЊ msg СЂР°Р±РѕС‡РµРјСѓ РїСЂРѕС†РµСЃСЃСѓ СЃ РёРґРµРЅС‚РёС„РёРєР°С‚РѕСЂРѕРј РїСЂРёР»РѕР¶РµРЅРёСЏ id.
 void VTT_INTERPROCESS_DLL_API
 interprocess_master_send(_In_ const int application_id, _In_reads_bytes_(bc_data) char const * p_data, _In_range_(0, VTT_INTERPROCESS_BC_MESSAGE_BUFFER_LIMIT) const int bc_data);
 
-//	Метод вызывается ведущим процессом, чтобы принять данные переданные рабочими процессами.
-//	Метод блокирующий, до появления первого сообщения, которое можно забрать.
-//	В msgs суммарные данные передаваемых сообщений.
+//	РњРµС‚РѕРґ РІС‹Р·С‹РІР°РµС‚СЃСЏ РІРµРґСѓС‰РёРј РїСЂРѕС†РµСЃСЃРѕРј, С‡С‚РѕР±С‹ РїСЂРёРЅСЏС‚СЊ РґР°РЅРЅС‹Рµ РїРµСЂРµРґР°РЅРЅС‹Рµ СЂР°Р±РѕС‡РёРјРё РїСЂРѕС†РµСЃСЃР°РјРё.
+//	РњРµС‚РѕРґ Р±Р»РѕРєРёСЂСѓСЋС‰РёР№, РґРѕ РїРѕСЏРІР»РµРЅРёСЏ РїРµСЂРІРѕРіРѕ СЃРѕРѕР±С‰РµРЅРёСЏ, РєРѕС‚РѕСЂРѕРµ РјРѕР¶РЅРѕ Р·Р°Р±СЂР°С‚СЊ.
+//	Р’ msgs СЃСѓРјРјР°СЂРЅС‹Рµ РґР°РЅРЅС‹Рµ РїРµСЂРµРґР°РІР°РµРјС‹С… СЃРѕРѕР±С‰РµРЅРёР№.
 int VTT_INTERPROCESS_DLL_API
 interprocess_master_recieve(_Out_writes_bytes_(bc_buffer_capacity) char * p_buffer, _In_ const int bc_buffer_capacity);
 
-//	Методы, вызываемые в ведомом процессе
+//	РњРµС‚РѕРґС‹, РІС‹Р·С‹РІР°РµРјС‹Рµ РІ РІРµРґРѕРјРѕРј РїСЂРѕС†РµСЃСЃРµ:
 
-//	Метод передает msg ведущему процессу.
+//	РњРµС‚РѕРґ РїРµСЂРµРґР°РµС‚ msg РІРµРґСѓС‰РµРјСѓ РїСЂРѕС†РµСЃСЃСѓ.
 void VTT_INTERPROCESS_DLL_API
 interprocess_slave_send(_In_reads_bytes_(bc_data) char const * p_data, _In_range_(0, VTT_INTERPROCESS_BC_MESSAGE_BUFFER_LIMIT) const int bc_data);
 
-//	Метод принимает раннее переданные сообщения, предназначенные процессу с идентификатором id.
-//	В msgs суммарные данные передаваемых сообщений.
+//	РњРµС‚РѕРґ РїСЂРёРЅРёРјР°РµС‚ СЂР°РЅРЅРµРµ РїРµСЂРµРґР°РЅРЅС‹Рµ СЃРѕРѕР±С‰РµРЅРёСЏ, РїСЂРµРґРЅР°Р·РЅР°С‡РµРЅРЅС‹Рµ РїСЂРѕС†РµСЃСЃСѓ СЃ РёРґРµРЅС‚РёС„РёРєР°С‚РѕСЂРѕРј id.
+//	Р’ msgs СЃСѓРјРјР°СЂРЅС‹Рµ РґР°РЅРЅС‹Рµ РїРµСЂРµРґР°РІР°РµРјС‹С… СЃРѕРѕР±С‰РµРЅРёР№.
 int VTT_INTERPROCESS_DLL_API
 interprocess_slave_recieve(_In_ const int application_id, _Out_writes_bytes_(bc_buffer_capacity) char * p_buffer, _In_ const int bc_buffer_capacity); 
 

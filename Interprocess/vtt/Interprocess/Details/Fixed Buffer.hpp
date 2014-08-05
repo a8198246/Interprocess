@@ -18,6 +18,7 @@ namespace n_interprocess
 {
 namespace n_details
 {
+	//	Ready to be a process-shared object.
 	template<::boost::uint32_t tp_Capacity>
 	class t_FixedBuffer
 	{
@@ -25,8 +26,8 @@ namespace n_details
 
 		#pragma region Fields
 
-		protected: t_buffer          m_buffer;
-		protected: ::boost::uint32_t m_size = 0;
+		protected: t_buffer                   m_buffer;
+		protected: volatile ::boost::uint32_t m_size = 0;
 		
 		#pragma	endregion
 		
@@ -57,16 +58,16 @@ namespace n_details
 			if(new_size <= tp_Capacity)
 			{
 				memcpy(m_buffer.data() + m_size, chunk.Get_Data(), chunk.Get_Size());
-				m_size = static_cast<decltype(m_size)>(new_size);
+				m_size = static_cast<::boost::uint32_t>(new_size);
 			}
 		}
 
 		public: auto Retrieve_Chunk(void) -> t_Chunk
 		{
 			assert(Is_Not_Empty());
-			auto const old_size = m_size;
+			t_Chunk result(m_buffer.data(), m_size);
 			m_size = 0;
-			return(t_Chunk(m_buffer.data(), old_size));
+			return(result);
 		}
 	};
 }

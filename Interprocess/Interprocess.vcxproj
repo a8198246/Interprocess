@@ -157,6 +157,9 @@ copy "$(OutDir)*.pdb" "$(ProjectDir)x64\Debug\"</Command>
       <PreprocessorDefinitions>NDEBUG;VTT_X32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>Precompiled.hpp</PrecompiledHeaderFile>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <StringPooling>true</StringPooling>
+      <BufferSecurityCheck>true</BufferSecurityCheck>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>false</GenerateDebugInformation>
@@ -185,12 +188,16 @@ copy "$(OutDir)*.lib" "$(ProjectDir)x32\Release\"</Command>
       <PreprocessorDefinitions>NDEBUG;VTT_X64;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>Precompiled.hpp</PrecompiledHeaderFile>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <StringPooling>true</StringPooling>
+      <BufferSecurityCheck>true</BufferSecurityCheck>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
+      <ShowProgress>NotSet</ShowProgress>
     </Link>
     <PostBuildEvent>
       <Command>mkdir "$(ProjectDir)x64\Release\"
@@ -207,12 +214,18 @@ copy "$(OutDir)*.lib" "$(ProjectDir)x64\Release\"</Command>
     <ClInclude Include="vtt\Interprocess\Configuration.hpp" />
     <ClInclude Include="vtt\Interprocess\Details\Broker.hpp" />
     <ClInclude Include="vtt\Interprocess\Details\Chunk.hpp" />
+    <ClInclude Include="vtt\Interprocess\Details\Conditional Variable.hpp" />
+    <ClInclude Include="vtt\Interprocess\Details\Event.hpp" />
     <ClInclude Include="vtt\Interprocess\Details\Fixed Buffer.hpp" />
     <ClInclude Include="vtt\Interprocess\Details\Main Windows SDK Control.hpp" />
     <ClInclude Include="vtt\Interprocess\Details\Master.hpp" />
+    <ClInclude Include="vtt\Interprocess\Details\Named Mutex.hpp" />
+    <ClInclude Include="vtt\Interprocess\Details\Owned Handle.hpp" />
     <ClInclude Include="vtt\Interprocess\Details\Patron.hpp" />
     <ClInclude Include="vtt\Interprocess\Details\Pipe.hpp" />
     <ClInclude Include="vtt\Interprocess\Details\Precompiled.hpp" />
+    <ClInclude Include="vtt\Interprocess\Details\Scoped Lock.hpp" />
+    <ClInclude Include="vtt\Interprocess\Details\Shared Memory.hpp" />
     <ClInclude Include="vtt\Interprocess\Details\Slave.hpp" />
     <ClInclude Include="vtt\Interprocess\Details\Static Instace.hpp" />
     <ClInclude Include="vtt\Interprocess\Details\Write Chunk To Buffer.hpp" />

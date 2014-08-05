@@ -19,6 +19,12 @@
     <ClInclude Include="vtt\Interprocess\Details\Pipe.hpp" />
     <ClInclude Include="vtt\Interprocess\Details\Static Instace.hpp" />
     <ClInclude Include="vtt\Interprocess\Details\Write Chunk To Buffer.hpp" />
+    <ClInclude Include="vtt\Interprocess\Details\Named Mutex.hpp" />
+    <ClInclude Include="vtt\Interprocess\Details\Scoped Lock.hpp" />
+    <ClInclude Include="vtt\Interprocess\Details\Conditional Variable.hpp" />
+    <ClInclude Include="vtt\Interprocess\Details\Owned Handle.hpp" />
+    <ClInclude Include="vtt\Interprocess\Details\Event.hpp" />
+    <ClInclude Include="vtt\Interprocess\Details\Shared Memory.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="vtt\Interprocess\Details\Precompiled.cpp" />
