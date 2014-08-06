@@ -4,6 +4,7 @@
     <LocalDebuggerCommand>$(SolutionDir)_Build\$(ProjectName).exe</LocalDebuggerCommand>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
     <LocalDebuggerWorkingDirectory>$(SolutionDir)_Build\</LocalDebuggerWorkingDirectory>
+    <LocalDebuggerCommandArguments>3</LocalDebuggerCommandArguments>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LocalDebuggerCommand>$(SolutionDir)_Build\$(ProjectName).exe</LocalDebuggerCommand>
@@ -16,6 +17,8 @@
     <LocalDebuggerCommand>$(SolutionDir)_Build\$(ProjectName).exe</LocalDebuggerCommand>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
     <LocalDebuggerWorkingDirectory>$(SolutionDir)_Build\</LocalDebuggerWorkingDirectory>
+    <LocalDebuggerCommandArguments>
+    </LocalDebuggerCommandArguments>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LocalDebuggerCommand>$(SolutionDir)_Build\$(ProjectName).exe</LocalDebuggerCommand>

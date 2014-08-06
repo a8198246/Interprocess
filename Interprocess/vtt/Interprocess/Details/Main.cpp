@@ -3,6 +3,8 @@
 
 #include "../Interface.hpp"
 
+#include <Windows.h>
+
 #ifdef _DEBUG
 #	pragma comment(lib, "boost_thread-vc120-mt-gd-1_55.lib")
 #	pragma comment(lib, "boost_system-vc120-mt-gd-1_55.lib")

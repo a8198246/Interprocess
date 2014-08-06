@@ -50,6 +50,7 @@ namespace n_details
 				if(patron.m_p_master.get() == nullptr)
 				{
 					patron.m_p_master.reset(new t_Master());
+					atexit(Explicit_Cleanup);
 				}
 			}
 			return(*patron.m_p_master);
@@ -68,9 +69,24 @@ namespace n_details
 				if(patron.m_p_slave.get() == nullptr)
 				{
 					patron.m_p_slave.reset(new t_Slave());
+					atexit(Explicit_Cleanup);
 				}
 			}
 			return(*patron.m_p_slave);
+		}
+
+		public: static void Explicit_Cleanup(void)
+		{
+			auto & patron = Get_Instace();
+			::boost::lock_guard<::boost::mutex> lock(patron.m_class_sync);
+			if(patron.m_p_slave.get() != nullptr)
+			{
+				patron.m_p_slave.reset();
+			}
+			if(patron.m_p_master.get() != nullptr)
+			{
+				patron.m_p_master.reset();
+			}
 		}
 	};
 }

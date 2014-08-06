@@ -98,7 +98,7 @@
       <WarningLevel>Level4</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <TreatWarningAsError>true</TreatWarningAsError>
+      <TreatWarningAsError>false</TreatWarningAsError>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <MinimalRebuild>false</MinimalRebuild>
       <PreprocessorDefinitions>_DEBUG;VTT_X32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -134,7 +134,7 @@ copy "C:\Program Files (x86)\Visual Leak Detector\bin\Win32\*.manifest" "$(Solut
       <WarningLevel>Level4</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <TreatWarningAsError>true</TreatWarningAsError>
+      <TreatWarningAsError>false</TreatWarningAsError>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <MinimalRebuild>false</MinimalRebuild>
       <PreprocessorDefinitions>_DEBUG;VTT_X64;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -172,7 +172,7 @@ copy "C:\Program Files (x86)\Visual Leak Detector\bin\Win64\*.manifest" "$(Solut
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <TreatWarningAsError>true</TreatWarningAsError>
+      <TreatWarningAsError>false</TreatWarningAsError>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <PreprocessorDefinitions>NDEBUG;VTT_X32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
@@ -206,7 +206,7 @@ copy "$(SolutionDir)..\boost\stage\lib\boost_chrono-vc120-mt-1_55.dll" "$(Soluti
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <TreatWarningAsError>true</TreatWarningAsError>
+      <TreatWarningAsError>false</TreatWarningAsError>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <PreprocessorDefinitions>NDEBUG;VTT_X64;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>

@@ -34,13 +34,12 @@ namespace n_details
 
 		protected: t_Broker                        m_Broker;
 		//	slaves to master
-		protected: ::boost::thread                 m_input_service_thread; // runs input service loop which handles writing of data into slaves to master pipe
 		protected: ::boost::asio::io_service       m_input_service;
+		protected: ::boost::thread                 m_input_service_thread; // runs input service loop which handles writing of data into slaves to master pipe
 		protected: ::boost::asio::io_service::work m_input_service_work;
 		//	master to slave
-		protected: ::boost::thread                 m_output_service_thread; // continiously reads data from master to slave pipe and sends it to output service
 		protected: ::boost::asio::io_service       m_output_service;
-		protected: ::boost::asio::io_service::work m_output_service_work;
+		protected: ::boost::thread                 m_output_service_thread; // continiously reads data from master to slave pipe and sends it to output service
 		protected: t_Chunk                         m_pending_output;
 		//	debug logging
 	//#ifdef _DEBUG
@@ -55,7 +54,6 @@ namespace n_details
 		public: t_Slave(void)
 		:	m_input_service_work(m_input_service)
 		,	m_input_service_thread(::boost::bind(&::boost::asio::io_service::run, &m_input_service))
-		,	m_output_service_work(m_output_service)
 		{
 		//#ifdef _DEBUG
 		//	{
@@ -66,6 +64,15 @@ namespace n_details
 		//#endif
 		}
 
+		public: ~t_Slave(void)
+		{
+			m_input_service.stop();
+		//	m_input_service_thread.join(); // hungs even when m_input_service_thread exits any user mode code
+			m_output_service_thread.interrupt();
+		//	m_output_service_thread.join(); // hungs even when m_output_service_thread exits any user mode code
+			::boost::this_thread::sleep(::boost::posix_time::seconds(1)); // dirty hack
+		}
+		
 		//	output service thread routine
 		private: void Retrieve_Output_From_Master(void)
 		{
@@ -73,7 +80,8 @@ namespace n_details
 			auto & pipe = m_Broker.Get_MasterToSlavePipe(m_application_id);
 			for(;;)
 			{
-				m_output_service.post(::boost::bind(&t_Slave::Handle_Ouput_From_Master, this, pipe.Read()));
+				auto chunk = pipe.Read();
+				m_output_service.post(::boost::bind(&t_Slave::Handle_Ouput_From_Master, this, chunk));
 			}
 		}
 

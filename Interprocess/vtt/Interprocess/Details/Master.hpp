@@ -32,8 +32,8 @@ namespace n_details
 
 		protected: t_Broker                        m_Broker;
 		//	master-to-slaves
-		protected: ::boost::thread                 m_input_service_thread; // runs input service loop which handles writing of data into master-to-slave pipes
 		protected: ::boost::asio::io_service       m_input_service;
+		protected: ::boost::thread                 m_input_service_thread; // runs input service loop which handles writing of data into master-to-slave pipes
 		protected: ::boost::asio::io_service::work m_input_service_work;
 		//	slaves-to-master
 		protected: t_Chunk                         m_pending_output;
@@ -56,6 +56,13 @@ namespace n_details
 		//		m_logger << "master initialized" << ::std::endl;
 		//	}
 		//#endif
+		}
+		
+		public: ~t_Master(void)
+		{
+			m_input_service.stop();
+		//	m_input_service_thread.join(); // hungs even when m_input_service_thread exits any user mode code
+			::boost::this_thread::sleep(::boost::posix_time::seconds(1)); // dirty hack
 		}
 
 		//	Method to be called from user threads
