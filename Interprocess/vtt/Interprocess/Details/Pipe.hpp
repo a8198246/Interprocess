@@ -40,7 +40,7 @@ namespace n_details
 		public: explicit t_Pipe(_Inout_ ::std::string && name)
 		:	m_mutex(::std::move(name))
 		,	m_shared(m_mutex, sizeof(t_Buffer))
-		,	m_p_buffer(m_shared.Construct<t_Buffer>())
+		,	m_p_buffer(m_shared.Obtain<t_Buffer>())
 		{
 			//	Do nothing
 		}

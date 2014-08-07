@@ -27,7 +27,7 @@ namespace n_details
 		#pragma region Fields
 
 		protected: t_buffer                   m_buffer;
-		protected: volatile ::boost::uint32_t m_size = 0;
+		protected: volatile ::boost::uint32_t m_size;
 		
 		#pragma	endregion
 		

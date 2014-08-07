@@ -25,12 +25,18 @@ namespace n_details
 		#pragma region Fields
 
 		protected: void * m_p_memory = nullptr;
+	#ifdef _DEBUG
+		protected: const size_t m_bc_memory;
+	#endif
 
 		#pragma endregion
 
 		private: t_SharedMemoty(void) = delete;
 
 		public: t_SharedMemoty(_In_ t_NamedMutex & sync, _In_ const size_t bc_capacity)
+	#ifdef _DEBUG
+		:	m_bc_memory(bc_capacity)
+	#endif
 		{
 			auto name = sync.Get_Name() + "f"; // name must differ from mutex name
 			t_ScopedLock lock(sync);
@@ -69,9 +75,10 @@ namespace n_details
 		}
 
 		public: template<typename tp_Object>
-		auto Construct(void) -> tp_Object *
+		auto Obtain(void) -> tp_Object *
 		{
-			return(new (m_p_memory) tp_Object());
+			assert(m_bc_memory == sizeof(tp_Object));
+			return(static_cast<tp_Object *>(m_p_memory));
 		}
 	};
 }

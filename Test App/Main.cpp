@@ -5,7 +5,7 @@
 #include <sal.h>
 
 #include <Windows.h>
-/*
+
 #include <random>
 #include <vector>
 #include <algorithm>
@@ -25,10 +25,10 @@
 #	pragma comment(lib, "boost_system-vc120-mt-1_55.lib")
 #endif
 
-#define APPLICATION_ID_MAX 15
+#define APPLICATION_ID_MAX 0
 #define WORK_TIME_SECONDS  30
 #define BC_MESSAGE_MAX     128
-#define SEND_RATE          5   // messages will be send once in m_send_rate times
+#define SEND_RATE          20  // messages will be send once in m_send_rate times
 #define INTERVAL_MSECONDS  100 // interval between recive and send attempts
 
 class t_Worker
@@ -98,7 +98,7 @@ class t_Worker
 	private: void Recieve(void)
 	{
 		m_buffer.resize(VTT_INTERPROCESS_BC_MESSAGE_BUFFER_LIMIT);
-		size_t bc_recieved;
+		size_t bc_recieved = 0;
 		if(m_is_master)
 		{
 			bc_recieved = static_cast<size_t>(interprocess_master_recieve(m_buffer.data(), static_cast<int>(m_buffer.size())));
@@ -160,9 +160,9 @@ class t_Worker
 };
 
 int t_Worker::m_seed;
-*/
+
 int main(int argc, char * args[], char *[])
-{
+{/*
 	auto h_interprocess_library = ::LoadLibraryW(L"Interprocess.dll");
 	if(NULL != h_interprocess_library)
 	{
@@ -183,9 +183,9 @@ int main(int argc, char * args[], char *[])
 		auto r = ::FreeLibrary(h_interprocess_library);
 		h_interprocess_library = NULL;
 	}
+	 Sleep(1000);
+	return(0);*/
 	
-	return(0);
-	/*
 	auto is_master = (1 == argc);
 	if(is_master)
 	{
@@ -226,5 +226,5 @@ int main(int argc, char * args[], char *[])
 		t_Worker worker(is_master, application_id, sync);
 		::boost::this_thread::sleep(::boost::get_system_time() + ::boost::posix_time::milliseconds(WORK_TIME_SECONDS * 1000));
 	}
-	return(0);*/
+	return(0);
 }
