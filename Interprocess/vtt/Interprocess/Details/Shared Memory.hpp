@@ -41,10 +41,10 @@ namespace n_details
 			auto name = sync.Get_Name() + "f"; // name must differ from mutex name
 			t_ScopedLock lock(sync);
 			m_handle = ::OpenFileMappingA(FILE_MAP_ALL_ACCESS, FALSE, name.c_str());
-			if(Is_Not_Initialized())
+			if(NULL == m_handle)
 			{
 				m_handle = ::CreateFileMappingA(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, 0, static_cast<::DWORD>(bc_capacity), name.c_str());
-				if(Is_Not_Initialized())
+				if(NULL == m_handle)
 				{
 					auto last_error = ::GetLastError();
 					throw(::std::system_error(static_cast<int>(last_error), ::std::system_category(), "failed to create named file mapping: ERROR_UNEXPECTED"));

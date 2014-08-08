@@ -49,10 +49,20 @@ namespace n_details
 
 		private: void operator = (t_Pipe const &) = delete;
 
+		public: auto Is_Empty(void) const throw() -> bool
+		{
+			return(m_p_buffer->Is_Empty());
+		}
+
+		public: auto Is_Not_Empty(void) const throw() -> bool
+		{
+			return(m_p_buffer->Is_Not_Empty());
+		}
+
 		public: auto Read(void) -> t_Chunk
 		{
 			t_ScopedLock lock(m_mutex);
-			while(m_p_buffer->Is_Empty())
+			while(Is_Empty())
 			{
 				t_ConditionalVariable cond;
 				cond.Timed_Wait(lock, 100);

@@ -5,4 +5,10 @@
 
 #define VTT_INTERPROCESS_DLL_EXPORTS
 
+#define _DEBUG_LOGGING
+
+#ifndef _DEBUG
+#undef _DEBUG_LOGGING
+#endif
+
 #endif

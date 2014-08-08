@@ -31,12 +31,12 @@ namespace n_details
 		
 		#pragma	endregion
 		
-		public: auto Is_Empty(void) const throw() -> size_t
+		public: auto Is_Empty(void) const throw() -> bool
 		{
 			return(0 == m_size);
 		}
 
-		public: auto Is_Not_Empty(void) const throw() -> size_t
+		public: auto Is_Not_Empty(void) const throw() -> bool
 		{
 			return(0 != m_size);
 		}

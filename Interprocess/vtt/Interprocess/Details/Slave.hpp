@@ -18,7 +18,7 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/bind.hpp>
 
-#ifdef _DEBUG
+#ifdef _DEBUG_LOGGING
 #include <fstream>
 #endif
 
@@ -42,12 +42,12 @@ namespace n_details
 		protected: ::boost::thread                 m_output_service_thread; // continiously reads data from master to slave pipe and sends it to output service
 		protected: t_Chunk                         m_pending_output;
 		//	debug logging
-	//#ifdef _DEBUG
-	//	protected: ::boost::mutex                  m_logger_sync;
-	//	private: ::std::ofstream                   m_logger;
-	//#endif
+	#ifdef _DEBUG_LOGGING
+		protected: ::boost::mutex                  m_logger_sync;
+		private: ::std::ofstream                   m_logger;
+	#endif
 		private: volatile t_ApplicationId          m_application_id = 0;
-		private: volatile bool                     m_application_set = false;
+		private: volatile bool                     m_application_id_set = false;
 
 		#pragma endregion
 
@@ -55,47 +55,78 @@ namespace n_details
 		:	m_input_service_work(m_input_service)
 		,	m_input_service_thread(::boost::bind(&::boost::asio::io_service::run, &m_input_service))
 		{
-		//#ifdef _DEBUG
-		//	{
-		//		::boost::lock_guard<::boost::mutex> lock(m_logger_sync);
-		//		m_logger.open("slave.log");
-		//		m_logger << "slave initialized" << ::std::endl;
-		//	}
-		//#endif
+		#ifdef _DEBUG_LOGGING
+			{
+				::boost::lock_guard<::boost::mutex> lock(m_logger_sync);
+				m_logger.open("slave.log");
+				m_logger << "slave initialized" << ::std::endl;
+			}
+		#endif
 		}
 
 		public: ~t_Slave(void)
 		{
 			m_input_service.stop();
-		//	m_input_service_thread.join(); // hungs even when m_input_service_thread exits any user mode code
+		//	m_input_service_thread.join(); // this will cause a deadlock since threads started from dll will be waiting for it to unload
 			m_output_service_thread.interrupt();
-		//	m_output_service_thread.join(); // hungs even when m_output_service_thread exits any user mode code
-			::boost::this_thread::sleep(::boost::posix_time::seconds(1)); // dirty hack
+		//	m_output_service_thread.join(); // this will cause a deadlock since threads started from dll will be waiting for it to unload
+			::boost::this_thread::sleep(::boost::posix_time::seconds(1)); // let's hope that user-mode code in m_input_service_thread will be completed during this period
+		#ifdef _DEBUG_LOGGING
+			{
+				::boost::lock_guard<::boost::mutex> lock(m_logger_sync);
+				m_logger << "slave finalized" << ::std::endl;
+			}
+			m_logger.close();
+		#endif
 		}
 		
 		//	output service thread routine
 		private: void Retrieve_Output_From_Master(void)
 		{
-			assert(m_application_set);
+			assert(m_application_id_set);
 			auto & pipe = m_Broker.Get_MasterToSlavePipe(m_application_id);
+		#ifdef _DEBUG_LOGGING
+			{
+				::boost::lock_guard<::boost::mutex> lock(m_logger_sync);
+				m_logger << "reader thread got master to slave pipe" << ::std::endl;
+			}
+		#endif
 			for(;;)
 			{
+			#ifdef _DEBUG_LOGGING
+				{
+					::boost::lock_guard<::boost::mutex> lock(m_logger_sync);
+					m_logger << "reader thread starts reading..." << ::std::endl;
+				}
+			#endif
 				auto chunk = pipe.Read();
+			#ifdef _DEBUG_LOGGING
+				{
+					::boost::lock_guard<::boost::mutex> lock(m_logger_sync);
+					m_logger << "reader thread read " << chunk.Get_Size() << " bytes" << ::std::endl;
+				}
+			#endif
 				m_output_service.post(::boost::bind(&t_Slave::Handle_Ouput_From_Master, this, chunk));
+			#ifdef _DEBUG_LOGGING
+				{
+					::boost::lock_guard<::boost::mutex> lock(m_logger_sync);
+					m_logger << "reader thread posted new task to output service" << ::std::endl;
+				}
+			#endif
 			}
 		}
 
 		//	Method to be called from user threads
 		private: void Handle_Ouput_From_Master(_In_ t_Chunk chunk)
 		{
-			assert(m_application_set);
+			assert(m_application_id_set);
 			assert(m_pending_output.Is_Empty());
-		//#ifdef _DEBUG
-		//	{
-		//		::boost::lock_guard<::boost::mutex> lock(m_logger_sync);
-		//		m_logger << "slave got " << chunk.Get_Size() << " bytes of data from master process" << ::std::endl;
-		//	}
-		//#endif
+		#ifdef _DEBUG_LOGGING
+			{
+				::boost::lock_guard<::boost::mutex> lock(m_logger_sync);
+				m_logger << "slave got " << chunk.Get_Size() << " bytes of data from output service" << ::std::endl;
+			}
+		#endif
 			m_pending_output = chunk;
 		}
 
@@ -103,11 +134,37 @@ namespace n_details
 		//	Returns number of bytes written into the buffer.
 		public: auto Recieve_From_Master(_In_ const t_ApplicationId application_id, _Out_writes_bytes_(bc_buffer_capacity) char * p_buffer, _In_ const size_t bc_buffer_capacity) -> size_t
 		{
-			if(!m_application_set)
+		#ifdef _DEBUG_LOGGING
 			{
+				static int i = 0;
+				::boost::lock_guard<::boost::mutex> lock(m_logger_sync);
+				m_logger << "slave recieve request #" << i << ::std::endl;
+				++i;
+			}
+		#endif
+			if(!m_application_id_set)
+			{
+			#ifdef _DEBUG_LOGGING
+				{
+					::boost::lock_guard<::boost::mutex> lock(m_logger_sync);
+					m_logger << "application id set to " << m_application_id << ::std::endl;
+				}
+			#endif
 				m_application_id = application_id;
-				m_application_set = true;
+				m_application_id_set = true;
+				auto & pipe = m_Broker.Get_MasterToSlavePipe(m_application_id); // this will initialize the pipe
+				if(pipe.Is_Not_Empty())
+				{
+					m_pending_output = pipe.Read();
+				#ifdef _DEBUG_LOGGING
+					{
+						::boost::lock_guard<::boost::mutex> lock(m_logger_sync);
+						m_logger << "slave got " << m_pending_output.Get_Size() << " bytes of data from output service" << ::std::endl;
+					}
+				#endif
+				}
 				m_output_service_thread = ::boost::thread(::boost::bind(&t_Slave::Retrieve_Output_From_Master, this));
+				::boost::this_thread::yield();
 			}
 			if(application_id != m_application_id)
 			{
@@ -130,7 +187,17 @@ namespace n_details
 				{
 					break;
 				}
-				m_output_service.poll_one();
+			#ifdef _DEBUG_LOGGING
+				{
+					::boost::lock_guard<::boost::mutex> lock(m_logger_sync);
+					m_logger << "executing output service" << ::std::endl;
+				}
+			#endif
+				m_output_service.run_one();
+				if(m_pending_output.Is_Empty())
+				{
+					m_output_service.poll_one();
+				}
 				if(m_pending_output.Is_Empty())
 				{
 					break;

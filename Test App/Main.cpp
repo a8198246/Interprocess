@@ -91,7 +91,7 @@ class t_Worker
 			{
 				Send();
 			}
-			::boost::this_thread::sleep(::boost::get_system_time() + ::boost::posix_time::milliseconds(INTERVAL_MSECONDS));
+			::boost::this_thread::sleep(::boost::get_system_time() + ::boost::posix_time::milliseconds(m_is_master ? INTERVAL_MSECONDS : 1000));
 		}
 	}
 
@@ -99,9 +99,16 @@ class t_Worker
 	{
 		m_buffer.resize(VTT_INTERPROCESS_BC_MESSAGE_BUFFER_LIMIT);
 		size_t bc_recieved = 0;
+		static int attempt = 0;
+		if(!m_is_master)
+		{
+			t_Lock lock(m_sync);
+			::std::cout << "\t #" << attempt << " attempt to recieve" << ::std::endl;
+		}
+		++attempt;
 		if(m_is_master)
 		{
-			bc_recieved = static_cast<size_t>(interprocess_master_recieve(m_buffer.data(), static_cast<int>(m_buffer.size())));
+		//	bc_recieved = static_cast<size_t>(interprocess_master_recieve(m_buffer.data(), static_cast<int>(m_buffer.size())));
 		}
 		else
 		{
@@ -133,13 +140,13 @@ class t_Worker
 		}
 		else
 		{
-			{
-				t_Lock lock(m_sync);
-				::std::cout << "\t >> thread #" << ::boost::this_thread::get_id() << " sends " << m_buffer.size() << " bytes to master:" << ::std::endl;
-				::std::cout.write(m_buffer.data(), m_buffer.size());
-				::std::cout.flush();
-			}
-			interprocess_slave_send(m_buffer.data(), static_cast<int>(m_buffer.size()));
+			//{
+			//	t_Lock lock(m_sync);
+			//	::std::cout << "\t >> thread #" << ::boost::this_thread::get_id() << " sends " << m_buffer.size() << " bytes to master:" << ::std::endl;
+			//	::std::cout.write(m_buffer.data(), m_buffer.size());
+			//	::std::cout.flush();
+			//}
+			//interprocess_slave_send(m_buffer.data(), static_cast<int>(m_buffer.size()));
 		}
 	}
 
