@@ -44,7 +44,7 @@ namespace n_details
 			}
 		}
 
-		private: void operator = (t_ScopedLock const &) = delete;
+		private: void operator=(t_ScopedLock const &) = delete;
 	};
 }
 }

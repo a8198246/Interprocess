@@ -16,8 +16,6 @@
 
 #include <boost/lexical_cast.hpp>
 
-#define VTT_INTERPROCESS_MAPPED_OBJECTS_PREFIX "vtt interprocess "
-
 namespace n_vtt
 {
 namespace n_interprocess
@@ -42,14 +40,14 @@ namespace n_details
 		#pragma endregion
 
 		public: t_Broker(void)
-		:	m_slaves_to_master_pipe(::std::string(VTT_INTERPROCESS_MAPPED_OBJECTS_PREFIX "s to m"))
+		:	m_slaves_to_master_pipe(::std::string(VTT_SZ_INTERPROCESS_NAMED_OBJECTS_PREFIX "s to m"))
 		{
 			//	Do nothing
 		}
 
 		private: t_Broker(t_Broker const &) = delete;
 
-		private: void operator = (t_Broker const &) = delete;
+		private: void operator=(t_Broker const &) = delete;
 
 		public: auto Get_SlavesToMasterPipe(void) -> t_SlavesToMasterPipe &
 		{
@@ -70,7 +68,7 @@ namespace n_details
 						(
 							new t_MasterToSlavePipe
 							(
-								VTT_INTERPROCESS_MAPPED_OBJECTS_PREFIX "m to s" + ::boost::lexical_cast<::std::string>(application_id)
+								VTT_SZ_INTERPROCESS_NAMED_OBJECTS_PREFIX "m to s" + ::boost::lexical_cast<::std::string>(application_id)
 							)
 						)
 					)

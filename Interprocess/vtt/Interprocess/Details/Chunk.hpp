@@ -5,6 +5,7 @@
 
 #include <sal.h>
 
+#include <algorithm>
 #include <memory.h>
 
 #include <boost/scoped_array.hpp>
@@ -47,7 +48,7 @@ namespace n_details
 			::std::swap(m_bc_data, that_w.m_bc_data);
 		}
 						
-		public: void operator = (_Inout_ t_Chunk const & that)
+		public: void operator=(_Inout_ t_Chunk const & that)
 		{
 			auto & that_w = const_cast<t_Chunk &>(that);
 			m_p_data.swap(that_w.m_p_data);
@@ -74,11 +75,11 @@ namespace n_details
 			return(m_bc_data);
 		}
 
-		public: void Clear(void) throw()
-		{
-			m_p_data.reset();
-			m_bc_data = 0;
-		}
+		//public: void Clear(void) throw()
+		//{
+		//	m_p_data.reset();
+		//	m_bc_data = 0;
+		//}
 	};
 }
 }

@@ -5,9 +5,9 @@
 
 #include <sal.h>
 
-#include <cassert>
-
 #include <Windows.h>
+
+#include <cassert>
 
 namespace n_vtt
 {
@@ -40,7 +40,7 @@ namespace n_details
 			}
 		}
 
-		public: void operator = (t_OwnedHandle const &) = delete;
+		public: void operator=(t_OwnedHandle const &) = delete;
 
 		public: auto Is_Initialized(void) const throw() -> bool
 		{

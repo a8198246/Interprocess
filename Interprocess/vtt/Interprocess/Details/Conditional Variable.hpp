@@ -8,10 +8,9 @@
 
 #include <sal.h>
 
-#include <string>
-#include <stdexcept>
-
 #include <Windows.h>
+
+#include <system_error>
 
 namespace n_vtt
 {
@@ -21,22 +20,20 @@ namespace n_details
 {
 	class t_ConditionalVariable
 	{
-		public: t_ConditionalVariable(void) throw()
-		{
-			//	Do nothing
-		}
+		public: t_ConditionalVariable(void) = delete;
+
+		public: ~t_ConditionalVariable(void) = delete;
 
 		public: t_ConditionalVariable(t_ConditionalVariable const &) = delete;
 
-		public: void operator = (t_ConditionalVariable const &) = delete;
+		public: void operator=(t_ConditionalVariable const &) = delete;
 
-		public: void Timed_Wait(_Inout_ t_ScopedLock & lock, _In_ const int timeout_msec)
+		public: static void Timed_Wait(_Inout_ t_ScopedLock & lock, _In_ t_Event & event, _In_ const int timeout_msec)
 		{
 			assert(lock.m_locked);
-			t_Event event(lock.m_mutex.m_name);
-			::SetLastError(ERROR_SUCCESS);
 			lock.m_mutex.Unlock();
 			lock.m_locked = false;
+			event.Reset();
 			auto result = ::WaitForSingleObject(event.m_handle, timeout_msec);
 			switch(result)
 			{
@@ -52,20 +49,14 @@ namespace n_details
 				default:
 				{
 					auto last_error = ::GetLastError();
-					throw(::std::system_error(static_cast<int>(last_error), ::std::system_category(), "failed to wait for event: UNEXPECTED"));
+					throw(::std::system_error(static_cast<int>(last_error), ::std::system_category(), "failed to wait for the event"));
 				}
 			}
 		}
 
-		public: void Wait(_Inout_ t_ScopedLock & lock)
+		public: static void Wait(_Inout_ t_ScopedLock & lock, _In_ t_Event & event)
 		{
-			Timed_Wait(lock, INFINITE);
-		}
-
-		public: void Notify(_Inout_ t_ScopedLock & lock)
-		{
-			t_Event event(lock.m_mutex.m_name);
-			event.Set();
+			Timed_Wait(lock, event, INFINITE);
 		}
 	};
 }

@@ -9,7 +9,6 @@
 
 #include <string>
 #include <cassert>
-#include <utility>
 #include <system_error>
 
 #include <Windows.h>
@@ -26,47 +25,39 @@ namespace n_details
 	{
 		friend class t_ConditionalVariable;
 
-		#pragma region Fields
-
-		private: ::std::string m_name;
-
-		#pragma endregion
-
 		public: t_NamedMutex(void) = delete;
 
-		public: t_NamedMutex(_In_ ::std::string && name)
-		:	m_name(::std::move(name))
+		public: t_NamedMutex(_Inout_ ::std::string & name)
 		{
-			assert(!m_name.empty());
+			assert(!name.empty());
+			name.push_back('m'); // name must differ from event / mappings names
 			auto first_try = true;
 			for(;;)
 			{
-				::SetLastError(ERROR_SUCCESS);
-				m_handle = ::CreateMutexA(NULL, FALSE, m_name.c_str());
-				auto last_error = ::GetLastError();
-				if(Is_Initialized())
+				m_handle = ::CreateMutexA(NULL, FALSE, name.c_str());
+				if(NULL != m_handle)
 				{
 					break;
 				}
-				else if (ERROR_ACCESS_DENIED == last_error)
-				{
-					throw(::std::system_error(static_cast<int>(last_error), ::std::system_category(), "failed to create interprocess named mutex: ERROR_ACCESS_DENIED"));
-				}
-				else if(first_try)
+				if(first_try)
 				{
 					first_try = false;
 				}
 				else
 				{
+					auto last_error = ::GetLastError();
 					throw(::std::system_error(static_cast<int>(last_error), ::std::system_category(), "failed to create interprocess named mutex: UNEXPECTED"));
 				}
 			}
+			name.pop_back();
 		}
 
 		public: t_NamedMutex(t_NamedMutex const &) = delete;
 
-		public: void operator = (t_NamedMutex const &) = delete;
+		public: void operator=(t_NamedMutex const &) = delete;
 
+		//	returns true if lock was acquired at the specified preriod of time
+		//	returns false if a timeout occurred and lock was not acquired
 		public: auto Timed_Lock(_In_ const int timeout_msec) -> bool
 		{
 			assert(Is_Initialized());
@@ -82,7 +73,6 @@ namespace n_details
 				{
 					return(false);
 				}
-				case WAIT_FAILED:
 				default:
 				{
 					throw(::std::system_error(static_cast<int>(result), ::std::system_category(), "failed to lock interprocess named mutex: UNEXPECTED"));
@@ -103,11 +93,6 @@ namespace n_details
 			auto released = ::ReleaseMutex(m_handle);
 			DBG_UNREFERENCED_LOCAL_VARIABLE(released);
 			assert(FALSE != released);
-		}
-
-		public: auto Get_Name(void) const throw() -> ::std::string const &
-		{
-			return(m_name);
 		}
 	};
 }

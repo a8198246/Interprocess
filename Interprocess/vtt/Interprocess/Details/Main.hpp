@@ -5,7 +5,9 @@
 
 #define VTT_INTERPROCESS_DLL_EXPORTS
 
-#define _DEBUG_LOGGING
+#define VTT_SZ_INTERPROCESS_NAMED_OBJECTS_PREFIX "vtt interprocess "
+
+//#define _DEBUG_LOGGING
 
 #ifndef _DEBUG
 #undef _DEBUG_LOGGING
