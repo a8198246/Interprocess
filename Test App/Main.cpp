@@ -1,5 +1,7 @@
 #define BOOST_ALL_NO_LIB
 
+#define RUNTIME_DYNAMIC_LINKING
+
 #include <vld.h>
 
 #include <sal.h>
@@ -15,8 +17,6 @@
 #include <boost/thread.hpp>
 #include <boost/lexical_cast.hpp>
 
-#include <vtt/Interprocess.hpp>
-
 #ifdef _DEBUG
 #	pragma comment(lib, "boost_thread-vc120-mt-gd-1_55.lib")
 #	pragma comment(lib, "boost_system-vc120-mt-gd-1_55.lib")
@@ -25,11 +25,26 @@
 #	pragma comment(lib, "boost_system-vc120-mt-1_55.lib")
 #endif
 
-#define APPLICATION_ID_MAX 0
+#ifdef RUNTIME_DYNAMIC_LINKING
+
+void (*interprocess_master_send   )(const int, char const *, const int);
+int  (*interprocess_master_recieve)(char *, const int);
+void (*interprocess_slave_send    )(char const *, const int);
+int  (*interprocess_slave_recieve )(const int, char *, const int);
+
+#define VTT_INTERPROCESS_BC_MESSAGE_BUFFER_LIMIT 65535
+
+#else
+
+#include <vtt/Interprocess.hpp>
+
+#endif
+
+#define APPLICATION_ID_MAX 5
 #define WORK_TIME_SECONDS  30
 #define BC_MESSAGE_MAX     128
 #define SEND_RATE          20  // messages will be send once in m_send_rate times
-#define INTERVAL_MSECONDS  100 // interval between recive and send attempts
+#define INTERVAL_MSECONDS  100 // interval between recive / send attempts
 
 class t_Worker
 {
@@ -65,7 +80,7 @@ class t_Worker
 
 	private: t_Worker(t_Worker const &) = delete;
 
-	private: void operator = (t_Worker const &) = delete;
+	private: void operator=(t_Worker const &) = delete;
 
 	public: ~t_Worker(void)
 	{
@@ -91,7 +106,7 @@ class t_Worker
 			{
 				Send();
 			}
-			::boost::this_thread::sleep(::boost::get_system_time() + ::boost::posix_time::milliseconds(m_is_master ? INTERVAL_MSECONDS : 1000));
+			::boost::this_thread::sleep(::boost::get_system_time() + ::boost::posix_time::milliseconds(INTERVAL_MSECONDS));
 		}
 	}
 
@@ -99,16 +114,16 @@ class t_Worker
 	{
 		m_buffer.resize(VTT_INTERPROCESS_BC_MESSAGE_BUFFER_LIMIT);
 		size_t bc_recieved = 0;
-		static int attempt = 0;
-		if(!m_is_master)
-		{
-			t_Lock lock(m_sync);
-			::std::cout << "\t #" << attempt << " attempt to recieve" << ::std::endl;
-		}
-		++attempt;
+		//static int attempt = 0;
+		//if(!m_is_master)
+		//{
+		//	t_Lock lock(m_sync);
+		//	::std::cout << "\t #" << attempt << " attempt to recieve" << ::std::endl;
+		//}
+		//++attempt;
 		if(m_is_master)
 		{
-		//	bc_recieved = static_cast<size_t>(interprocess_master_recieve(m_buffer.data(), static_cast<int>(m_buffer.size())));
+			bc_recieved = static_cast<size_t>(interprocess_master_recieve(m_buffer.data(), static_cast<int>(m_buffer.size())));
 		}
 		else
 		{
@@ -140,13 +155,13 @@ class t_Worker
 		}
 		else
 		{
-			//{
-			//	t_Lock lock(m_sync);
-			//	::std::cout << "\t >> thread #" << ::boost::this_thread::get_id() << " sends " << m_buffer.size() << " bytes to master:" << ::std::endl;
-			//	::std::cout.write(m_buffer.data(), m_buffer.size());
-			//	::std::cout.flush();
-			//}
-			//interprocess_slave_send(m_buffer.data(), static_cast<int>(m_buffer.size()));
+			{
+				t_Lock lock(m_sync);
+				::std::cout << "\t >> thread #" << ::boost::this_thread::get_id() << " sends " << m_buffer.size() << " bytes to master:" << ::std::endl;
+				::std::cout.write(m_buffer.data(), m_buffer.size());
+				::std::cout.flush();
+			}
+			interprocess_slave_send(m_buffer.data(), static_cast<int>(m_buffer.size()));
 		}
 	}
 
@@ -169,30 +184,23 @@ class t_Worker
 int t_Worker::m_seed;
 
 int main(int argc, char * args[], char *[])
-{/*
+{
+#ifdef RUNTIME_DYNAMIC_LINKING
 	auto h_interprocess_library = ::LoadLibraryW(L"Interprocess.dll");
 	if(NULL != h_interprocess_library)
 	{
-		auto interprocess_slave_recieve = (int (*)(const int, char *, const int))::GetProcAddress(h_interprocess_library, "interprocess_slave_recieve");
-		auto interprocess_master_send = (void (*)(const int, char const *, const int))::GetProcAddress(h_interprocess_library, "interprocess_master_send");
-		if((nullptr != interprocess_slave_recieve) && (nullptr != interprocess_master_send))
-		{
-			char p_buffer[1000];
-			auto tries = 30;
-			while (tries)
-			{
-				interprocess_slave_recieve(13, p_buffer, 1000);
-			//	interprocess_master_send(13, p_buffer, 1000);
-				 Sleep(30);
-				 --tries;
-			}
-		}
-		auto r = ::FreeLibrary(h_interprocess_library);
-		h_interprocess_library = NULL;
+		interprocess_master_send    = (void (*)(const int, char const *, const int))::GetProcAddress(h_interprocess_library, "interprocess_master_send"   );
+		interprocess_master_recieve = (int  (*)(char *, const int                 ))::GetProcAddress(h_interprocess_library, "interprocess_master_recieve");
+		interprocess_slave_send     = (void (*)(char const *, const int           ))::GetProcAddress(h_interprocess_library, "interprocess_slave_send"    );
+		interprocess_slave_recieve  = (int  (*)(const int, char *, const int      ))::GetProcAddress(h_interprocess_library, "interprocess_slave_recieve" );
 	}
-	 Sleep(1000);
-	return(0);*/
-	
+	else
+	{
+		::std::cerr << "failed to load " "Interprocess.dll";
+		return(ERROR_APP_INIT_FAILURE);
+	}
+#endif
+
 	auto is_master = (1 == argc);
 	if(is_master)
 	{
@@ -217,21 +225,28 @@ int main(int argc, char * args[], char *[])
 		catch(::boost::bad_lexical_cast &)
 		{
 			::std::cout <<  "application_id \"" << args[1] << "\" is invalid" << ::std::endl;
-			return(0);
+			return(ERROR_APP_INIT_FAILURE);
 		}
 		if(APPLICATION_ID_MAX < application_id)
 		{
 			::std::cout <<  "application_id \"" << args[1] << "\" is invalid, must be within 0 - " << APPLICATION_ID_MAX << " range" << ::std::endl;
-			return(0);
+			return(ERROR_APP_INIT_FAILURE);
 		}
 	}
 
 	srand(42);
 	
-	::boost::mutex sync;
 	{
+		::boost::mutex sync;
 		t_Worker worker(is_master, application_id, sync);
 		::boost::this_thread::sleep(::boost::get_system_time() + ::boost::posix_time::milliseconds(WORK_TIME_SECONDS * 1000));
 	}
+
+#ifdef RUNTIME_DYNAMIC_LINKING
+	auto unloaded = ::FreeLibrary(h_interprocess_library);
+	DBG_UNREFERENCED_LOCAL_VARIABLE(unloaded);
+	assert(FALSE != unloaded);
+	h_interprocess_library = NULL;
+#endif
 	return(0);
 }
