@@ -43,7 +43,7 @@ int  (*interprocess_slave_recieve )(const int, char *, const int);
 #define APPLICATION_ID_MAX 5
 #define WORK_TIME_SECONDS  30
 #define BC_MESSAGE_MAX     128
-#define SEND_RATE          20  // messages will be send once in m_send_rate times
+#define SEND_RATE          3   // messages will be send once in m_send_rate times
 #define INTERVAL_MSECONDS  100 // interval between recive / send attempts
 
 class t_Worker

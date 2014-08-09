@@ -37,7 +37,6 @@ namespace n_details
 		protected: ::boost::asio::io_service::work m_input_service_work;
 		//	slaves-to-master
 		protected: t_Chunk                         m_pending_output;
-		//	debug logging
 	#ifdef _DEBUG_LOGGING
 		protected: ::boost::mutex                  m_logger_sync;
 		private: ::std::ofstream                   m_logger;
@@ -65,8 +64,8 @@ namespace n_details
 			::boost::this_thread::sleep(::boost::posix_time::seconds(1)); // let's hope that user-mode code in m_input_service_thread will be completed during this period
 		}
 
-		//	Method to be called from user threads
 		//	Returns number of bytes written into the buffer.
+		//	To be called from user threads
 		public: auto Recieve_From_Slaves(_Out_writes_bytes_(bc_buffer_capacity) char * p_buffer, _In_ const size_t bc_buffer_capacity) -> size_t
 		{
 			assert(nullptr != p_buffer);

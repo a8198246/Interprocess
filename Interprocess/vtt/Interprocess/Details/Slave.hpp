@@ -41,7 +41,6 @@ namespace n_details
 		protected: ::boost::asio::io_service       m_output_service;
 		protected: ::boost::thread                 m_output_service_thread; // continiously reads data from master to slave pipe and sends it to output service
 		protected: t_Chunk                         m_pending_output;
-		//	debug logging
 	#ifdef _DEBUG_LOGGING
 		protected: ::boost::mutex                  m_logger_sync;
 		private: ::std::ofstream                   m_logger;
@@ -70,7 +69,7 @@ namespace n_details
 		//	m_input_service_thread.join(); // this will cause a deadlock since threads started from dll will be waiting for it to unload
 			m_output_service_thread.interrupt();
 		//	m_output_service_thread.join(); // this will cause a deadlock since threads started from dll will be waiting for it to unload
-			::boost::this_thread::sleep(::boost::posix_time::seconds(1)); // let's hope that user-mode code in m_input_service_thread will be completed during this period
+			::boost::this_thread::sleep(::boost::posix_time::seconds(1)); // let's hope that user-mode code in m_input_service_thread and m_output_service_thread will be completed during this period
 		#ifdef _DEBUG_LOGGING
 			{
 				::boost::lock_guard<::boost::mutex> lock(m_logger_sync);
@@ -116,7 +115,7 @@ namespace n_details
 			}
 		}
 
-		//	Method to be called from user threads
+		//	To be called from user threads
 		private: void Handle_Ouput_From_Master(_In_ t_Chunk chunk)
 		{
 			assert(m_application_id_set);
@@ -130,8 +129,8 @@ namespace n_details
 			m_pending_output = chunk;
 		}
 
-		//	Method to be called from user threads
 		//	Returns number of bytes written into the buffer.
+		//	To be called from user threads
 		public: auto Recieve_From_Master(_In_ const t_ApplicationId application_id, _Out_writes_bytes_(bc_buffer_capacity) char * p_buffer, _In_ const size_t bc_buffer_capacity) -> size_t
 		{
 		#ifdef _DEBUG_LOGGING
@@ -164,7 +163,6 @@ namespace n_details
 				#endif
 				}
 				m_output_service_thread = ::boost::thread(::boost::bind(&t_Slave::Retrieve_Output_From_Master, this));
-				::boost::this_thread::yield();
 			}
 			if(application_id != m_application_id)
 			{
