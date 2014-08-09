@@ -4,7 +4,8 @@
     <LocalDebuggerCommand>$(SolutionDir)_Build\$(ProjectName).exe</LocalDebuggerCommand>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
     <LocalDebuggerWorkingDirectory>$(SolutionDir)_Build\</LocalDebuggerWorkingDirectory>
-    <LocalDebuggerCommandArguments>3</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>
+    </LocalDebuggerCommandArguments>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LocalDebuggerCommand>$(SolutionDir)_Build\$(ProjectName).exe</LocalDebuggerCommand>

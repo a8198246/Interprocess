@@ -40,11 +40,12 @@ int  (*interprocess_slave_recieve )(const int, char *, const int);
 
 #endif
 
-#define APPLICATION_ID_MAX 5
+#define APPLICATION_ID_MAX 0
 #define WORK_TIME_SECONDS  30
 #define BC_MESSAGE_MAX     128
 #define SEND_RATE          3   // messages will be send once in m_send_rate times
 #define INTERVAL_MSECONDS  100 // interval between recive / send attempts
+#define BUFFER_SIZE        256
 
 class t_Worker
 {
@@ -73,7 +74,7 @@ class t_Worker
 	:	m_is_master(is_master)
 	,	m_application_id(application_id)
 	,	m_sync(cout_sync)
-	,	m_buffer(VTT_INTERPROCESS_BC_MESSAGE_BUFFER_LIMIT)
+	,	m_buffer(BUFFER_SIZE)
 	{
 		m_thread = ::boost::thread([this](){Routine();});
 	}
@@ -112,7 +113,7 @@ class t_Worker
 
 	private: void Recieve(void)
 	{
-		m_buffer.resize(VTT_INTERPROCESS_BC_MESSAGE_BUFFER_LIMIT);
+		m_buffer.resize(BUFFER_SIZE);
 		size_t bc_recieved = 0;
 		//static int attempt = 0;
 		//if(!m_is_master)
@@ -129,7 +130,7 @@ class t_Worker
 		{
 			bc_recieved = static_cast<size_t>(interprocess_slave_recieve(m_application_id, m_buffer.data(), static_cast<int>(m_buffer.size())));
 		}
-		assert(bc_recieved <= VTT_INTERPROCESS_BC_MESSAGE_BUFFER_LIMIT);
+		assert(bc_recieved <= BUFFER_SIZE);
 		if(0 != bc_recieved)
 		{
 			t_Lock lock(m_sync);
