@@ -10,4 +10,6 @@
 //	compared to the maximum length of master-to-slave shared memory buffer.
 #define VTT_INTERPROCESS_SLAVE_TO_MASTER_MESSAGE_BUFFER_SIZE_MAGNITUDE 100
 
+#define VTT_INTERPROCESS_CALLING_CONVENTION __stdcall
+
 #endif

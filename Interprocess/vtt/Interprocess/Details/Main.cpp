@@ -17,7 +17,7 @@ using namespace n_vtt;
 using namespace n_interprocess;
 using namespace n_details;
 
-void __stdcall interprocess_master_send(_In_ const int application_id, _In_reads_bytes_(bc_data) char const * p_data, _In_range_(0, VTT_INTERPROCESS_BC_MESSAGE_BUFFER_LIMIT) const int bc_data)
+void VTT_INTERPROCESS_CALLING_CONVENTION interprocess_master_send(_In_ const int application_id, _In_reads_bytes_(bc_data) char const * p_data, _In_range_(0, VTT_INTERPROCESS_BC_MESSAGE_BUFFER_LIMIT) const int bc_data)
 {
 	if((nullptr != p_data) && (0 < bc_data) && (bc_data <= VTT_INTERPROCESS_BC_MESSAGE_BUFFER_LIMIT))
 	{
@@ -25,7 +25,7 @@ void __stdcall interprocess_master_send(_In_ const int application_id, _In_reads
 	}
 }
 
-int __stdcall interprocess_master_recieve(_Out_writes_bytes_(bc_buffer_capacity) char * p_buffer, _In_ const int bc_buffer_capacity)
+int VTT_INTERPROCESS_CALLING_CONVENTION interprocess_master_recieve(_Out_writes_bytes_(bc_buffer_capacity) char * p_buffer, _In_ const int bc_buffer_capacity)
 {
 	auto bc_written = 0;
 	if((nullptr != p_buffer) && (0 < bc_buffer_capacity))
@@ -35,7 +35,7 @@ int __stdcall interprocess_master_recieve(_Out_writes_bytes_(bc_buffer_capacity)
 	return(bc_written);
 }
 
-void __stdcall interprocess_slave_send(_In_reads_bytes_(bc_data) char const * p_data, _In_range_(0, VTT_INTERPROCESS_BC_MESSAGE_BUFFER_LIMIT) const int bc_data)
+void VTT_INTERPROCESS_CALLING_CONVENTION interprocess_slave_send(_In_reads_bytes_(bc_data) char const * p_data, _In_range_(0, VTT_INTERPROCESS_BC_MESSAGE_BUFFER_LIMIT) const int bc_data)
 {
 	if((nullptr != p_data) && (0 < bc_data) && (bc_data <= VTT_INTERPROCESS_BC_MESSAGE_BUFFER_LIMIT))
 	{
@@ -43,7 +43,7 @@ void __stdcall interprocess_slave_send(_In_reads_bytes_(bc_data) char const * p_
 	}
 }
 
-int __stdcall interprocess_slave_recieve(_In_ const int application_id, _Out_writes_bytes_(bc_buffer_capacity) char * p_buffer, _In_ const int bc_buffer_capacity)
+int VTT_INTERPROCESS_CALLING_CONVENTION interprocess_slave_recieve(_In_ const int application_id, _Out_writes_bytes_(bc_buffer_capacity) char * p_buffer, _In_ const int bc_buffer_capacity)
 {
 	auto bc_written = 0;
 	if((nullptr != p_buffer) && (0 < bc_buffer_capacity))
