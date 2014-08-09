@@ -27,10 +27,12 @@
 
 #ifdef RUNTIME_DYNAMIC_LINKING
 
-void (*interprocess_master_send   )(const int, char const *, const int);
-int  (*interprocess_master_recieve)(char *, const int);
-void (*interprocess_slave_send    )(char const *, const int);
-int  (*interprocess_slave_recieve )(const int, char *, const int);
+#define VTT_INTERPROCESS_CALLING_CONVENTION __stdcall
+
+void (VTT_INTERPROCESS_CALLING_CONVENTION *interprocess_master_send   )(const int, char const *, const int);
+int  (VTT_INTERPROCESS_CALLING_CONVENTION *interprocess_master_recieve)(char *, const int);
+void (VTT_INTERPROCESS_CALLING_CONVENTION *interprocess_slave_send    )(char const *, const int);
+int  (VTT_INTERPROCESS_CALLING_CONVENTION *interprocess_slave_recieve )(const int, char *, const int);
 
 #define VTT_INTERPROCESS_BC_MESSAGE_BUFFER_LIMIT 65535
 
@@ -190,10 +192,10 @@ int main(int argc, char * args[], char *[])
 	auto h_interprocess_library = ::LoadLibraryW(L"Interprocess.dll");
 	if(NULL != h_interprocess_library)
 	{
-		interprocess_master_send    = (void (*)(const int, char const *, const int))::GetProcAddress(h_interprocess_library, "interprocess_master_send"   );
-		interprocess_master_recieve = (int  (*)(char *, const int                 ))::GetProcAddress(h_interprocess_library, "interprocess_master_recieve");
-		interprocess_slave_send     = (void (*)(char const *, const int           ))::GetProcAddress(h_interprocess_library, "interprocess_slave_send"    );
-		interprocess_slave_recieve  = (int  (*)(const int, char *, const int      ))::GetProcAddress(h_interprocess_library, "interprocess_slave_recieve" );
+		interprocess_master_send    = (void (VTT_INTERPROCESS_CALLING_CONVENTION *)(const int, char const *, const int))::GetProcAddress(h_interprocess_library, "interprocess_master_send"   );
+		interprocess_master_recieve = (int  (VTT_INTERPROCESS_CALLING_CONVENTION *)(char *, const int                 ))::GetProcAddress(h_interprocess_library, "interprocess_master_recieve");
+		interprocess_slave_send     = (void (VTT_INTERPROCESS_CALLING_CONVENTION *)(char const *, const int           ))::GetProcAddress(h_interprocess_library, "interprocess_slave_send"    );
+		interprocess_slave_recieve  = (int  (VTT_INTERPROCESS_CALLING_CONVENTION *)(const int, char *, const int      ))::GetProcAddress(h_interprocess_library, "interprocess_slave_recieve" );
 	}
 	else
 	{
