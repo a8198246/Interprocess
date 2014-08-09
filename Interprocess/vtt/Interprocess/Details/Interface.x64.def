@@ -1,0 +1,6 @@
+LIBRARY
+EXPORTS
+	interprocess_master_recieve
+	interprocess_master_send
+	interprocess_slave_recieve
+	interprocess_slave_send

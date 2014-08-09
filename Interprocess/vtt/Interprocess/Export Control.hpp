@@ -9,7 +9,7 @@
 
 #ifdef VTT_INTERPROCESS_DLL_EXPORTS
 #	if defined(_MSC_VER)
-#		define VTT_INTERPROCESS_DLL_API __declspec(dllexport)
+#		define VTT_INTERPROCESS_DLL_API// __declspec(dllexport) // using .def file instead
 #	elif defined(__GNUC__)
 #		error Unsupported platform
 #	else
@@ -17,7 +17,7 @@
 #	endif
 #else
 #	if defined(_MSC_VER)
-#		define VTT_INTERPROCESS_DLL_API __declspec(dllimport)
+#		define VTT_INTERPROCESS_DLL_API// __declspec(dllimport) // using .def file instead
 #		ifdef _DEBUG
 #			if defined(VTT_X32)
 #				pragma comment(lib, "x32/Debug/Interprocess.lib")

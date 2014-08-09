@@ -33,4 +33,8 @@
   <ItemGroup>
     <Text Include="Readme.txt" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="vtt\Interprocess\Details\Interface.x32.def" />
+    <None Include="vtt\Interprocess\Details\Interface.x64.def" />
+  </ItemGroup>
 </Project>

@@ -106,6 +106,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
       <TreatLinkerWarningAsErrors>true</TreatLinkerWarningAsErrors>
+      <ModuleDefinitionFile>$(ProjectDir)vtt\Interprocess\Details\Interface.x32.def</ModuleDefinitionFile>
     </Link>
     <PreBuildEvent>
       <Command>rmdir "$(ProjectDir)x32\Debug\" /S /Q</Command>
@@ -134,6 +135,7 @@ copy "$(OutDir)*.pdb" "$(ProjectDir)x32\Debug\"</Command>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
       <TreatLinkerWarningAsErrors>true</TreatLinkerWarningAsErrors>
+      <ModuleDefinitionFile>$(ProjectDir)vtt\Interprocess\Details\Interface.x64.def</ModuleDefinitionFile>
     </Link>
     <PreBuildEvent>
       <Command>rmdir "$(ProjectDir)x64\Debug\" /S /Q</Command>
@@ -170,6 +172,7 @@ copy "$(OutDir)*.pdb" "$(ProjectDir)x64\Debug\"</Command>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
       <SetChecksum>true</SetChecksum>
+      <ModuleDefinitionFile>$(ProjectDir)vtt\Interprocess\Details\Interface.x32.def</ModuleDefinitionFile>
     </Link>
     <PostBuildEvent>
       <Command>mkdir "$(ProjectDir)x32\Release\"
@@ -206,6 +209,7 @@ copy "$(OutDir)*.lib" "$(ProjectDir)x32\Release\"</Command>
       <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
       <ShowProgress>NotSet</ShowProgress>
       <SetChecksum>true</SetChecksum>
+      <ModuleDefinitionFile>$(ProjectDir)vtt\Interprocess\Details\Interface.x64.def</ModuleDefinitionFile>
     </Link>
     <PostBuildEvent>
       <Command>mkdir "$(ProjectDir)x64\Release\"
@@ -253,6 +257,10 @@ copy "$(OutDir)*.lib" "$(ProjectDir)x64\Release\"</Command>
   </ItemGroup>
   <ItemGroup>
     <Text Include="Readme.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="vtt\Interprocess\Details\Interface.x32.def" />
+    <None Include="vtt\Interprocess\Details\Interface.x64.def" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
