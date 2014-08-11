@@ -131,7 +131,7 @@ namespace n_details
 
 		//	Returns number of bytes written into the buffer.
 		//	To be called from user threads
-		public: auto Recieve_From_Master(_In_ const t_ApplicationId application_id, _Out_writes_bytes_(bc_buffer_capacity) char * p_buffer, _In_ const size_t bc_buffer_capacity) -> size_t
+		public: auto Recieve_From_Master(_In_ const t_ApplicationId application_id, _Out_writes_bytes_opt_(bc_buffer_capacity) char * p_buffer, _In_ const size_t bc_buffer_capacity) -> size_t
 		{
 		#ifdef _DEBUG_LOGGING
 			{

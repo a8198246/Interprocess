@@ -66,7 +66,7 @@ namespace n_details
 
 		//	Returns number of bytes written into the buffer.
 		//	To be called from user threads
-		public: auto Recieve_From_Slaves(_Out_writes_bytes_(bc_buffer_capacity) char * p_buffer, _In_ const size_t bc_buffer_capacity) -> size_t
+		public: auto Recieve_From_Slaves(_Out_writes_bytes_opt_(bc_buffer_capacity) char * p_buffer, _In_ const size_t bc_buffer_capacity) -> size_t
 		{
 			assert(nullptr != p_buffer);
 			assert(0 < bc_buffer_capacity);

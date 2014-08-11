@@ -232,7 +232,6 @@ copy "$(OutDir)*.lib" "$(ProjectDir)x64\Release\"</Command>
     <ClInclude Include="vtt\Interprocess\Details\Main Windows SDK Control.hpp" />
     <ClInclude Include="vtt\Interprocess\Details\Master.hpp" />
     <ClInclude Include="vtt\Interprocess\Details\Named Mutex.hpp" />
-    <ClInclude Include="vtt\Interprocess\Details\Net Broker.hpp" />
     <ClInclude Include="vtt\Interprocess\Details\Owned Handle.hpp" />
     <ClInclude Include="vtt\Interprocess\Details\Patron.hpp" />
     <ClInclude Include="vtt\Interprocess\Details\Pipe.hpp" />
@@ -240,6 +239,7 @@ copy "$(OutDir)*.lib" "$(ProjectDir)x64\Release\"</Command>
     <ClInclude Include="vtt\Interprocess\Details\Scoped Lock.hpp" />
     <ClInclude Include="vtt\Interprocess\Details\Shared Memory.hpp" />
     <ClInclude Include="vtt\Interprocess\Details\Slave.hpp" />
+    <ClInclude Include="vtt\Interprocess\Details\Sockets User.hpp" />
     <ClInclude Include="vtt\Interprocess\Details\Static Instace.hpp" />
     <ClInclude Include="vtt\Interprocess\Details\UDP Multicast Socket.hpp" />
     <ClInclude Include="vtt\Interprocess\Details\Write Chunk To Buffer.hpp" />
