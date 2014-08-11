@@ -33,7 +33,7 @@ void (VTT_INTERPROCESS_CALLING_CONVENTION *interprocess_master_send   )(const in
 int  (VTT_INTERPROCESS_CALLING_CONVENTION *interprocess_master_recieve)(char *, const int);
 void (VTT_INTERPROCESS_CALLING_CONVENTION *interprocess_slave_send    )(char const *, const int);
 int  (VTT_INTERPROCESS_CALLING_CONVENTION *interprocess_slave_recieve )(const int, char *, const int);
-int  (VTT_INTERPROCESS_CALLING_CONVENTION *udp_multicast_recieve      )(wchar_t const *, const int, char *, const int);
+int  (VTT_INTERPROCESS_CALLING_CONVENTION *udp_multicast_recieve      )(wchar_t const *, const int, char *, const int, const int);
 
 #define VTT_INTERPROCESS_BC_MESSAGE_BUFFER_LIMIT 65535
 
@@ -171,7 +171,7 @@ class t_Worker
 	private: void Recieve_From_Soket(void)
 	{
 		m_buffer.resize(BUFFER_SIZE);
-		size_t bc_recieved = static_cast<size_t>(udp_multicast_recieve(GROUP, PORT, m_buffer.data(), static_cast<int>(m_buffer.size())));
+		size_t bc_recieved = static_cast<size_t>(udp_multicast_recieve(GROUP, PORT, m_buffer.data(), static_cast<int>(m_buffer.size()), 100));
 		assert(bc_recieved <= BUFFER_SIZE);
 		if(0 != bc_recieved)
 		{

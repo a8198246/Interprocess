@@ -58,13 +58,13 @@ interprocess_slave_recieve(_In_ const int application_id, _Out_writes_bytes_(bc_
 }
 
 int VTT_INTERPROCESS_CALLING_CONVENTION
-udp_multicast_recieve(_In_z_ wchar_t const * psz_host, _In_range_(0, 65535) const int port, _Out_writes_bytes_(bc_buffer_capacity) char * p_buffer, _In_ const int bc_buffer_capacity)
+udp_multicast_recieve(_In_z_ wchar_t const * psz_host, _In_range_(0, 65535) const int port, _Out_writes_bytes_(bc_buffer_capacity) char * p_buffer, _In_ const int bc_buffer_capacity, _In_ const int timeout_msec)
 {
 	auto bc_written = 0;
 	if((nullptr != psz_host) && (L'\0' != *psz_host) && (0 <= port) && (port <= 65535) && (nullptr != p_buffer) && (0 < bc_buffer_capacity))
 	{
 		t_Address address(psz_host, static_cast<unsigned short>(port), false);
-		bc_written = static_cast<int>(t_Patron::Get_NetBroker()[address].Recieve(p_buffer, static_cast<size_t>(bc_buffer_capacity), VTT_INTERPROCESS_SOCKET_RECIEVE_TIMEOUT_MSECONDS));
+		bc_written = static_cast<int>(t_Patron::Get_NetBroker()[address].Recieve(p_buffer, static_cast<size_t>(bc_buffer_capacity), timeout_msec));
 	}
 	return(bc_written);
 }

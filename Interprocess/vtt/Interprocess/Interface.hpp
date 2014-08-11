@@ -36,7 +36,7 @@ interprocess_slave_recieve(_In_ const int application_id, _Out_writes_bytes_(bc_
 //	прочие методы:
 
 int VTT_INTERPROCESS_DLL_API VTT_INTERPROCESS_CALLING_CONVENTION
-udp_multicast_recieve(_In_z_ wchar_t const * psz_host, _In_range_(0, 65535) const int port, _Out_writes_bytes_(bc_buffer_capacity) char * p_buffer, _In_ const int bc_buffer_capacity);
+udp_multicast_recieve(_In_z_ wchar_t const * psz_host, _In_range_(0, 65535) const int port, _Out_writes_bytes_(bc_buffer_capacity) char * p_buffer, _In_ const int bc_buffer_capacity, _In_ const int timeout_msec);
 
 VTT_EXTERN_C_ZONE_END
 

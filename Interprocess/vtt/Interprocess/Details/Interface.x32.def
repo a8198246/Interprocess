@@ -4,4 +4,4 @@ EXPORTS
 	interprocess_master_send=_interprocess_master_send@12
 	interprocess_slave_recieve=_interprocess_slave_recieve@12
 	interprocess_slave_send=_interprocess_slave_send@8
-	udp_multicast_recieve=_udp_multicast_recieve@16
+	udp_multicast_recieve=_udp_multicast_recieve@20
