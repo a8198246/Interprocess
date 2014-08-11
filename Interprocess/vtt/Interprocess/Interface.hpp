@@ -20,7 +20,7 @@ interprocess_master_send(_In_ const int application_id, _In_reads_bytes_(bc_data
 //	Метод блокирующий, до появления первого сообщения, которое можно забрать.
 //	В msgs суммарные данные передаваемых сообщений.
 int VTT_INTERPROCESS_DLL_API VTT_INTERPROCESS_CALLING_CONVENTION
-interprocess_master_recieve(_Out_writes_bytes_opt_(bc_buffer_capacity) char * p_buffer, _In_ const int bc_buffer_capacity);
+interprocess_master_recieve(_Out_writes_bytes_opt_(bc_buffer_capacity) char * p_buffer, _In_ const int bc_buffer_capacity, _In_ const int timeout_msec);
 
 //	Методы, вызываемые в ведомом процессе:
 

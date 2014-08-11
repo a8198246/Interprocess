@@ -62,6 +62,23 @@ namespace n_details
 			return(m_shared_memory.Obtain<t_Buffer>().Is_Not_Empty());
 		}
 
+		public: auto Read(_In_ const int timeout_msec) -> t_Chunk
+		{
+			t_ScopedLock lock(m_sync);
+			if(Is_Empty())
+			{
+				t_ConditionalVariable::Timed_Wait(lock, m_flag, timeout_msec);
+			}
+			if(Is_Empty())
+			{
+				return(t_Chunk());
+			}
+			else
+			{
+				return(m_shared_memory.Obtain<t_Buffer>().Retrieve_Chunk());
+			}
+		}
+
 		public: auto Read(void) -> t_Chunk
 		{
 			t_ScopedLock lock(m_sync);

@@ -30,7 +30,7 @@
 #define VTT_INTERPROCESS_CALLING_CONVENTION __stdcall
 
 void (VTT_INTERPROCESS_CALLING_CONVENTION *interprocess_master_send   )(const int, char const *, const int);
-int  (VTT_INTERPROCESS_CALLING_CONVENTION *interprocess_master_recieve)(char *, const int);
+int  (VTT_INTERPROCESS_CALLING_CONVENTION *interprocess_master_recieve)(char *, const int, const int);
 void (VTT_INTERPROCESS_CALLING_CONVENTION *interprocess_slave_send    )(char const *, const int);
 int  (VTT_INTERPROCESS_CALLING_CONVENTION *interprocess_slave_recieve )(const int, char *, const int);
 int  (VTT_INTERPROCESS_CALLING_CONVENTION *udp_multicast_recieve      )(wchar_t const *, const int, char *, const int, const int, int *);
@@ -141,23 +141,23 @@ class t_Worker
 		{
 			for(;;)
 			{
-				auto need_to_recieve_from_socket = true;
-				if(need_to_recieve_from_socket)
+				//auto need_to_recieve_from_socket = true;
+				//if(need_to_recieve_from_socket)
+				//{
+				//	Recieve_From_Soket();
+				//	::boost::this_thread::interruption_point();
+				//}
+				auto need_to_recieve = true;
+				if(need_to_recieve)
 				{
-					Recieve_From_Soket();
-					::boost::this_thread::interruption_point();
+					Recieve();
 				}
-				//auto need_to_recieve = true;
-				//if(need_to_recieve)
-				//{
-				//	Recieve();
-				//}
-				//auto need_to_send = (rand() % SEND_RATE) == 0;
-				//if(need_to_send)
-				//{
-				//	Send();
-				//}
-				//::boost::this_thread::sleep(::boost::get_system_time() + ::boost::posix_time::milliseconds(INTERVAL_MSECONDS));
+				auto need_to_send = (rand() % SEND_RATE) == 0;
+				if(need_to_send)
+				{
+					Send();
+				}
+				::boost::this_thread::sleep(::boost::get_system_time() + ::boost::posix_time::milliseconds(INTERVAL_MSECONDS));
 			}
 		}
 		catch(::std::system_error & e)
@@ -196,16 +196,16 @@ class t_Worker
 	{
 		m_buffer.resize(BUFFER_SIZE);
 		size_t bc_recieved = 0;
-		//static int attempt = 0;
-		//if(!m_is_master)
-		//{
-		//	t_Lock lock(m_sync);
-		//	::std::cout << "\t #" << attempt << " attempt to recieve" << ::std::endl;
-		//}
-		//++attempt;
+		static int attempt = 0;
 		if(m_is_master)
 		{
-			bc_recieved = static_cast<size_t>(interprocess_master_recieve(m_buffer.data(), static_cast<int>(m_buffer.size())));
+			t_Lock lock(m_sync);
+			::std::cout << "\t #" << attempt << " attempt to recieve" << ::std::endl;
+		}
+		++attempt;
+		if(m_is_master)
+		{
+			bc_recieved = static_cast<size_t>(interprocess_master_recieve(m_buffer.data(), static_cast<int>(m_buffer.size()), 100));
 		}
 		else
 		{

@@ -66,7 +66,7 @@ namespace n_details
 
 		//	Returns number of bytes written into the buffer.
 		//	To be called from user threads
-		public: auto Recieve_From_Slaves(_Out_writes_bytes_opt_(bc_buffer_capacity) char * p_buffer, _In_ const size_t bc_buffer_capacity) -> size_t
+		public: auto Recieve_From_Slaves(_Out_writes_bytes_opt_(bc_buffer_capacity) char * p_buffer, _In_ const size_t bc_buffer_capacity, _In_ const int timeout_msec) -> size_t
 		{
 			assert(nullptr != p_buffer);
 			assert(0 < bc_buffer_capacity);
@@ -80,7 +80,7 @@ namespace n_details
 			{
 				assert(m_pending_output.Is_Empty());
 				auto & pipe = m_Broker.Get_SlavesToMasterPipe();
-				Write_Chunk_To_Buffer(pipe.Read(), p_buffer, bc_buffer_capacity, bc_written, m_pending_output);
+				Write_Chunk_To_Buffer(pipe.Read(timeout_msec), p_buffer, bc_buffer_capacity, bc_written, m_pending_output);
 			}
 			assert(bc_written <= bc_buffer_capacity);
 			return(bc_written);

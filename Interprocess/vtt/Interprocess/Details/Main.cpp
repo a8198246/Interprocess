@@ -36,14 +36,14 @@ interprocess_master_send(_In_ const int application_id, _In_reads_bytes_(bc_data
 }
 
 int VTT_INTERPROCESS_CALLING_CONVENTION
-interprocess_master_recieve(_Out_writes_bytes_opt_(bc_buffer_capacity) char * p_buffer, _In_ const int bc_buffer_capacity)
+interprocess_master_recieve(_Out_writes_bytes_opt_(bc_buffer_capacity) char * p_buffer, _In_ const int bc_buffer_capacity, _In_ const int timeout_msec)
 {
 	auto bc_written = 0;
 	if((nullptr != p_buffer) && (0 < bc_buffer_capacity))
 	{
 		try
 		{
-			bc_written = static_cast<int>(t_Patron::Get_Master().Recieve_From_Slaves(p_buffer, static_cast<size_t>(bc_buffer_capacity)));
+			bc_written = static_cast<int>(t_Patron::Get_Master().Recieve_From_Slaves(p_buffer, static_cast<size_t>(bc_buffer_capacity), timeout_msec));
 		}
 		catch(...)
 		{

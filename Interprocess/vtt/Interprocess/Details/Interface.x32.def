@@ -1,6 +1,6 @@
 LIBRARY
 EXPORTS
-	interprocess_master_recieve=_interprocess_master_recieve@8
+	interprocess_master_recieve=_interprocess_master_recieve@12
 	interprocess_master_send=_interprocess_master_send@12
 	interprocess_slave_recieve=_interprocess_slave_recieve@12
 	interprocess_slave_send=_interprocess_slave_send@8
