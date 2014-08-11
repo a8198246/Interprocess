@@ -4,3 +4,4 @@ EXPORTS
 	interprocess_master_send
 	interprocess_slave_recieve
 	interprocess_slave_send
+	udp_multicast_recieve

@@ -5,6 +5,7 @@
 
 #include "Master.hpp"
 #include "Slave.hpp"
+#include "Net Broker.hpp"
 #include "Static Instace.hpp"
 
 #include <memory>
@@ -24,8 +25,9 @@ namespace n_details
 
 		#pragma region Fields
 
-		protected: ::std::unique_ptr<t_Master> m_p_master;
-		protected: ::std::unique_ptr<t_Slave>  m_p_slave;
+		protected: ::std::unique_ptr<t_Master>    m_p_master;
+		protected: ::std::unique_ptr<t_Slave>     m_p_slave;
+		protected: ::std::unique_ptr<t_NetBroker> m_p_net_broker;
 
 		#pragma endregion
 
@@ -64,9 +66,21 @@ namespace n_details
 			return(*patron.m_p_slave);
 		}
 
+		public: static auto Get_NetBroker(void) -> t_NetBroker &
+		{
+			auto & patron = Get_Instace();
+			if(!patron.m_p_net_broker)
+			{
+				patron.m_p_net_broker.reset(new t_NetBroker());
+				atexit(Explicit_Cleanup);
+			}
+			return(*patron.m_p_net_broker);
+		}
+
 		private: static void Explicit_Cleanup(void)
 		{
 			auto & patron = Get_Instace();
+			patron.m_p_net_broker.reset();
 			patron.m_p_slave.reset();
 			patron.m_p_master.reset();
 		}

@@ -33,6 +33,7 @@ void (VTT_INTERPROCESS_CALLING_CONVENTION *interprocess_master_send   )(const in
 int  (VTT_INTERPROCESS_CALLING_CONVENTION *interprocess_master_recieve)(char *, const int);
 void (VTT_INTERPROCESS_CALLING_CONVENTION *interprocess_slave_send    )(char const *, const int);
 int  (VTT_INTERPROCESS_CALLING_CONVENTION *interprocess_slave_recieve )(const int, char *, const int);
+int  (VTT_INTERPROCESS_CALLING_CONVENTION *udp_multicast_recieve      )(wchar_t const *, const int, char *, const int);
 
 #define VTT_INTERPROCESS_BC_MESSAGE_BUFFER_LIMIT 65535
 
@@ -42,12 +43,51 @@ int  (VTT_INTERPROCESS_CALLING_CONVENTION *interprocess_slave_recieve )(const in
 
 #endif
 
-#define APPLICATION_ID_MAX 0
-#define WORK_TIME_SECONDS  30
-#define BC_MESSAGE_MAX     128
-#define SEND_RATE          3   // messages will be send once in m_send_rate times
-#define INTERVAL_MSECONDS  100 // interval between recive / send attempts
-#define BUFFER_SIZE        256
+#define APPLICATION_ID_MAX    0
+#define WORK_TIME_SECONDS     30
+#define BC_MESSAGE_MAX        128
+#define BC_SOCKET_MESSAGE_MAX 512
+#define SEND_RATE             3   // messages will be send once in m_send_rate times
+#define INTERVAL_MSECONDS     100 // interval between recive / send attempts
+#define BUFFER_SIZE           512
+#define GROUP                 L"224.0.0.108"
+#define PORT                  12345
+
+inline void
+ErrorCode_To_String(_In_ const int error_code, _Inout_ ::std::wstring & report)
+{
+	report.push_back(L'#');
+	report += ::boost::lexical_cast<::std::wstring>(error_code);
+	report.push_back(L' ');
+	report.push_back(L'\"');
+	auto psz_error_description = static_cast<wchar_t *>(nullptr);
+	auto flags = FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_ALLOCATE_BUFFER;
+	auto formatted = ::FormatMessageW(flags, NULL, error_code, NULL, reinterpret_cast<::LPWSTR>(&psz_error_description), NULL, NULL);
+	DBG_UNREFERENCED_LOCAL_VARIABLE(formatted);
+	if(psz_error_description != nullptr)
+	{
+		report += psz_error_description;
+		::LocalFree(reinterpret_cast<::HLOCAL>(psz_error_description));
+		psz_error_description = nullptr;
+	}
+	else
+	{
+		report += L"(failed to retrieve error description)";
+	}
+	while((L'\r' == report.back()) || (L'\n' == report.back()))
+	{
+		report.pop_back();
+	}
+	report.push_back(L'\"');
+}
+
+inline auto
+ErrorCode_To_String(_In_ const int error_code) -> ::std::wstring
+{
+	::std::wstring report;
+	ErrorCode_To_String(error_code, report);
+	return(::std::move(report));
+}
 
 class t_Worker
 {
@@ -97,19 +137,53 @@ class t_Worker
 			t_Lock lock(m_sync);
 			::std::cout << "thread #" << ::boost::this_thread::get_id() << " started" << ::std::endl;
 		}
-		for(;;)
+		try
 		{
-			auto need_to_recieve = true;
-			if(need_to_recieve)
+			for(;;)
 			{
-				Recieve();
+				auto need_to_recieve_from_socket = true;
+				if(need_to_recieve_from_socket)
+				{
+					Recieve_From_Soket();
+					::boost::this_thread::interruption_point();
+				}
+				//auto need_to_recieve = true;
+				//if(need_to_recieve)
+				//{
+				//	Recieve();
+				//}
+				//auto need_to_send = (rand() % SEND_RATE) == 0;
+				//if(need_to_send)
+				//{
+				//	Send();
+				//}
+				//::boost::this_thread::sleep(::boost::get_system_time() + ::boost::posix_time::milliseconds(INTERVAL_MSECONDS));
 			}
-			auto need_to_send = (rand() % SEND_RATE) == 0;
-			if(need_to_send)
-			{
-				Send();
-			}
-			::boost::this_thread::sleep(::boost::get_system_time() + ::boost::posix_time::milliseconds(INTERVAL_MSECONDS));
+		}
+		catch(::std::system_error & e)
+		{
+			t_Lock lock(m_sync);
+			::std::cerr << "caught an exception " << e.what() << ": " << ::std::endl;
+			::std::wcerr << ErrorCode_To_String(e.code().value()) << ::std::endl;
+		}
+	}
+
+	private: void Recieve_From_Soket(void)
+	{
+		m_buffer.resize(BUFFER_SIZE);
+		size_t bc_recieved = static_cast<size_t>(udp_multicast_recieve(GROUP, PORT, m_buffer.data(), static_cast<int>(m_buffer.size())));
+		assert(bc_recieved <= BUFFER_SIZE);
+		if(0 != bc_recieved)
+		{
+			t_Lock lock(m_sync);
+			::std::cout << "\t << thread #" << ::boost::this_thread::get_id() << " recieved " << bc_recieved << " bytes from UDP socket:" << ::std::endl;
+			::std::cout.write(m_buffer.data(), bc_recieved);
+			::std::cout.flush();
+		}
+		else
+		{
+			t_Lock lock(m_sync);
+			::std::cout << "\t << recieved nothing..." << ::std::endl;
 		}
 	}
 
@@ -188,14 +262,23 @@ int t_Worker::m_seed;
 
 int main(int argc, char * args[], char *[])
 {
+	setlocale(LC_CTYPE, ".866");
+	srand(42);
+
 #ifdef RUNTIME_DYNAMIC_LINKING
 	auto h_interprocess_library = ::LoadLibraryW(L"Interprocess.dll");
 	if(NULL != h_interprocess_library)
 	{
-		interprocess_master_send    = (void (VTT_INTERPROCESS_CALLING_CONVENTION *)(const int, char const *, const int))::GetProcAddress(h_interprocess_library, "interprocess_master_send"   );
-		interprocess_master_recieve = (int  (VTT_INTERPROCESS_CALLING_CONVENTION *)(char *, const int                 ))::GetProcAddress(h_interprocess_library, "interprocess_master_recieve");
-		interprocess_slave_send     = (void (VTT_INTERPROCESS_CALLING_CONVENTION *)(char const *, const int           ))::GetProcAddress(h_interprocess_library, "interprocess_slave_send"    );
-		interprocess_slave_recieve  = (int  (VTT_INTERPROCESS_CALLING_CONVENTION *)(const int, char *, const int      ))::GetProcAddress(h_interprocess_library, "interprocess_slave_recieve" );
+		interprocess_master_send    = reinterpret_cast<decltype(interprocess_master_send   )>(::GetProcAddress(h_interprocess_library, "interprocess_master_send"   ));
+		interprocess_master_recieve = reinterpret_cast<decltype(interprocess_master_recieve)>(::GetProcAddress(h_interprocess_library, "interprocess_master_recieve"));
+		interprocess_slave_send     = reinterpret_cast<decltype(interprocess_slave_send    )>(::GetProcAddress(h_interprocess_library, "interprocess_slave_send"    ));
+		interprocess_slave_recieve  = reinterpret_cast<decltype(interprocess_slave_recieve )>(::GetProcAddress(h_interprocess_library, "interprocess_slave_recieve" ));
+		udp_multicast_recieve       = reinterpret_cast<decltype(udp_multicast_recieve      )>(::GetProcAddress(h_interprocess_library, "udp_multicast_recieve"      ));
+		assert(nullptr != interprocess_master_send   );
+		assert(nullptr != interprocess_master_recieve);
+		assert(nullptr != interprocess_slave_send    );
+		assert(nullptr != interprocess_slave_recieve );
+		assert(nullptr != udp_multicast_recieve      );
 	}
 	else
 	{
@@ -236,8 +319,6 @@ int main(int argc, char * args[], char *[])
 			return(ERROR_APP_INIT_FAILURE);
 		}
 	}
-
-	srand(42);
 	
 	{
 		::boost::mutex sync;

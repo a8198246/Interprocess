@@ -12,6 +12,8 @@
 #include <sal.h>
 
 #include <Windows.h>
+#include <Winsock2.h>
+#include <Ws2tcpip.h>
 
 #include <array>
 #include <string>
@@ -19,6 +21,7 @@
 #include <utility>
 #include <memory>
 #include <cassert>
+#include <cstring>
 #include <memory.h>
 
 #include <boost/cstdint.hpp>

@@ -7,6 +7,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Interprocess", "Interproces
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Test App", "Test App\Test App.vcxproj", "{0A3E3266-F051-4ACD-9FF7-48AF5763A0EA}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "UDP Multicaster", "UDP Multicaster\UDP Multicaster.vcxproj", "{7395733C-0E2F-4525-AFB9-27F965C14797}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug 32|Win32 = Debug 32|Win32
@@ -31,6 +33,12 @@ Global
 		{0A3E3266-F051-4ACD-9FF7-48AF5763A0EA}.Release 32|Win32.Build.0 = Release|Win32
 		{0A3E3266-F051-4ACD-9FF7-48AF5763A0EA}.Release 64|Win32.ActiveCfg = Release|x64
 		{0A3E3266-F051-4ACD-9FF7-48AF5763A0EA}.Release 64|Win32.Build.0 = Release|x64
+		{7395733C-0E2F-4525-AFB9-27F965C14797}.Debug 32|Win32.ActiveCfg = Debug|Win32
+		{7395733C-0E2F-4525-AFB9-27F965C14797}.Debug 32|Win32.Build.0 = Debug|Win32
+		{7395733C-0E2F-4525-AFB9-27F965C14797}.Debug 64|Win32.ActiveCfg = Debug|Win32
+		{7395733C-0E2F-4525-AFB9-27F965C14797}.Release 32|Win32.ActiveCfg = Release|Win32
+		{7395733C-0E2F-4525-AFB9-27F965C14797}.Release 32|Win32.Build.0 = Release|Win32
+		{7395733C-0E2F-4525-AFB9-27F965C14797}.Release 64|Win32.ActiveCfg = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

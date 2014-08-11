@@ -25,6 +25,8 @@
     <ClInclude Include="vtt\Interprocess\Details\Owned Handle.hpp" />
     <ClInclude Include="vtt\Interprocess\Details\Event.hpp" />
     <ClInclude Include="vtt\Interprocess\Details\Shared Memory.hpp" />
+    <ClInclude Include="vtt\Interprocess\Details\Net Broker.hpp" />
+    <ClInclude Include="vtt\Interprocess\Details\UDP Multicast Socket.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="vtt\Interprocess\Details\Precompiled.cpp" />
