@@ -106,6 +106,17 @@ namespace n_details
 			assert(0 < bc_data);
 			m_input_service.post(::boost::bind(&t_Master::Handle_Input_To_Slave, this, application_id, t_Chunk(p_data, bc_data)));
 		}
+
+		//	To be called from user threads
+		public: void Send_To_AllSlaves(_In_reads_bytes_(bc_data) char const * p_data, _In_ const size_t bc_data)
+		{
+			assert(nullptr != p_data);
+			assert(0 < bc_data);
+			{
+				m_Broker.Get_CommonPipe().Write(p_data, bc_data);
+			}
+			::boost::this_thread::yield();
+		}
 	};
 }
 }

@@ -29,11 +29,13 @@
 
 #define VTT_INTERPROCESS_CALLING_CONVENTION __stdcall
 
-void (VTT_INTERPROCESS_CALLING_CONVENTION *interprocess_master_send   )(const int, char const *, const int);
-int  (VTT_INTERPROCESS_CALLING_CONVENTION *interprocess_master_recieve)(char *, const int, const int);
-void (VTT_INTERPROCESS_CALLING_CONVENTION *interprocess_slave_send    )(char const *, const int);
-int  (VTT_INTERPROCESS_CALLING_CONVENTION *interprocess_slave_recieve )(const int, char *, const int);
-int  (VTT_INTERPROCESS_CALLING_CONVENTION *udp_multicast_recieve      )(wchar_t const *, const int, char *, const int, const int, int *);
+void (VTT_INTERPROCESS_CALLING_CONVENTION *interprocess_master_send         )(const int, char const *, const int);
+int  (VTT_INTERPROCESS_CALLING_CONVENTION *interprocess_master_recieve      )(char *, const int, const int);
+void (VTT_INTERPROCESS_CALLING_CONVENTION *interprocess_master_send_to_all  )(char *, const int);
+void (VTT_INTERPROCESS_CALLING_CONVENTION *interprocess_slave_send          )(char const *, const int);
+int  (VTT_INTERPROCESS_CALLING_CONVENTION *interprocess_slave_recieve       )(const int, char *, const int);
+int  (VTT_INTERPROCESS_CALLING_CONVENTION *interprocess_slave_recieve_common)(char *, const int, const int);
+int  (VTT_INTERPROCESS_CALLING_CONVENTION *udp_multicast_recieve            )(wchar_t const *, const int, char *, const int, const int, int *);
 
 #define VTT_INTERPROCESS_BC_MESSAGE_BUFFER_LIMIT 65535
 
@@ -43,11 +45,11 @@ int  (VTT_INTERPROCESS_CALLING_CONVENTION *udp_multicast_recieve      )(wchar_t 
 
 #endif
 
-#define APPLICATION_ID_MAX    0
+#define APPLICATION_ID_MAX    100
 #define WORK_TIME_SECONDS     30
 #define BC_MESSAGE_MAX        128
 #define BC_SOCKET_MESSAGE_MAX 512
-#define SEND_RATE             3   // messages will be send once in m_send_rate times
+#define SEND_RATE             20  // messages will be send once in m_send_rate times
 #define INTERVAL_MSECONDS     100 // interval between recive / send attempts
 #define BUFFER_SIZE           512
 #define GROUP                 L"224.0.0.108"
@@ -147,16 +149,17 @@ class t_Worker
 				//	Recieve_From_Soket();
 				//	::boost::this_thread::interruption_point();
 				//}
-				auto need_to_recieve = true;
-				if(need_to_recieve)
-				{
-					Recieve();
-				}
-				auto need_to_send = (rand() % SEND_RATE) == 0;
-				if(need_to_send)
-				{
-					Send();
-				}
+				//auto need_to_recieve = true;
+				//if(need_to_recieve)
+				//{
+				//	Recieve();
+				//}
+				//auto need_to_send = (rand() % SEND_RATE) == 0;
+				//if(need_to_send)
+				//{
+				//	Send();
+				//}
+				Common();
 				::boost::this_thread::sleep(::boost::get_system_time() + ::boost::posix_time::milliseconds(INTERVAL_MSECONDS));
 			}
 		}
@@ -165,6 +168,37 @@ class t_Worker
 			t_Lock lock(m_sync);
 			::std::cerr << "caught an exception " << e.what() << ": " << ::std::endl;
 			::std::wcerr << ErrorCode_To_String(e.code().value()) << ::std::endl;
+		}
+	}
+
+	private: void Common(void)
+	{
+		if(m_is_master)
+		{
+			auto need_to_send = (rand() % SEND_RATE) == 0;
+			if(need_to_send)
+			{
+				Generate_Message();
+				{
+					t_Lock lock(m_sync);
+					::std::cout << "\t >> thread #" << ::boost::this_thread::get_id() << " sends " << m_buffer.size() << " bytes to all the slaves:" << ::std::endl;
+					::std::cout.write(m_buffer.data(), m_buffer.size());
+					::std::cout.flush();
+				}
+				interprocess_master_send_to_all(m_buffer.data(), static_cast<int>(m_buffer.size()));
+			}
+		}
+		else
+		{
+			m_buffer.resize(BUFFER_SIZE);
+			auto bc_recieved = interprocess_slave_recieve_common(m_buffer.data(), static_cast<int>(m_buffer.size()), 50);
+			if(0 != bc_recieved)
+			{
+				t_Lock lock(m_sync);
+				::std::cout << "\t << thread #" << ::boost::this_thread::get_id() << " recieved " << bc_recieved << " bytes:" << ::std::endl;
+				::std::cout.write(m_buffer.data(), bc_recieved);
+				::std::cout.flush();
+			}
 		}
 	}
 
@@ -274,16 +308,20 @@ int main(int argc, char * args[], char *[])
 	auto h_interprocess_library = ::LoadLibraryW(L"Interprocess.dll");
 	if(NULL != h_interprocess_library)
 	{
-		interprocess_master_send    = reinterpret_cast<decltype(interprocess_master_send   )>(::GetProcAddress(h_interprocess_library, "interprocess_master_send"   ));
-		interprocess_master_recieve = reinterpret_cast<decltype(interprocess_master_recieve)>(::GetProcAddress(h_interprocess_library, "interprocess_master_recieve"));
-		interprocess_slave_send     = reinterpret_cast<decltype(interprocess_slave_send    )>(::GetProcAddress(h_interprocess_library, "interprocess_slave_send"    ));
-		interprocess_slave_recieve  = reinterpret_cast<decltype(interprocess_slave_recieve )>(::GetProcAddress(h_interprocess_library, "interprocess_slave_recieve" ));
-		udp_multicast_recieve       = reinterpret_cast<decltype(udp_multicast_recieve      )>(::GetProcAddress(h_interprocess_library, "udp_multicast_recieve"      ));
-		assert(nullptr != interprocess_master_send   );
-		assert(nullptr != interprocess_master_recieve);
-		assert(nullptr != interprocess_slave_send    );
-		assert(nullptr != interprocess_slave_recieve );
-		assert(nullptr != udp_multicast_recieve      );
+		interprocess_master_send          = reinterpret_cast<decltype(interprocess_master_send         )>(::GetProcAddress(h_interprocess_library, "interprocess_master_send"         ));
+		interprocess_master_recieve       = reinterpret_cast<decltype(interprocess_master_recieve      )>(::GetProcAddress(h_interprocess_library, "interprocess_master_recieve"      ));
+		interprocess_master_send_to_all   = reinterpret_cast<decltype(interprocess_master_send_to_all  )>(::GetProcAddress(h_interprocess_library, "interprocess_master_send_to_all"  ));
+		interprocess_slave_send           = reinterpret_cast<decltype(interprocess_slave_send          )>(::GetProcAddress(h_interprocess_library, "interprocess_slave_send"          ));
+		interprocess_slave_recieve        = reinterpret_cast<decltype(interprocess_slave_recieve       )>(::GetProcAddress(h_interprocess_library, "interprocess_slave_recieve"       ));
+		interprocess_slave_recieve_common = reinterpret_cast<decltype(interprocess_slave_recieve_common)>(::GetProcAddress(h_interprocess_library, "interprocess_slave_recieve_common"));
+		udp_multicast_recieve             = reinterpret_cast<decltype(udp_multicast_recieve            )>(::GetProcAddress(h_interprocess_library, "udp_multicast_recieve"            ));
+		assert(nullptr != interprocess_master_send         );
+		assert(nullptr != interprocess_master_recieve      );
+		assert(nullptr != interprocess_master_send_to_all  );
+		assert(nullptr != interprocess_slave_send          );
+		assert(nullptr != interprocess_slave_recieve       );
+		assert(nullptr != interprocess_slave_recieve_common);		
+		assert(nullptr != udp_multicast_recieve            );
 	}
 	else
 	{

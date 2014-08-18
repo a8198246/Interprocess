@@ -28,6 +28,8 @@ namespace n_details
 
 		protected: typedef t_Pipe<VTT_INTERPROCESS_BC_MESSAGE_BUFFER_LIMIT> t_MasterToSlavePipe;
 
+		protected: typedef t_MultiReaderPipe<VTT_INTERPROCESS_BC_MESSAGE_BUFFER_LIMIT> t_CommonPipe;
+
 		protected: typedef ::std::unique_ptr<t_MasterToSlavePipe> t_pPipe;
 
 		protected: typedef ::std::map<t_ApplicationId, t_pPipe> t_MasterToSlavePipesMap;
@@ -35,12 +37,14 @@ namespace n_details
 		#pragma region Fields
 
 		protected: t_SlavesToMasterPipe    m_slaves_to_master_pipe;
+		protected: t_CommonPipe            m_commom_pipe;
 		protected: t_MasterToSlavePipesMap m_master_to_slaves_pipes_map;
 
 		#pragma endregion
 
 		public: t_Broker(void)
 		:	m_slaves_to_master_pipe(::std::string(VTT_SZ_INTERPROCESS_NAMED_OBJECTS_PREFIX "s to m"))
+		,	m_commom_pipe(::std::string(VTT_SZ_INTERPROCESS_NAMED_OBJECTS_PREFIX "common"))
 		{
 			//	Do nothing
 		}
@@ -52,6 +56,11 @@ namespace n_details
 		public: auto Get_SlavesToMasterPipe(void) -> t_SlavesToMasterPipe &
 		{
 			return(m_slaves_to_master_pipe);
+		}
+		
+		public: auto Get_CommonPipe(void) -> t_CommonPipe &
+		{
+			return(m_commom_pipe);
 		}
 
 		public: auto Get_MasterToSlavePipe(_In_ const t_ApplicationId application_id) -> t_MasterToSlavePipe &

@@ -51,7 +51,39 @@ namespace n_details
 			return(tp_Capacity);
 		}
 
-		public: void Store_Chunk(t_Chunk chunk)
+		public: void Clear(void)
+		{
+			m_size = 0;
+		}
+
+		public: void Store(_In_reads_bytes_(bc_data) char const * p_data, _In_ const size_t bc_data)
+		{
+			assert(nullptr != p_data);
+			assert(0 < bc_data);
+			assert(bc_data <= tp_Capacity);
+			auto const new_size = m_size + bc_data;
+			if(new_size <= tp_Capacity)
+			{
+				memcpy(m_buffer.data() + m_size, p_data, bc_data);
+				m_size = static_cast<::boost::uint32_t>(new_size);
+			}
+		}
+
+		public: auto Retrieve_Data(_Out_writes_bytes_opt_(bc_buffer_capacity) char * p_buffer, _In_ const size_t bc_buffer_capacity) -> size_t
+		{
+			assert(nullptr != p_buffer);
+			assert(0 < bc_buffer_capacity);
+			assert(m_size <= bc_buffer_capacity);
+			size_t bc_written = 0;
+			if(m_size <= bc_buffer_capacity)
+			{
+				memcpy(p_buffer, m_buffer.data(), m_size);
+				bc_written = m_size;
+			}
+			return(bc_written);
+		}
+
+		public: void Store(t_Chunk chunk)
 		{
 			assert(chunk.Is_Not_Empty());
 			auto const new_size = m_size + chunk.Get_Size();

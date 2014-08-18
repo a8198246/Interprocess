@@ -66,28 +66,28 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>C:\Program Files %28x86%29\Visual Leak Detector\include\;$(SolutionDir)..\boost\;$(SolutionDir)Interprocess\;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Program Files %28x86%29\Visual Leak Detector\lib\Win32\;$(SolutionDir)..\boost\stage\lib\;$(SolutionDir)Interprocess\;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)..\Visual Leak Detector\include\;$(SolutionDir)..\boost\;$(SolutionDir)Interprocess\;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)..\Visual Leak Detector\lib\Win32\;$(SolutionDir)..\boost\stage\lib\;$(SolutionDir)Interprocess\;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)_Output\$(ProjectName)\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)_Output\$(ProjectName)\$(Platform)\$(Configuration)\Work items\</IntDir>
     <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>C:\Program Files %28x86%29\Visual Leak Detector\include\;$(SolutionDir)..\boost\;$(SolutionDir)Interprocess\;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Program Files %28x86%29\Visual Leak Detector\lib\Win64\;$(SolutionDir)..\boost\stage64\lib\;$(SolutionDir)Interprocess\;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)..\Visual Leak Detector\include\;$(SolutionDir)..\boost\;$(SolutionDir)Interprocess\;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)..\Visual Leak Detector\lib\Win64\;$(SolutionDir)..\boost\stage64\lib\;$(SolutionDir)Interprocess\;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)_Output\$(ProjectName)\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)_Output\$(ProjectName)\$(Platform)\$(Configuration)\Work items\</IntDir>
     <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>C:\Program Files %28x86%29\Visual Leak Detector\include\;$(SolutionDir)..\boost\;$(SolutionDir)Interprocess\;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)..\Visual Leak Detector\include\;$(SolutionDir)..\boost\;$(SolutionDir)Interprocess\;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)..\boost\stage\lib\;$(SolutionDir)Interprocess\;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)_Output\$(ProjectName)\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)_Output\$(ProjectName)\$(Platform)\$(Configuration)\Work items\</IntDir>
     <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>C:\Program Files %28x86%29\Visual Leak Detector\include\;$(SolutionDir)..\boost\;$(SolutionDir)Interprocess\;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)..\Visual Leak Detector\include\;$(SolutionDir)..\boost\;$(SolutionDir)Interprocess\;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)..\boost\stage64\lib\;$(SolutionDir)Interprocess\;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)_Output\$(ProjectName)\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)_Output\$(ProjectName)\$(Platform)\$(Configuration)\Work items\</IntDir>
@@ -126,8 +126,8 @@ copy "$(SolutionDir)Interprocess\x32\Debug\*.pdb" "$(SolutionDir)_Build\"
 copy "$(SolutionDir)..\boost\stage\lib\boost_thread-vc120-mt-gd-1_55.dll" "$(SolutionDir)_Build\"
 copy "$(SolutionDir)..\boost\stage\lib\boost_system-vc120-mt-gd-1_55.dll" "$(SolutionDir)_Build\"
 copy "$(SolutionDir)..\boost\stage\lib\boost_chrono-vc120-mt-gd-1_55.dll" "$(SolutionDir)_Build\"
-copy "C:\Program Files (x86)\Visual Leak Detector\bin\Win32\*.dll" "$(SolutionDir)_Build\"
-copy "C:\Program Files (x86)\Visual Leak Detector\bin\Win32\*.manifest" "$(SolutionDir)_Build\"</Command>
+copy "$(SolutionDir)..\Visual Leak Detector\bin\Win32\*.dll" "$(SolutionDir)_Build\"
+copy "$(SolutionDir)..\Visual Leak Detector\bin\Win32\*.manifest" "$(SolutionDir)_Build\"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -163,8 +163,8 @@ copy "$(SolutionDir)Interprocess\x64\Debug\*.pdb" "$(SolutionDir)_Build\"
 copy "$(SolutionDir)..\boost\stage64\lib\boost_thread-vc120-mt-gd-1_55.dll" "$(SolutionDir)_Build\"
 copy "$(SolutionDir)..\boost\stage64\lib\boost_system-vc120-mt-gd-1_55.dll" "$(SolutionDir)_Build\"
 copy "$(SolutionDir)..\boost\stage64\lib\boost_chrono-vc120-mt-gd-1_55.dll" "$(SolutionDir)_Build\"
-copy "C:\Program Files (x86)\Visual Leak Detector\bin\Win64\*.dll" "$(SolutionDir)_Build\"
-copy "C:\Program Files (x86)\Visual Leak Detector\bin\Win64\*.manifest" "$(SolutionDir)_Build\"</Command>
+copy "$(SolutionDir)..\Visual Leak Detector\bin\Win64\*.dll" "$(SolutionDir)_Build\"
+copy "$(SolutionDir)..\Visual Leak Detector\bin\Win64\*.manifest" "$(SolutionDir)_Build\"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">

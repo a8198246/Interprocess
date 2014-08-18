@@ -54,6 +54,22 @@ interprocess_master_recieve(_Out_writes_bytes_opt_(bc_buffer_capacity) char * p_
 }
 
 void VTT_INTERPROCESS_CALLING_CONVENTION
+interprocess_master_send_to_all(_In_reads_bytes_(bc_data) char const * p_data, _In_range_(0, VTT_INTERPROCESS_BC_MESSAGE_BUFFER_LIMIT) const int bc_data)
+{
+	if((nullptr != p_data) && (0 < bc_data) && (bc_data <= VTT_INTERPROCESS_BC_MESSAGE_BUFFER_LIMIT))
+	{
+		try
+		{
+			t_Patron::Get_Master().Send_To_AllSlaves(p_data, bc_data);
+		}
+		catch(...)
+		{
+			//	Do nothing
+		}
+	}
+}
+
+void VTT_INTERPROCESS_CALLING_CONVENTION
 interprocess_slave_send(_In_reads_bytes_(bc_data) char const * p_data, _In_range_(0, VTT_INTERPROCESS_BC_MESSAGE_BUFFER_LIMIT) const int bc_data)
 {
 	if((nullptr != p_data) && (0 < bc_data) && (bc_data <= VTT_INTERPROCESS_BC_MESSAGE_BUFFER_LIMIT))
@@ -78,6 +94,24 @@ interprocess_slave_recieve(_In_ const int application_id, _Out_writes_bytes_opt_
 		try
 		{
 			bc_written = static_cast<int>(t_Patron::Get_Slave().Recieve_From_Master(application_id, p_buffer, static_cast<size_t>(bc_buffer_capacity)));
+		}
+		catch(...)
+		{
+			assert(0 == bc_written);
+		}
+	}
+	return(bc_written);
+}
+
+int VTT_INTERPROCESS_CALLING_CONVENTION
+interprocess_slave_recieve_common(_Out_writes_bytes_opt_(bc_buffer_capacity) char * p_buffer, _In_ const int bc_buffer_capacity, _In_ const int timeout_msec)
+{
+	auto bc_written = 0;
+	if((nullptr != p_buffer) && (0 < bc_buffer_capacity))
+	{
+		try
+		{
+			bc_written = static_cast<int>(t_Patron::Get_Slave().RecieveCommon_From_Master(p_buffer, static_cast<size_t>(bc_buffer_capacity), timeout_msec));
 		}
 		catch(...)
 		{

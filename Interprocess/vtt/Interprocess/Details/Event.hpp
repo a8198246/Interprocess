@@ -26,13 +26,13 @@ namespace n_details
 
 		public: t_Event(void) = delete;
 
-		public: explicit t_Event(_Inout_ ::std::string & name)
+		public: explicit t_Event(_Inout_ ::std::string & name, _In_ const bool manual_reset = false)
 		{
 			name.push_back('e'); // event name must differ from named mutex / file mappings name
 			auto first_try = true;
 			for(;;)
 			{
-				m_handle = ::CreateEventA(NULL, FALSE, FALSE, name.c_str());
+				m_handle = ::CreateEventA(NULL, manual_reset, FALSE, name.c_str());
 				if(NULL != m_handle)
 				{
 					break;
@@ -66,6 +66,29 @@ namespace n_details
 			auto reset = ::ResetEvent(m_handle);
 			DBG_UNREFERENCED_LOCAL_VARIABLE(reset);
 			assert(FALSE != reset);
+		}
+
+		public: auto Timed_Wait(_In_ const int timeout_msec) -> bool
+		{
+			auto wait_result = ::WaitForSingleObject(m_handle, timeout_msec);
+			switch(wait_result)
+			{
+				case WAIT_ABANDONED:
+				case WAIT_OBJECT_0:
+				{
+					return(true);
+				}
+				case WAIT_TIMEOUT:
+				{
+					return(false);
+				}
+				case WAIT_FAILED:
+				default:
+				{
+					auto last_error = ::GetLastError();
+					throw(::std::system_error(static_cast<int>(last_error), ::std::system_category(), "failed to wait for the event"));
+				}
+			}
 		}
 	};
 }

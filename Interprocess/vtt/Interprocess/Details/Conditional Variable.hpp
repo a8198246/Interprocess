@@ -28,14 +28,14 @@ namespace n_details
 
 		public: void operator=(t_ConditionalVariable const &) = delete;
 
-		public: static void Timed_Wait(_Inout_ t_ScopedLock & lock, _In_ t_Event & event, _In_ const int timeout_msec)
+		public: static auto Timed_Wait(_Inout_ t_ScopedLock & lock, _In_ t_Event & event, _In_ const int timeout_msec) -> bool
 		{
 			assert(lock.m_locked);
 			lock.m_mutex.Unlock();
 			lock.m_locked = false;
 			event.Reset();
-			auto result = ::WaitForSingleObject(event.m_handle, timeout_msec);
-			switch(result)
+			auto wait_result = ::WaitForSingleObject(event.m_handle, timeout_msec);
+			switch(wait_result)
 			{
 				case WAIT_ABANDONED:
 				case WAIT_OBJECT_0:
@@ -43,7 +43,7 @@ namespace n_details
 				{
 					lock.m_locked = true;
 					lock.m_mutex.Lock();
-					return;
+					return(WAIT_TIMEOUT != wait_result);
 				}
 				case WAIT_FAILED:
 				default:

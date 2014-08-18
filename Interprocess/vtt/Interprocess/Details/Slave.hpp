@@ -219,6 +219,16 @@ namespace n_details
 			assert(0 < bc_data);
 			m_input_service.post(::boost::bind(&t_Slave::Handle_Input_To_Master, this, t_Chunk(p_data, bc_data)));
 		}
+
+		//	To be called from user threads
+		public: auto RecieveCommon_From_Master(_Out_writes_bytes_opt_(bc_buffer_capacity) char * p_buffer, _In_ const size_t bc_buffer_capacity, _In_ const int timeout_msec) -> size_t
+		{
+			assert(nullptr != p_buffer);
+			assert(0 < bc_buffer_capacity);
+			auto bc_written = m_Broker.Get_CommonPipe().Read(p_buffer, bc_buffer_capacity, timeout_msec);
+			assert(bc_written <= bc_buffer_capacity);
+			return(bc_written);
+		}
 	};
 }
 }

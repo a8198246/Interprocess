@@ -22,6 +22,10 @@ interprocess_master_send(_In_ const int application_id, _In_reads_bytes_(bc_data
 int VTT_INTERPROCESS_DLL_API VTT_INTERPROCESS_CALLING_CONVENTION
 interprocess_master_recieve(_Out_writes_bytes_opt_(bc_buffer_capacity) char * p_buffer, _In_ const int bc_buffer_capacity, _In_ const int timeout_msec);
 
+//
+void VTT_INTERPROCESS_DLL_API VTT_INTERPROCESS_CALLING_CONVENTION
+interprocess_master_send_to_all(_In_reads_bytes_(bc_data) char const * p_data, _In_range_(0, VTT_INTERPROCESS_BC_MESSAGE_BUFFER_LIMIT) const int bc_data);
+
 //	Методы, вызываемые в ведомом процессе:
 
 //	Метод передает msg ведущему процессу.
@@ -33,18 +37,25 @@ interprocess_slave_send(_In_reads_bytes_(bc_data) char const * p_data, _In_range
 int VTT_INTERPROCESS_DLL_API VTT_INTERPROCESS_CALLING_CONVENTION
 interprocess_slave_recieve(_In_ const int application_id, _Out_writes_bytes_opt_(bc_buffer_capacity) char * p_buffer, _In_ const int bc_buffer_capacity); 
 
+//
+int VTT_INTERPROCESS_DLL_API VTT_INTERPROCESS_CALLING_CONVENTION
+interprocess_slave_recieve_common(_Out_writes_bytes_opt_(bc_buffer_capacity) char * p_buffer, _In_ const int bc_buffer_capacity, _In_ const int timeout_msec);
+
 //	прочие методы:
 
 int VTT_INTERPROCESS_DLL_API VTT_INTERPROCESS_CALLING_CONVENTION
 udp_multicast_recieve
 (
-	_In_z_ wchar_t const *                        psz_host
-,	_In_range_(0, 65535) const int                port
+	_In_z_ wchar_t const *                            psz_host
+,	_In_range_(0, 65535) const int                    port
 ,	_Out_writes_bytes_opt_(bc_buffer_capacity) char * p_buffer
-,	_In_ const int                                bc_buffer_capacity
-,	_In_ const int                                timeout_msec
-,	_Out_ int *                                   p_error_code
+,	_In_ const int                                    bc_buffer_capacity
+,	_In_ const int                                    timeout_msec
+,	_Out_ int *                                       p_error_code
 );
+
+
+
 
 VTT_EXTERN_C_ZONE_END
 
