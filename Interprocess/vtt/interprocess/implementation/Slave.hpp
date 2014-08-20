@@ -1,5 +1,5 @@
-#ifndef HEADER_VTT_INTERPROCESS_DETAILS_SLAVE
-#define HEADER_VTT_INTERPROCESS_DETAILS_SLAVE
+#ifndef HEADER_VTT_INTERPROCESS_IMPLEMENTATION_SLAVE
+#define HEADER_VTT_INTERPROCESS_IMPLEMENTATION_SLAVE
 
 #pragma once
 
@@ -26,7 +26,7 @@ namespace n_vtt
 {
 namespace n_interprocess
 {
-namespace n_details
+namespace n_implementation
 {
 	class t_Slave
 	{

@@ -19,7 +19,7 @@ namespace n_vtt
 {
 namespace n_interprocess
 {
-namespace n_details
+namespace n_implementation
 {
 	class t_SharedMemoty
 	:	public t_OwnedHandle
@@ -63,7 +63,7 @@ namespace n_details
 
 		private: t_SharedMemoty(t_SharedMemoty const &) = delete;
 
-		private: void operator=(t_SharedMemoty const &) = delete;
+		private: void operator =(t_SharedMemoty const &) = delete;
 
 		public: ~t_SharedMemoty(void)
 		{

@@ -106,7 +106,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
       <TreatLinkerWarningAsErrors>true</TreatLinkerWarningAsErrors>
-      <ModuleDefinitionFile>$(ProjectDir)vtt\Interprocess\Details\Interface.x32.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>$(ProjectDir)vtt\interprocess\implementation\Interface.x32.def</ModuleDefinitionFile>
     </Link>
     <PreBuildEvent>
       <Command>rmdir "$(ProjectDir)x32\Debug\" /S /Q</Command>
@@ -135,7 +135,7 @@ copy "$(OutDir)*.pdb" "$(ProjectDir)x32\Debug\"</Command>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
       <TreatLinkerWarningAsErrors>true</TreatLinkerWarningAsErrors>
-      <ModuleDefinitionFile>$(ProjectDir)vtt\Interprocess\Details\Interface.x64.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>$(ProjectDir)vtt\interprocess\implementation\Interface.x64.def</ModuleDefinitionFile>
     </Link>
     <PreBuildEvent>
       <Command>rmdir "$(ProjectDir)x64\Debug\" /S /Q</Command>
@@ -172,7 +172,7 @@ copy "$(OutDir)*.pdb" "$(ProjectDir)x64\Debug\"</Command>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
       <SetChecksum>true</SetChecksum>
-      <ModuleDefinitionFile>$(ProjectDir)vtt\Interprocess\Details\Interface.x32.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>$(ProjectDir)vtt\interprocess\implementation\Interface.x32.def</ModuleDefinitionFile>
     </Link>
     <PostBuildEvent>
       <Command>mkdir "$(ProjectDir)x32\Release\"
@@ -209,7 +209,7 @@ copy "$(OutDir)*.lib" "$(ProjectDir)x32\Release\"</Command>
       <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
       <ShowProgress>NotSet</ShowProgress>
       <SetChecksum>true</SetChecksum>
-      <ModuleDefinitionFile>$(ProjectDir)vtt\Interprocess\Details\Interface.x64.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>$(ProjectDir)vtt\interprocess\implementation\Interface.x64.def</ModuleDefinitionFile>
     </Link>
     <PostBuildEvent>
       <Command>mkdir "$(ProjectDir)x64\Release\"
@@ -224,33 +224,35 @@ copy "$(OutDir)*.lib" "$(ProjectDir)x64\Release\"</Command>
     <ClInclude Include="vtt\Interprocess.hpp" />
     <ClInclude Include="vtt\Interprocess\Application Identifier.hpp" />
     <ClInclude Include="vtt\Interprocess\Configuration.hpp" />
-    <ClInclude Include="vtt\Interprocess\Details\Broker.hpp" />
-    <ClInclude Include="vtt\Interprocess\Details\Chunk.hpp" />
-    <ClInclude Include="vtt\Interprocess\Details\Conditional Variable.hpp" />
-    <ClInclude Include="vtt\Interprocess\Details\Event.hpp" />
-    <ClInclude Include="vtt\Interprocess\Details\Fixed Buffer.hpp" />
-    <ClInclude Include="vtt\Interprocess\Details\Main Windows SDK Control.hpp" />
-    <ClInclude Include="vtt\Interprocess\Details\Master.hpp" />
-    <ClInclude Include="vtt\Interprocess\Details\Named Mutex.hpp" />
-    <ClInclude Include="vtt\Interprocess\Details\Owned Handle.hpp" />
-    <ClInclude Include="vtt\Interprocess\Details\Patron.hpp" />
-    <ClInclude Include="vtt\Interprocess\Details\Pipe.hpp" />
-    <ClInclude Include="vtt\Interprocess\Details\Precompiled.hpp" />
-    <ClInclude Include="vtt\Interprocess\Details\Scoped Lock.hpp" />
-    <ClInclude Include="vtt\Interprocess\Details\Shared Memory.hpp" />
-    <ClInclude Include="vtt\Interprocess\Details\Slave.hpp" />
-    <ClInclude Include="vtt\Interprocess\Details\Sockets User.hpp" />
-    <ClInclude Include="vtt\Interprocess\Details\Static Instace.hpp" />
-    <ClInclude Include="vtt\Interprocess\Details\UDP Multicast Socket.hpp" />
-    <ClInclude Include="vtt\Interprocess\Details\Write Chunk To Buffer.hpp" />
+    <ClInclude Include="vtt\interprocess\implementation\Broker.hpp" />
+    <ClInclude Include="vtt\interprocess\implementation\Chunk.hpp" />
+    <ClInclude Include="vtt\interprocess\implementation\Conditional Variable.hpp" />
+    <ClInclude Include="vtt\interprocess\implementation\Event.hpp" />
+    <ClInclude Include="vtt\interprocess\implementation\Fixed Buffer.hpp" />
+    <ClInclude Include="vtt\interprocess\implementation\Main Windows SDK Control.hpp" />
+    <ClInclude Include="vtt\interprocess\implementation\Master.hpp" />
+    <ClInclude Include="vtt\interprocess\implementation\Multi Writer Single Reader Pipe.hpp" />
+    <ClInclude Include="vtt\interprocess\implementation\Named Mutex.hpp" />
+    <ClInclude Include="vtt\interprocess\implementation\Owned Handle.hpp" />
+    <ClInclude Include="vtt\interprocess\implementation\Patron.hpp" />
+    <ClInclude Include="vtt\interprocess\implementation\Pipe.hpp" />
+    <ClInclude Include="vtt\interprocess\implementation\Precompiled.hpp" />
+    <ClInclude Include="vtt\interprocess\implementation\Scoped Lock.hpp" />
+    <ClInclude Include="vtt\interprocess\implementation\Shared Memory.hpp" />
+    <ClInclude Include="vtt\interprocess\implementation\Single Writer Multi Reader Pipe.hpp" />
+    <ClInclude Include="vtt\interprocess\implementation\Slave.hpp" />
+    <ClInclude Include="vtt\interprocess\implementation\Sockets User.hpp" />
+    <ClInclude Include="vtt\interprocess\implementation\Static Instace.hpp" />
+    <ClInclude Include="vtt\interprocess\implementation\UDP Multicast Socket.hpp" />
+    <ClInclude Include="vtt\interprocess\implementation\Write Chunk To Buffer.hpp" />
     <ClInclude Include="vtt\Interprocess\Export Control.hpp" />
     <ClInclude Include="vtt\Interprocess\Interface.hpp" />
-    <ClInclude Include="vtt\Interprocess\Details\Main Boost Control.hpp" />
-    <ClInclude Include="vtt\Interprocess\Details\Main.hpp" />
+    <ClInclude Include="vtt\interprocess\implementation\Main Boost Control.hpp" />
+    <ClInclude Include="vtt\interprocess\implementation\Main.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="vtt\Interprocess\Details\Main.cpp" />
-    <ClCompile Include="vtt\Interprocess\Details\Precompiled.cpp">
+    <ClCompile Include="vtt\interprocess\implementation\Main.cpp" />
+    <ClCompile Include="vtt\interprocess\implementation\Precompiled.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
@@ -261,8 +263,8 @@ copy "$(OutDir)*.lib" "$(ProjectDir)x64\Release\"</Command>
     <Text Include="Readme.txt" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="vtt\Interprocess\Details\Interface.x32.def" />
-    <None Include="vtt\Interprocess\Details\Interface.x64.def" />
+    <None Include="vtt\interprocess\implementation\Interface.x32.def" />
+    <None Include="vtt\interprocess\implementation\Interface.x64.def" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

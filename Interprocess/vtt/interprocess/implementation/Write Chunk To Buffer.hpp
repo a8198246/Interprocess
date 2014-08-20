@@ -1,5 +1,5 @@
-#ifndef HEADER_VTT_INTERPROCESS_DETAILS_WRITE_CHUNK_TO_BUFFER
-#define HEADER_VTT_INTERPROCESS_DETAILS_WRITE_CHUNK_TO_BUFFER
+#ifndef HEADER_VTT_INTERPROCESS_IMPLEMENTATION_WRITE_CHUNK_TO_BUFFER
+#define HEADER_VTT_INTERPROCESS_IMPLEMENTATION_WRITE_CHUNK_TO_BUFFER
 
 #pragma once
 
@@ -14,7 +14,7 @@ namespace n_vtt
 {
 namespace n_interprocess
 {
-namespace n_details
+namespace n_implementation
 {
 	inline void Write_Chunk_To_Buffer(_In_ t_Chunk recieved, char * p_buffer, _In_ const size_t bc_buffer_capacity, _Inout_ size_t & bc_written, _Inout_ t_Chunk & pending)
 	{

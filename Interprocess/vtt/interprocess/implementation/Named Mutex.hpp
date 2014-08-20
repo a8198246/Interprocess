@@ -1,5 +1,5 @@
-#ifndef HEADER_VTT_INTERPROCESS_DETAILS_NAMED_MUTEX
-#define HEADER_VTT_INTERPROCESS_DETAILS_NAMED_MUTEX
+#ifndef HEADER_VTT_INTERPROCESS_IMPLEMENTATION_NAMED_MUTEX
+#define HEADER_VTT_INTERPROCESS_IMPLEMENTATION_NAMED_MUTEX
 
 #pragma once
 
@@ -17,7 +17,7 @@ namespace n_vtt
 {
 namespace n_interprocess
 {
-namespace n_details
+namespace n_implementation
 {
 	//	Replacement for broken boost::interprocess::named_mutex
 	class t_NamedMutex
@@ -54,7 +54,7 @@ namespace n_details
 
 		public: t_NamedMutex(t_NamedMutex const &) = delete;
 
-		public: void operator=(t_NamedMutex const &) = delete;
+		public: void operator =(t_NamedMutex const &) = delete;
 
 		//	returns true if lock was acquired at the specified preriod of time
 		//	returns false if a timeout occurred and lock was not acquired

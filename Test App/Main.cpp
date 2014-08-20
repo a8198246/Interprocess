@@ -191,7 +191,7 @@ class t_Worker
 		else
 		{
 			m_buffer.resize(BUFFER_SIZE);
-			auto bc_recieved = interprocess_slave_recieve_common(m_buffer.data(), static_cast<int>(m_buffer.size()), 50);
+			auto bc_recieved = interprocess_slave_recieve_common(m_buffer.data(), static_cast<int>(m_buffer.size()), 1000);
 			if(0 != bc_recieved)
 			{
 				t_Lock lock(m_sync);

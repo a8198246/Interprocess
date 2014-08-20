@@ -1,5 +1,5 @@
-#ifndef HEADER_VTT_INTERPROCESS_DETAILS_PATRON
-#define HEADER_VTT_INTERPROCESS_DETAILS_PATRON
+#ifndef HEADER_VTT_INTERPROCESS_IMPLEMENTATION_PATRON
+#define HEADER_VTT_INTERPROCESS_IMPLEMENTATION_PATRON
 
 #pragma once
 
@@ -14,7 +14,7 @@ namespace n_vtt
 {
 namespace n_interprocess
 {
-namespace n_details
+namespace n_implementation
 {
 	class t_Patron
 	:	public t_StaticInstace<t_Patron>

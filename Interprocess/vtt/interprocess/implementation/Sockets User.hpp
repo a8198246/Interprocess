@@ -42,7 +42,7 @@ namespace n_windows
 			}
 		}
 
-		private: void operator=(t_SocketsUser const &) = delete;
+		private: void operator =(t_SocketsUser const &) = delete;
 	};
 }
 }

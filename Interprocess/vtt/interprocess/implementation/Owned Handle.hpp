@@ -1,5 +1,5 @@
-#ifndef HEADER_VTT_INTERPROCESS_DETAILS_OWNED_HANDLE
-#define HEADER_VTT_INTERPROCESS_DETAILS_OWNED_HANDLE
+#ifndef HEADER_VTT_INTERPROCESS_IMPLEMENTATION_OWNED_HANDLE
+#define HEADER_VTT_INTERPROCESS_IMPLEMENTATION_OWNED_HANDLE
 
 #pragma once
 
@@ -13,7 +13,7 @@ namespace n_vtt
 {
 namespace n_interprocess
 {
-namespace n_details
+namespace n_implementation
 {
 	class t_OwnedHandle
 	{
@@ -40,7 +40,7 @@ namespace n_details
 			}
 		}
 
-		public: void operator=(t_OwnedHandle const &) = delete;
+		public: void operator =(t_OwnedHandle const &) = delete;
 
 		public: auto Is_Initialized(void) const throw() -> bool
 		{

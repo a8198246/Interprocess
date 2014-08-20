@@ -17,7 +17,7 @@
 
 using namespace n_vtt;
 using namespace n_interprocess;
-using namespace n_details;
+using namespace n_implementation;
 
 void VTT_INTERPROCESS_CALLING_CONVENTION
 interprocess_master_send(_In_ const int application_id, _In_reads_bytes_(bc_data) char const * p_data, _In_range_(0, VTT_INTERPROCESS_BC_MESSAGE_BUFFER_LIMIT) const int bc_data)

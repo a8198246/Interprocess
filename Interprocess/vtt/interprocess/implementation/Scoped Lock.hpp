@@ -1,5 +1,5 @@
-#ifndef HEADER_VTT_INTERPROCESS_DETAILS_SCOPED_LOCK
-#define HEADER_VTT_INTERPROCESS_DETAILS_SCOPED_LOCK
+#ifndef HEADER_VTT_INTERPROCESS_IMPLEMENTATION_SCOPED_LOCK
+#define HEADER_VTT_INTERPROCESS_IMPLEMENTATION_SCOPED_LOCK
 
 #pragma once
 
@@ -7,16 +7,16 @@
 
 #include <sal.h>
 
+#include <cassert>
+
 namespace n_vtt
 {
 namespace n_interprocess
 {
-namespace n_details
+namespace n_implementation
 {
 	class t_ScopedLock
 	{
-		friend class t_ConditionalVariable;
-
 		#pragma region Fields
 
 		private: t_NamedMutex & m_mutex;
@@ -29,8 +29,7 @@ namespace n_details
 		public: explicit t_ScopedLock(t_NamedMutex & mutex)
 		:	m_mutex(mutex)
 		{
-			m_locked = true;
-			m_mutex.Lock();
+			Lock();
 		}
 
 		private: t_ScopedLock(t_ScopedLock const &) = delete;
@@ -39,12 +38,25 @@ namespace n_details
 		{
 			if(m_locked)
 			{
-				m_mutex.Unlock();
-				m_locked = false;
+				Unlock();
 			}
 		}
 
-		private: void operator=(t_ScopedLock const &) = delete;
+		private: void operator =(t_ScopedLock const &) = delete;
+
+		public: void Lock(void)
+		{
+			assert(!m_locked);
+			m_locked = true;
+			m_mutex.Lock();
+		}
+
+		public: void Unlock(void)
+		{
+			assert(m_locked);
+			m_mutex.Unlock();
+			m_locked = false;
+		}
 	};
 }
 }

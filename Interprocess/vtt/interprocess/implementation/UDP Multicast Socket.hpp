@@ -1,5 +1,5 @@
-#ifndef HEADER_VTT_INTERPROCESS_DETAILS_UDP_MULTICAST_SOCKET
-#define HEADER_VTT_INTERPROCESS_DETAILS_UDP_MULTICAST_SOCKET
+#ifndef HEADER_VTT_INTERPROCESS_IMPLEMENTATION_UDP_MULTICAST_SOCKET
+#define HEADER_VTT_INTERPROCESS_IMPLEMENTATION_UDP_MULTICAST_SOCKET
 
 #pragma once
 
@@ -17,7 +17,7 @@ namespace n_vtt
 {
 namespace n_interprocess
 {
-namespace n_details
+namespace n_implementation
 {
 	class t_UDPMulticastSocket
 	{
@@ -97,7 +97,7 @@ namespace n_details
 			Close();
 		}
 
-		private: void operator=(t_UDPMulticastSocket const &) = delete;
+		private: void operator =(t_UDPMulticastSocket const &) = delete;
 
 		protected: void Close(void)
 		{

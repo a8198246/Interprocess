@@ -1,5 +1,5 @@
-#ifndef HEADER_VTT_INTERPROCESS_DETAILS_EVENT
-#define HEADER_VTT_INTERPROCESS_DETAILS_EVENT
+#ifndef HEADER_VTT_INTERPROCESS_IMPLEMENTATION_EVENT
+#define HEADER_VTT_INTERPROCESS_IMPLEMENTATION_EVENT
 
 #pragma once
 
@@ -7,17 +7,17 @@
 
 #include <sal.h>
 
+#include <Windows.h>
+
 #include <string>
 #include <cassert>
 #include <system_error>
-
-#include <Windows.h>
 
 namespace n_vtt
 {
 namespace n_interprocess
 {
-namespace n_details
+namespace n_implementation
 {
 	class t_Event
 	:	public t_OwnedHandle
@@ -52,7 +52,7 @@ namespace n_details
 
 		public: t_Event(t_Event const &) = delete;
 
-		public: void operator=(t_Event const &) = delete;
+		public: void operator =(t_Event const &) = delete;
 
 		public: void Set(void) throw()
 		{
@@ -73,8 +73,8 @@ namespace n_details
 			auto wait_result = ::WaitForSingleObject(m_handle, timeout_msec);
 			switch(wait_result)
 			{
-				case WAIT_ABANDONED:
 				case WAIT_OBJECT_0:
+				case WAIT_ABANDONED:
 				{
 					return(true);
 				}
@@ -89,6 +89,13 @@ namespace n_details
 					throw(::std::system_error(static_cast<int>(last_error), ::std::system_category(), "failed to wait for the event"));
 				}
 			}
+		}
+
+		public: void Wait(void)
+		{
+			auto wait_result = Timed_Wait(INFINITE);
+			DBG_UNREFERENCED_LOCAL_VARIABLE(wait_result);
+			assert(wait_result);
 		}
 	};
 }

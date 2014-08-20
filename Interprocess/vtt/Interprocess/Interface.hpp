@@ -54,9 +54,6 @@ udp_multicast_recieve
 ,	_Out_ int *                                       p_error_code
 );
 
-
-
-
 VTT_EXTERN_C_ZONE_END
 
 #endif

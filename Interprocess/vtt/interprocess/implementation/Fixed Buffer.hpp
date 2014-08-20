@@ -1,5 +1,5 @@
-#ifndef HEADER_VTT_INTERPROCESS_DETAILS_FIXED_BUFFER
-#define HEADER_VTT_INTERPROCESS_DETAILS_FIXED_BUFFER
+#ifndef HEADER_VTT_INTERPROCESS_IMPLEMENTATION_FIXED_BUFFER
+#define HEADER_VTT_INTERPROCESS_IMPLEMENTATION_FIXED_BUFFER
 
 #pragma once
 
@@ -16,7 +16,7 @@ namespace n_vtt
 {
 namespace n_interprocess
 {
-namespace n_details
+namespace n_implementation
 {
 	//	Ready to be a process-shared object.
 	template<::boost::uint32_t tp_Capacity>
@@ -69,6 +69,17 @@ namespace n_details
 			}
 		}
 
+		public: void Store(_In_ t_Chunk chunk)
+		{
+			assert(chunk.Is_Not_Empty());
+			auto const new_size = m_size + chunk.Get_Size();
+			if(new_size <= tp_Capacity)
+			{
+				memcpy(m_buffer.data() + m_size, chunk.Get_Data(), chunk.Get_Size());
+				m_size = static_cast<::boost::uint32_t>(new_size);
+			}
+		}
+
 		public: auto Retrieve_Data(_Out_writes_bytes_opt_(bc_buffer_capacity) char * p_buffer, _In_ const size_t bc_buffer_capacity) -> size_t
 		{
 			assert(nullptr != p_buffer);
@@ -81,17 +92,6 @@ namespace n_details
 				bc_written = m_size;
 			}
 			return(bc_written);
-		}
-
-		public: void Store(t_Chunk chunk)
-		{
-			assert(chunk.Is_Not_Empty());
-			auto const new_size = m_size + chunk.Get_Size();
-			if(new_size <= tp_Capacity)
-			{
-				memcpy(m_buffer.data() + m_size, chunk.Get_Data(), chunk.Get_Size());
-				m_size = static_cast<::boost::uint32_t>(new_size);
-			}
 		}
 
 		public: auto Retrieve_Chunk(void) -> t_Chunk

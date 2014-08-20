@@ -1,5 +1,5 @@
-#ifndef HEADER_VTT_INTERPROCESS_DETAILS_CHUNK
-#define HEADER_VTT_INTERPROCESS_DETAILS_CHUNK
+#ifndef HEADER_VTT_INTERPROCESS_IMPLEMENTATION_CHUNK
+#define HEADER_VTT_INTERPROCESS_IMPLEMENTATION_CHUNK
 
 #pragma once
 
@@ -14,7 +14,7 @@ namespace n_vtt
 {
 namespace n_interprocess
 {
-namespace n_details
+namespace n_implementation
 {
 	//	Helper class to fake move behavior with copy semantics.
 	//	A workaround for the lack of support for move semantics in boost::asio
@@ -48,7 +48,7 @@ namespace n_details
 			::std::swap(m_bc_data, that_w.m_bc_data);
 		}
 						
-		public: void operator=(_Inout_ t_Chunk const & that)
+		public: void operator =(_Inout_ t_Chunk const & that)
 		{
 			auto & that_w = const_cast<t_Chunk &>(that);
 			m_p_data.swap(that_w.m_p_data);
