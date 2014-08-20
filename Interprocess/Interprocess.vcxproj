@@ -222,37 +222,37 @@ copy "$(OutDir)*.lib" "$(ProjectDir)x64\Release\"</Command>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="vtt\Interprocess.hpp" />
-    <ClInclude Include="vtt\_interprocess\Application Identifier.hpp" />
-    <ClInclude Include="vtt\_interprocess\Configuration.hpp" />
-    <ClInclude Include="vtt\_interprocess\implementation\Broker.hpp" />
-    <ClInclude Include="vtt\_interprocess\implementation\Chunk.hpp" />
-    <ClInclude Include="vtt\_interprocess\implementation\Conditional Variable.hpp" />
-    <ClInclude Include="vtt\_interprocess\implementation\Event.hpp" />
-    <ClInclude Include="vtt\_interprocess\implementation\Fixed Buffer.hpp" />
-    <ClInclude Include="vtt\_interprocess\implementation\Main Windows SDK Control.hpp" />
-    <ClInclude Include="vtt\_interprocess\implementation\Master.hpp" />
-    <ClInclude Include="vtt\_interprocess\implementation\Multi Writer Single Reader Pipe.hpp" />
-    <ClInclude Include="vtt\_interprocess\implementation\Named Mutex.hpp" />
-    <ClInclude Include="vtt\_interprocess\implementation\Owned Handle.hpp" />
-    <ClInclude Include="vtt\_interprocess\implementation\Patron.hpp" />
-    <ClInclude Include="vtt\_interprocess\implementation\Pipe.hpp" />
-    <ClInclude Include="vtt\_interprocess\implementation\Precompiled.hpp" />
-    <ClInclude Include="vtt\_interprocess\implementation\Scoped Lock.hpp" />
-    <ClInclude Include="vtt\_interprocess\implementation\Shared Memory.hpp" />
-    <ClInclude Include="vtt\_interprocess\implementation\Single Writer Multi Reader Pipe.hpp" />
-    <ClInclude Include="vtt\_interprocess\implementation\Slave.hpp" />
-    <ClInclude Include="vtt\_interprocess\implementation\Sockets User.hpp" />
-    <ClInclude Include="vtt\_interprocess\implementation\Static Instace.hpp" />
-    <ClInclude Include="vtt\_interprocess\implementation\UDP Multicast Socket.hpp" />
-    <ClInclude Include="vtt\_interprocess\implementation\Write Chunk To Buffer.hpp" />
-    <ClInclude Include="vtt\_interprocess\Export Control.hpp" />
-    <ClInclude Include="vtt\_interprocess\Interface.hpp" />
-    <ClInclude Include="vtt\_interprocess\implementation\Main Boost Control.hpp" />
-    <ClInclude Include="vtt\_interprocess\implementation\Main.hpp" />
+    <ClInclude Include="vtt\interprocess\Application Identifier.hpp" />
+    <ClInclude Include="vtt\interprocess\Configuration.hpp" />
+    <ClInclude Include="vtt\interprocess\implementation\Broker.hpp" />
+    <ClInclude Include="vtt\interprocess\implementation\Chunk.hpp" />
+    <ClInclude Include="vtt\interprocess\implementation\Conditional Variable.hpp" />
+    <ClInclude Include="vtt\interprocess\implementation\Event.hpp" />
+    <ClInclude Include="vtt\interprocess\implementation\Fixed Buffer.hpp" />
+    <ClInclude Include="vtt\interprocess\implementation\Main Windows SDK Control.hpp" />
+    <ClInclude Include="vtt\interprocess\implementation\Master.hpp" />
+    <ClInclude Include="vtt\interprocess\implementation\Multi Writer Single Reader Pipe.hpp" />
+    <ClInclude Include="vtt\interprocess\implementation\Named Mutex.hpp" />
+    <ClInclude Include="vtt\interprocess\implementation\Owned Handle.hpp" />
+    <ClInclude Include="vtt\interprocess\implementation\Patron.hpp" />
+    <ClInclude Include="vtt\interprocess\implementation\Pipe.hpp" />
+    <ClInclude Include="vtt\interprocess\implementation\Precompiled.hpp" />
+    <ClInclude Include="vtt\interprocess\implementation\Scoped Lock.hpp" />
+    <ClInclude Include="vtt\interprocess\implementation\Shared Memory.hpp" />
+    <ClInclude Include="vtt\interprocess\implementation\Single Writer Multi Reader Pipe.hpp" />
+    <ClInclude Include="vtt\interprocess\implementation\Slave.hpp" />
+    <ClInclude Include="vtt\interprocess\implementation\Sockets User.hpp" />
+    <ClInclude Include="vtt\interprocess\implementation\Static Instace.hpp" />
+    <ClInclude Include="vtt\interprocess\implementation\UDP Multicast Socket.hpp" />
+    <ClInclude Include="vtt\interprocess\implementation\Write Chunk To Buffer.hpp" />
+    <ClInclude Include="vtt\interprocess\Export Control.hpp" />
+    <ClInclude Include="vtt\interprocess\Interface.hpp" />
+    <ClInclude Include="vtt\interprocess\implementation\Main Boost Control.hpp" />
+    <ClInclude Include="vtt\interprocess\implementation\Main.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="vtt\_interprocess\implementation\Main.cpp" />
-    <ClCompile Include="vtt\_interprocess\implementation\Precompiled.cpp">
+    <ClCompile Include="vtt\interprocess\implementation\Main.cpp" />
+    <ClCompile Include="vtt\interprocess\implementation\Precompiled.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
@@ -263,8 +263,8 @@ copy "$(OutDir)*.lib" "$(ProjectDir)x64\Release\"</Command>
     <Text Include="Readme.txt" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="vtt\_interprocess\implementation\Interface.x32.def" />
-    <None Include="vtt\_interprocess\implementation\Interface.x64.def" />
+    <None Include="vtt\interprocess\implementation\Interface.x32.def" />
+    <None Include="vtt\interprocess\implementation\Interface.x64.def" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

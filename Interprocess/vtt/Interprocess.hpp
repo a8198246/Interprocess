@@ -3,6 +3,6 @@
 
 #pragma once
 
-#include "Interprocess/Interface.hpp"
+#include "interprocess/Interface.hpp"
 
 #endif
