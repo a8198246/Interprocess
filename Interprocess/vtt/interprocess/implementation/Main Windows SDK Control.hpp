@@ -37,4 +37,6 @@
 #define _WIN32_IE      0x0800
 #define NTDDI_VERSION  NTDDI_WIN7
 
+#define _WINSOCK_DEPRECATED_NO_WARNINGS
+
 #endif
