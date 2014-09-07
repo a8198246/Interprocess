@@ -2,10 +2,14 @@
 #include "Patron.hpp"
 #include "Sockets User.hpp"
 #include "UDP Multicast Socket.hpp"
+#include "Threaded Logger.hpp"
 
 #include "../Interface.hpp"
 
 #include <Windows.h>
+
+#include <stdexcept>
+#include <system_error>
 
 #ifdef _DEBUG
 #	pragma comment(lib, "boost_thread-vc120-mt-gd-1_55.lib")
@@ -22,16 +26,51 @@ using namespace n_implementation;
 void VTT_INTERPROCESS_CALLING_CONVENTION
 interprocess_master_send(_In_ const int application_id, _In_reads_bytes_(bc_data) char const * p_data, _In_range_(0, VTT_INTERPROCESS_BC_MESSAGE_BUFFER_LIMIT) const int bc_data)
 {
-	if((nullptr != p_data) && (0 < bc_data) && (bc_data <= VTT_INTERPROCESS_BC_MESSAGE_BUFFER_LIMIT))
+	try
 	{
-		try
+	#ifdef _DEBUG_LOGGING
+		t_Patron::Init_Logger(true);
 		{
-			t_Patron::Get_Master().Send_To_Slave(application_id, p_data, static_cast<size_t>(bc_data));
+			auto & logger = t_ThreadedLogger::Get_Instance();
+			t_LoggerGuard guard(logger);
+			logger.Print_Prefix() << __FUNCSIG__ << ::std::endl;
+			logger.Print_Prefix() << "parameters:"
+				<< " application_id " << application_id
+				<< ", p_data " << ::std::hex << static_cast<void const *>(p_data) << ::std::dec
+				<< ", bc_data " << bc_data << ::std::endl;
 		}
-		catch(...)
+	#endif
+		if((nullptr != p_data) && (0 < bc_data) && (bc_data <= VTT_INTERPROCESS_BC_MESSAGE_BUFFER_LIMIT))
 		{
-			//	Do nothing
+			auto & master = t_Patron::Get_Master();
+			master.Send_To_Slave(application_id, p_data, static_cast<size_t>(bc_data));
 		}
+		else
+		{
+		#ifdef _DEBUG_LOGGING
+			t_ThreadedLogger::Print_InvalidFunctionParameterError();
+		#endif
+		}
+	}
+#ifdef _DEBUG_LOGGING
+	catch(::std::system_error & e)
+	{
+		t_ThreadedLogger::Print_Exception(e);
+	}
+	catch(::std::logic_error & e)
+	{
+		t_ThreadedLogger::Print_Exception(e);
+	}
+	catch(::std::exception & e)
+	{
+		t_ThreadedLogger::Print_Exception(e);
+	}
+#endif
+	catch(...)
+	{
+	#ifdef _DEBUG_LOGGING
+		t_ThreadedLogger::Print_UnknownException();
+	#endif
 	}
 }
 
@@ -39,16 +78,52 @@ int VTT_INTERPROCESS_CALLING_CONVENTION
 interprocess_master_recieve(_Out_writes_bytes_opt_(bc_buffer_capacity) char * p_buffer, _In_ const int bc_buffer_capacity, _In_ const int timeout_msec)
 {
 	auto bc_written = 0;
-	if((nullptr != p_buffer) && (0 < bc_buffer_capacity))
+	try
 	{
-		try
+	#ifdef _DEBUG_LOGGING
+		t_Patron::Init_Logger(true);
 		{
-			bc_written = static_cast<int>(t_Patron::Get_Master().Recieve_From_Slaves(p_buffer, static_cast<size_t>(bc_buffer_capacity), timeout_msec));
+			auto & logger = t_ThreadedLogger::Get_Instance();
+			t_LoggerGuard guard(logger);
+			logger.Print_Prefix() << __FUNCSIG__ << ::std::endl;
+			logger.Print_Prefix() << "parameters:"
+				<< " p_buffer " << ::std::hex << static_cast<void const *>(p_buffer) << ::std::dec
+				<< ", bc_buffer_capacity " << bc_buffer_capacity
+				<< ", timeout_msec " << timeout_msec << ::std::endl;
 		}
-		catch(...)
+	#endif
+		if((nullptr != p_buffer) && (0 < bc_buffer_capacity))
 		{
-			assert(0 == bc_written);
+			auto & master = t_Patron::Get_Master();
+			bc_written = static_cast<int>(master.Recieve_From_Slaves(p_buffer, static_cast<size_t>(bc_buffer_capacity), timeout_msec));
 		}
+		else
+		{
+		#ifdef _DEBUG_LOGGING
+			t_ThreadedLogger::Print_InvalidFunctionParameterError();
+		#endif
+		}
+	}
+#ifdef _DEBUG_LOGGING
+	catch(::std::system_error & e)
+	{
+		t_ThreadedLogger::Print_Exception(e);
+	}
+	catch(::std::logic_error & e)
+	{
+		t_ThreadedLogger::Print_Exception(e);
+	}
+	catch(::std::exception & e)
+	{
+		t_ThreadedLogger::Print_Exception(e);
+	}
+#endif
+	catch(...)
+	{
+	#ifdef _DEBUG_LOGGING
+		t_ThreadedLogger::Print_UnknownException();
+	#endif
+		assert(0 == bc_written);
 	}
 	return(bc_written);
 }
@@ -56,32 +131,100 @@ interprocess_master_recieve(_Out_writes_bytes_opt_(bc_buffer_capacity) char * p_
 void VTT_INTERPROCESS_CALLING_CONVENTION
 interprocess_master_send_to_all(_In_reads_bytes_(bc_data) char const * p_data, _In_range_(0, VTT_INTERPROCESS_BC_MESSAGE_BUFFER_LIMIT) const int bc_data)
 {
-	if((nullptr != p_data) && (0 < bc_data) && (bc_data <= VTT_INTERPROCESS_BC_MESSAGE_BUFFER_LIMIT))
+	try
 	{
-		try
+	#ifdef _DEBUG_LOGGING
+		t_Patron::Init_Logger(true);
 		{
-			t_Patron::Get_Master().Send_To_AllSlaves(p_data, bc_data);
+			auto & logger = t_ThreadedLogger::Get_Instance();
+			t_LoggerGuard guard(logger);
+			logger.Print_Prefix() << __FUNCSIG__ << ::std::endl;
+			logger.Print_Prefix() << "parameters:"
+				<< " p_data " << ::std::hex << static_cast<void const *>(p_data) << ::std::dec
+				<< ", bc_data " << bc_data << ::std::endl;
 		}
-		catch(...)
+	#endif
+		if((nullptr != p_data) && (0 < bc_data) && (bc_data <= VTT_INTERPROCESS_BC_MESSAGE_BUFFER_LIMIT))
 		{
-			//	Do nothing
+			auto & master = t_Patron::Get_Master();
+			master.Send_To_AllSlaves(p_data, bc_data);
 		}
+		else
+		{
+		#ifdef _DEBUG_LOGGING
+			t_ThreadedLogger::Print_InvalidFunctionParameterError();
+		#endif
+		}
+	}
+#ifdef _DEBUG_LOGGING
+	catch(::std::system_error & e)
+	{
+		t_ThreadedLogger::Print_Exception(e);
+	}
+	catch(::std::logic_error & e)
+	{
+		t_ThreadedLogger::Print_Exception(e);
+	}
+	catch(::std::exception & e)
+	{
+		t_ThreadedLogger::Print_Exception(e);
+	}
+#endif
+	catch(...)
+	{
+	#ifdef _DEBUG_LOGGING
+		t_ThreadedLogger::Print_UnknownException();
+	#endif
 	}
 }
 
 void VTT_INTERPROCESS_CALLING_CONVENTION
 interprocess_slave_send(_In_reads_bytes_(bc_data) char const * p_data, _In_range_(0, VTT_INTERPROCESS_BC_MESSAGE_BUFFER_LIMIT) const int bc_data)
 {
-	if((nullptr != p_data) && (0 < bc_data) && (bc_data <= VTT_INTERPROCESS_BC_MESSAGE_BUFFER_LIMIT))
+	try
 	{
-		try
+	#ifdef _DEBUG_LOGGING
+		t_Patron::Init_Logger(false);
 		{
-			t_Patron::Get_Slave().Send_To_Master(p_data, static_cast<size_t>(bc_data));
+			auto & logger = t_ThreadedLogger::Get_Instance();
+			t_LoggerGuard guard(logger);
+			logger.Print_Prefix() << __FUNCSIG__ << ::std::endl;
+			logger.Print_Prefix() << "parameters:"
+				<< " p_data " << ::std::hex << static_cast<void const *>(p_data) << ::std::dec
+				<< ", bc_data " << bc_data << ::std::endl;
 		}
-		catch(...)
+	#endif
+		if((nullptr != p_data) && (0 < bc_data) && (bc_data <= VTT_INTERPROCESS_BC_MESSAGE_BUFFER_LIMIT))
 		{
-			//	Do nothing
+			auto & slave = t_Patron::Get_Slave();
+			slave.Send_To_Master(p_data, static_cast<size_t>(bc_data));
 		}
+		else
+		{
+		#ifdef _DEBUG_LOGGING
+			t_ThreadedLogger::Print_InvalidFunctionParameterError();
+		#endif
+		}
+	}
+#ifdef _DEBUG_LOGGING
+	catch(::std::system_error & e)
+	{
+		t_ThreadedLogger::Print_Exception(e);
+	}
+	catch(::std::logic_error & e)
+	{
+		t_ThreadedLogger::Print_Exception(e);
+	}
+	catch(::std::exception & e)
+	{
+		t_ThreadedLogger::Print_Exception(e);
+	}
+#endif
+	catch(...)
+	{
+	#ifdef _DEBUG_LOGGING
+		t_ThreadedLogger::Print_UnknownException();
+	#endif
 	}
 }
 
@@ -89,16 +232,52 @@ int VTT_INTERPROCESS_CALLING_CONVENTION
 interprocess_slave_recieve(_In_ const int application_id, _Out_writes_bytes_opt_(bc_buffer_capacity) char * p_buffer, _In_ const int bc_buffer_capacity)
 {
 	auto bc_written = 0;
-	if((nullptr != p_buffer) && (0 < bc_buffer_capacity))
+	try
 	{
-		try
+	#ifdef _DEBUG_LOGGING
+		t_Patron::Init_Logger(false);
 		{
-			bc_written = static_cast<int>(t_Patron::Get_Slave().Recieve_From_Master(application_id, p_buffer, static_cast<size_t>(bc_buffer_capacity)));
+			auto & logger = t_ThreadedLogger::Get_Instance();
+			t_LoggerGuard guard(logger);
+			logger.Print_Prefix() << __FUNCSIG__ << ::std::endl;
+			logger.Print_Prefix() << "parameters:"
+				<< " application_id " << application_id 
+				<< ", p_buffer " << ::std::hex << static_cast<void const *>(p_buffer) << ::std::dec
+				<< ", bc_buffer_capacity " << bc_buffer_capacity << ::std::endl;
 		}
-		catch(...)
+	#endif
+		if((nullptr != p_buffer) && (0 < bc_buffer_capacity))
 		{
-			assert(0 == bc_written);
+			auto & slave = t_Patron::Get_Slave();
+			bc_written = static_cast<int>(slave.Recieve_From_Master(application_id, p_buffer, static_cast<size_t>(bc_buffer_capacity)));
 		}
+		else
+		{
+		#ifdef _DEBUG_LOGGING
+			t_ThreadedLogger::Print_InvalidFunctionParameterError();
+		#endif
+		}
+	}
+#ifdef _DEBUG_LOGGING
+	catch(::std::system_error & e)
+	{
+		t_ThreadedLogger::Print_Exception(e);
+	}
+	catch(::std::logic_error & e)
+	{
+		t_ThreadedLogger::Print_Exception(e);
+	}
+	catch(::std::exception & e)
+	{
+		t_ThreadedLogger::Print_Exception(e);
+	}
+#endif
+	catch(...)
+	{
+	#ifdef _DEBUG_LOGGING
+		t_ThreadedLogger::Print_UnknownException();
+	#endif
+		assert(0 == bc_written);
 	}
 	return(bc_written);
 }
@@ -107,16 +286,53 @@ int VTT_INTERPROCESS_CALLING_CONVENTION
 interprocess_slave_recieve_common(_Out_writes_bytes_opt_(bc_buffer_capacity) char * p_buffer, _In_ const int bc_buffer_capacity, _In_ const int timeout_msec)
 {
 	auto bc_written = 0;
-	if((nullptr != p_buffer) && (0 < bc_buffer_capacity))
+	try
 	{
-		try
+	#ifdef _DEBUG_LOGGING
+		t_Patron::Init_Logger(false);
 		{
-			bc_written = static_cast<int>(t_Patron::Get_Slave().RecieveCommon_From_Master(p_buffer, static_cast<size_t>(bc_buffer_capacity), timeout_msec));
+			auto & logger = t_ThreadedLogger::Get_Instance();
+			t_LoggerGuard guard(logger);
+			logger.Print_Prefix() << __FUNCSIG__ << ::std::endl;
+			logger.Print_Prefix() << "parameters:"
+				<< " p_buffer " << ::std::hex << static_cast<void const *>(p_buffer) << ::std::dec
+				<< ", bc_buffer_capacity " << bc_buffer_capacity
+				<< ", timeout_msec " << timeout_msec
+				<< ::std::endl;
 		}
-		catch(...)
+	#endif
+		if((nullptr != p_buffer) && (0 < bc_buffer_capacity))
 		{
-			assert(0 == bc_written);
+			auto & slave = t_Patron::Get_Slave();
+			bc_written = static_cast<int>(slave.RecieveCommon_From_Master(p_buffer, static_cast<size_t>(bc_buffer_capacity), timeout_msec));
 		}
+		else
+		{
+		#ifdef _DEBUG_LOGGING
+			t_ThreadedLogger::Print_InvalidFunctionParameterError();
+		#endif
+		}
+	}
+#ifdef _DEBUG_LOGGING
+	catch(::std::system_error & e)
+	{
+		t_ThreadedLogger::Print_Exception(e);
+	}
+	catch(::std::logic_error & e)
+	{
+		t_ThreadedLogger::Print_Exception(e);
+	}
+	catch(::std::exception & e)
+	{
+		t_ThreadedLogger::Print_Exception(e);
+	}
+#endif
+	catch(...)
+	{
+	#ifdef _DEBUG_LOGGING
+		t_ThreadedLogger::Print_UnknownException();
+	#endif
+		assert(0 == bc_written);
 	}
 	return(bc_written);
 }
@@ -124,12 +340,12 @@ interprocess_slave_recieve_common(_Out_writes_bytes_opt_(bc_buffer_capacity) cha
 int VTT_INTERPROCESS_CALLING_CONVENTION
 udp_multicast_recieve
 (
-	_In_z_ wchar_t const *                        psz_host
-,	_In_range_(0, 65535) const int                port
+	_In_z_ wchar_t const *                            psz_host
+,	_In_range_(0, 65535) const int                    port
 ,	_Out_writes_bytes_opt_(bc_buffer_capacity) char * p_buffer
-,	_In_ const int                                bc_buffer_capacity
-,	_In_ const int                                timeout_msec
-,	_Out_ int *                                   p_error_code
+,	_In_ const int                                    bc_buffer_capacity
+,	_In_ const int                                    timeout_msec
+,	_Out_ int *                                       p_error_code
 )
 {
 	auto bc_written = 0;

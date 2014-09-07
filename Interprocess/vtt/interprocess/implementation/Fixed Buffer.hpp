@@ -4,6 +4,7 @@
 #pragma once
 
 #include "Chunk.hpp"
+#include "Threaded Logger.hpp"
 
 #include <sal.h>
 
@@ -71,12 +72,38 @@ namespace n_implementation
 
 		public: void Store(_In_ t_Chunk chunk)
 		{
+		#ifdef _DEBUG_LOGGING
+			t_ThreadedLogger::Print_Message(__FUNCSIG__);
+		#endif
 			assert(chunk.Is_Not_Empty());
 			auto const new_size = m_size + chunk.Get_Size();
 			if(new_size <= tp_Capacity)
 			{
 				memcpy(m_buffer.data() + m_size, chunk.Get_Data(), chunk.Get_Size());
+				{
+				#ifdef _DEBUG_LOGGING
+					auto & logger = t_ThreadedLogger::Get_Instance();
+					t_LoggerGuard logger_guard(logger);
+					logger.Print_Prefix() << "stored " << chunk.Get_Size() << " bytes"
+						<< ", initial buffer size " << m_size << " bytes"
+						<< ", new buffer size " << new_size << " bytes"
+						<< ", buffer capacity " << Get_Capacity() << " bytes"
+						<< ::std::endl;
+					logger.Write_SentBlock(chunk.Get_Data(), chunk.Get_Size());
+				#endif
+				}
 				m_size = static_cast<::boost::uint32_t>(new_size);
+			}
+			else
+			{
+			#ifdef _DEBUG_LOGGING
+				auto & logger = t_ThreadedLogger::Get_Instance();
+				t_LoggerGuard logger_guard(logger);
+				logger.Print_Prefix() << "unable to store " << chunk.Get_Size() << " bytes"
+					<< ", initial buffer size " << m_size << " bytes"
+					<< ", buffer capacity " << Get_Capacity() << " bytes"
+					<< ::std::endl;
+			#endif
 			}
 		}
 
@@ -96,8 +123,21 @@ namespace n_implementation
 
 		public: auto Retrieve_Chunk(void) -> t_Chunk
 		{
+		#ifdef _DEBUG_LOGGING
+			t_ThreadedLogger::Print_Message(__FUNCSIG__);
+		#endif
 			assert(Is_Not_Empty());
 			t_Chunk result(m_buffer.data(), m_size);
+		#ifdef _DEBUG_LOGGING
+			{
+				auto & logger = t_ThreadedLogger::Get_Instance();
+				t_LoggerGuard logger_guard(logger);
+				logger.Print_Prefix() << "retirieved " << m_size << " bytes"
+					<< ", buffer capacity " << Get_Capacity() << " bytes"
+					<< ::std::endl;
+				logger.Write_ReceivedBlock(result.Get_Data(), result.Get_Size());
+			}
+		#endif
 			m_size = 0;
 			return(result);
 		}

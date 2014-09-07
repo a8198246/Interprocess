@@ -243,6 +243,7 @@ copy "$(OutDir)*.lib" "$(ProjectDir)x64\Release\"</Command>
     <ClInclude Include="vtt\interprocess\implementation\Slave.hpp" />
     <ClInclude Include="vtt\interprocess\implementation\Sockets User.hpp" />
     <ClInclude Include="vtt\interprocess\implementation\Static Instace.hpp" />
+    <ClInclude Include="vtt\interprocess\implementation\Threaded Logger.hpp" />
     <ClInclude Include="vtt\interprocess\implementation\UDP Multicast Socket.hpp" />
     <ClInclude Include="vtt\interprocess\implementation\Write Chunk To Buffer.hpp" />
     <ClInclude Include="vtt\interprocess\Export Control.hpp" />

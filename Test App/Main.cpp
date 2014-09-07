@@ -1,6 +1,6 @@
 #define BOOST_ALL_NO_LIB
 
-#define RUNTIME_DYNAMIC_LINKING
+//#define RUNTIME_DYNAMIC_LINKING
 
 #include <vld.h>
 
@@ -46,12 +46,12 @@ int  (VTT_INTERPROCESS_CALLING_CONVENTION *udp_multicast_recieve            )(wc
 #endif
 
 #define APPLICATION_ID_MAX    100
-#define WORK_TIME_SECONDS     30
+#define WORK_TIME_SECONDS     15
 #define BC_MESSAGE_MAX        128
 #define BC_SOCKET_MESSAGE_MAX 512
-#define SEND_RATE             20  // messages will be send once in m_send_rate times
+#define SEND_RATE             2  // messages will be send once in m_send_rate times
 #define INTERVAL_MSECONDS     100 // interval between recive / send attempts
-#define BUFFER_SIZE           512
+#define BUFFER_SIZE           VTT_INTERPROCESS_BC_MESSAGE_BUFFER_LIMIT * 100
 #define GROUP                 L"224.0.0.108"
 #define PORT                  12345
 
@@ -109,6 +109,9 @@ class t_Worker
 	private: t_Mutex &  m_sync;             // sync for ::std::cout and rand
 	private: t_Buffer   m_buffer;
 	private: t_Thread   m_thread;
+	private: ::DWORD    m_pid = ::GetCurrentProcessId();
+	private: int        m_last_sent_message_index = 0;
+	private: ::std::map<int, int> m_pid_to_expected_message_index;
 	
 	#pragma endregion
 
@@ -149,17 +152,17 @@ class t_Worker
 				//	Recieve_From_Soket();
 				//	::boost::this_thread::interruption_point();
 				//}
-				//auto need_to_recieve = true;
-				//if(need_to_recieve)
-				//{
-				//	Recieve();
-				//}
-				//auto need_to_send = (rand() % SEND_RATE) == 0;
-				//if(need_to_send)
-				//{
-				//	Send();
-				//}
-				Common();
+				auto need_to_recieve = true;
+				if(need_to_recieve)
+				{
+					Recieve();
+				}
+				auto need_to_send = (rand() % SEND_RATE) == 0;
+				if(need_to_send)
+				{
+					Send();
+				}
+				//Common();
 				::boost::this_thread::sleep(::boost::get_system_time() + ::boost::posix_time::milliseconds(INTERVAL_MSECONDS));
 			}
 		}
@@ -233,8 +236,8 @@ class t_Worker
 		static int attempt = 0;
 		if(m_is_master)
 		{
-			t_Lock lock(m_sync);
-			::std::cout << "\t #" << attempt << " attempt to recieve" << ::std::endl;
+			//t_Lock lock(m_sync);
+			//::std::cout << "\t #" << attempt << " attempt to recieve" << ::std::endl;
 		}
 		++attempt;
 		if(m_is_master)
@@ -248,34 +251,66 @@ class t_Worker
 		assert(bc_recieved <= BUFFER_SIZE);
 		if(0 != bc_recieved)
 		{
+			assert(13 <= bc_recieved); // 4 bytes pid 4 bytes messages number 4 bytes message length + 1 symbol + \n
 			t_Lock lock(m_sync);
-			::std::cout << "\t << thread #" << ::boost::this_thread::get_id() << " recieved " << bc_recieved << " bytes:" << ::std::endl;
-			::std::cout.write(m_buffer.data(), bc_recieved);
-			::std::cout.flush();
+			int offset = 0;
+			while(offset != static_cast<int>(bc_recieved))
+			{
+				//::std::cout << "\t << thread #" << ::boost::this_thread::get_id() << " recieved " << bc_recieved << " bytes:" << ::std::endl;
+				assert(offset + sizeof(int) < static_cast<int>(bc_recieved));
+				auto pid = *reinterpret_cast<int *>(m_buffer.data() + offset);
+				offset += sizeof(int);
+				m_pid_to_expected_message_index.insert(::std::make_pair(pid, 0));
+
+				assert(offset + sizeof(int) < static_cast<int>(bc_recieved));
+				auto message_index = *reinterpret_cast<int *>(m_buffer.data() + offset);
+				offset += sizeof(int);
+
+				assert(offset + sizeof(int) < static_cast<int>(bc_recieved));
+				auto bc_message = *reinterpret_cast<int *>(m_buffer.data() + offset);
+				offset += sizeof(int);
+
+				auto it_expected_message_index = m_pid_to_expected_message_index.find(pid);
+				auto & expected_message_index = it_expected_message_index->second;
+				if(expected_message_index != message_index)
+				{
+					::std::cout << "ERROR: message index mismatch, expected " << expected_message_index << " got " << message_index << " from " << pid << ::std::endl;
+				}
+				else
+				{
+				//	::std::cout << "message #" << message_index << " of " << bc_message << " bytes size" << ::std::endl;
+				}
+				expected_message_index = message_index + 1;
+				offset += bc_message;
+				assert(offset <= static_cast<int>(bc_recieved));
+			}
+			//::std::cout.write(m_buffer.data() + sizeof(int), bc_recieved);
+			//::std::cout.flush();
 		}
 	}
 
 	private: void Send(void)
 	{
-		Generate_Message();
 		if(m_is_master)
 		{
-			auto target_application_id = (rand() % (APPLICATION_ID_MAX + 1));
-			{
-				t_Lock lock(m_sync);
-				::std::cout << "\t >> thread #" << ::boost::this_thread::get_id() << " sends " << m_buffer.size() << " bytes to " << target_application_id << ":" << ::std::endl;
-				::std::cout.write(m_buffer.data(), m_buffer.size());
-				::std::cout.flush();
-			}
-			interprocess_master_send(target_application_id, m_buffer.data(), static_cast<int>(m_buffer.size()));
+			//auto target_application_id = (rand() % (APPLICATION_ID_MAX + 1));
+			//{
+			//	t_Lock lock(m_sync);
+			//	::std::cout << "\t >> thread #" << ::boost::this_thread::get_id() << " sends " << m_buffer.size() << " bytes to " << target_application_id << ":" << ::std::endl;
+			//	::std::cout.write(m_buffer.data(), m_buffer.size());
+			//	::std::cout.flush();
+			//}
+			//interprocess_master_send(target_application_id, m_buffer.data(), static_cast<int>(m_buffer.size()));
 		}
 		else
 		{
+			Generate_Message();
 			{
 				t_Lock lock(m_sync);
-				::std::cout << "\t >> thread #" << ::boost::this_thread::get_id() << " sends " << m_buffer.size() << " bytes to master:" << ::std::endl;
-				::std::cout.write(m_buffer.data(), m_buffer.size());
-				::std::cout.flush();
+				::std::cout << "\t >> thread #" << ::boost::this_thread::get_id() << " sends message #" << (m_last_sent_message_index - 1)
+				<< " of " << (m_buffer.size() - sizeof(int) * 3) << " bytes size to master:" << ::std::endl;
+			//	::std::cout.write(m_buffer.data() + sizeof(int), m_buffer.size());
+			//	::std::cout.flush();
 			}
 			interprocess_slave_send(m_buffer.data(), static_cast<int>(m_buffer.size()));
 		}
@@ -283,17 +318,17 @@ class t_Worker
 
 	private: void Generate_Message(void)
 	{
-		m_buffer.clear();
 		t_Lock lock(m_sync); // otherwise different threads will spam the same messages
 		srand(m_seed);
-		auto const bc_message = (rand() % BC_MESSAGE_MAX);
-		if(0 != bc_message)
-		{
-			m_buffer.resize(bc_message);
-			::std::generate(m_buffer.begin(), m_buffer.end(), [](void) -> char {return(static_cast<char>('a' + (rand() % 26)));});
-			m_buffer.back() = '\n';
-		}
+		auto const bc_message = 1 + (rand() % BC_MESSAGE_MAX);
+		m_buffer.resize(sizeof(int) * 3 + bc_message);
+		*reinterpret_cast<int *>(m_buffer.data() + sizeof(int) * 0) = static_cast<int>(m_pid);
+		*reinterpret_cast<int *>(m_buffer.data() + sizeof(int) * 1) = m_last_sent_message_index;
+		*reinterpret_cast<int *>(m_buffer.data() + sizeof(int) * 2) = bc_message;
+		::std::generate(m_buffer.begin() + sizeof(int) * 3, m_buffer.end(), [](void) -> char {return(static_cast<char>('a' + (rand() % 26)));});
+		m_buffer.back() = '\n';
 		m_seed = rand();
+		++m_last_sent_message_index;
 	}
 };
 

@@ -6,6 +6,7 @@
 #include "../Configuration.hpp"
 #include "../Application Identifier.hpp"
 
+#include "Threaded Logger.hpp"
 #include "Multi Writer Single Reader Pipe.hpp"
 #include "Single Writer Multi Reader Pipe.hpp"
 
@@ -47,7 +48,9 @@ namespace n_implementation
 		:	m_slaves_to_master_pipe(::std::string(VTT_SZ_INTERPROCESS_NAMED_OBJECTS_PREFIX "s to m"))
 		,	m_commom_pipe(::std::string(VTT_SZ_INTERPROCESS_NAMED_OBJECTS_PREFIX "common"))
 		{
-			//	Do nothing
+		#ifdef _DEBUG_LOGGING
+			t_ThreadedLogger::Print_Message(__FUNCSIG__);
+		#endif
 		}
 
 		private: t_Broker(t_Broker const &) = delete;
@@ -56,19 +59,31 @@ namespace n_implementation
 
 		public: auto Get_SlavesToMasterPipe(void) -> t_SlavesToMasterPipe &
 		{
+		#ifdef _DEBUG_LOGGING
+			t_ThreadedLogger::Print_Message(__FUNCSIG__);
+		#endif
 			return(m_slaves_to_master_pipe);
 		}
 		
 		public: auto Get_CommonPipe(void) -> t_CommonPipe &
 		{
+		#ifdef _DEBUG_LOGGING
+			t_ThreadedLogger::Print_Message(__FUNCSIG__);
+		#endif
 			return(m_commom_pipe);
 		}
 
 		public: auto Get_MasterToSlavePipe(_In_ const t_ApplicationId application_id) -> t_MasterToSlavePipe &
 		{
+		#ifdef _DEBUG_LOGGING
+			t_ThreadedLogger::Print_Message(__FUNCSIG__);
+		#endif
 			auto it_pair = m_master_to_slaves_pipes_map.find(application_id);
 			if(m_master_to_slaves_pipes_map.end() == it_pair)
 			{
+			#ifdef _DEBUG_LOGGING
+				t_ThreadedLogger::Print_Message("creating master to slave pipe for application id = " + ::boost::lexical_cast<::std::string>(application_id));
+			#endif
 				it_pair = m_master_to_slaves_pipes_map.insert
 				(
 					t_MasterToSlavePipesMap::value_type

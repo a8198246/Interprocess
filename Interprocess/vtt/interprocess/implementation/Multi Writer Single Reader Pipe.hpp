@@ -8,6 +8,7 @@
 #include "Scoped Lock.hpp"
 #include "Fixed Buffer.hpp"
 #include "Chunk.hpp"
+#include "Threaded Logger.hpp"
 
 #include <sal.h>
 

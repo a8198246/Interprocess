@@ -3,9 +3,11 @@
 
 #pragma once
 
+#include "Main.hpp"
 #include "Chunk.hpp"
 #include "Broker.hpp"
 #include "Write Chunk To Buffer.hpp"
+#include "Threaded Logger.hpp"
 
 #include "../Application Identifier.hpp"
 
@@ -15,10 +17,6 @@
 #include <boost/cstdint.hpp>
 #include <boost/asio.hpp>
 #include <boost/bind.hpp>
-
-#ifdef _DEBUG_LOGGING
-#include <fstream>
-#endif
 
 namespace n_vtt
 {
@@ -37,10 +35,6 @@ namespace n_implementation
 		protected: ::boost::asio::io_service::work m_input_service_work;
 		//	slaves-to-master
 		protected: t_Chunk                         m_pending_output;
-	#ifdef _DEBUG_LOGGING
-		protected: ::boost::mutex                  m_logger_sync;
-		private: ::std::ofstream                   m_logger;
-	#endif
 
 		#pragma endregion
 
@@ -49,16 +43,15 @@ namespace n_implementation
 		,	m_input_service_thread(::boost::bind(&::boost::asio::io_service::run, &m_input_service))
 		{
 		#ifdef _DEBUG_LOGGING
-			{
-				::boost::lock_guard<::boost::mutex> lock(m_logger_sync);
-				m_logger.open("master.log");
-				m_logger << "master initialized" << ::std::endl;
-			}
+			t_ThreadedLogger::Print_Message(__FUNCSIG__);
 		#endif
 		}
 		
 		public: ~t_Master(void)
 		{
+		#ifdef _DEBUG_LOGGING
+			t_ThreadedLogger::Print_Message(__FUNCSIG__);
+		#endif
 			m_input_service.stop();
 		//	m_input_service_thread.join(); // this will cause a deadlock since threads started from dll will be waiting for it to unload
 			::boost::this_thread::sleep(::boost::posix_time::seconds(1)); // let's hope that user-mode code in m_input_service_thread will be completed during this period
@@ -68,6 +61,9 @@ namespace n_implementation
 		//	To be called from user threads
 		public: auto Recieve_From_Slaves(_Out_writes_bytes_opt_(bc_buffer_capacity) char * p_buffer, _In_ const size_t bc_buffer_capacity, _In_ const int timeout_msec) -> size_t
 		{
+		#ifdef _DEBUG_LOGGING
+			t_ThreadedLogger::Print_Message(__FUNCSIG__);
+		#endif
 			assert(nullptr != p_buffer);
 			assert(0 < bc_buffer_capacity);
 			size_t bc_written = 0;
@@ -89,19 +85,19 @@ namespace n_implementation
 		//	To be called from input service thread
 		private: void Handle_Input_To_Slave(_In_ const t_ApplicationId application_id, _In_ t_Chunk chunk)
 		{
+		#ifdef _DEBUG_LOGGING
+			t_ThreadedLogger::Print_Message(__FUNCSIG__);
+		#endif
 			auto & pipe = m_Broker.Get_MasterToSlavePipe(application_id);
 			pipe.Write(chunk);
-		#ifdef _DEBUG_LOGGING
-			{
-				::boost::lock_guard<::boost::mutex> lock(m_logger_sync);
-				m_logger << "written " << chunk.Get_Size() << "bytes of data for " << application_id << ::std::endl;
-			}
-		#endif
 		}
 
 		//	To be called from user threads
 		public: void Send_To_Slave(_In_ const t_ApplicationId application_id, _In_reads_bytes_(bc_data) char const * p_data, _In_ const size_t bc_data)
 		{
+		#ifdef _DEBUG_LOGGING
+			t_ThreadedLogger::Print_Message(__FUNCSIG__);
+		#endif
 			assert(nullptr != p_data);
 			assert(0 < bc_data);
 			m_input_service.post(::boost::bind(&t_Master::Handle_Input_To_Slave, this, application_id, t_Chunk(p_data, bc_data)));
@@ -110,6 +106,9 @@ namespace n_implementation
 		//	To be called from user threads
 		public: void Send_To_AllSlaves(_In_reads_bytes_(bc_data) char const * p_data, _In_ const size_t bc_data)
 		{
+		#ifdef _DEBUG_LOGGING
+			t_ThreadedLogger::Print_Message(__FUNCSIG__);
+		#endif
 			assert(nullptr != p_data);
 			assert(0 < bc_data);
 			{
