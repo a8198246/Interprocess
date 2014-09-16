@@ -89,7 +89,7 @@ namespace n_implementation
 						<< ", new buffer size " << new_size << " bytes"
 						<< ", buffer capacity " << Get_Capacity() << " bytes"
 						<< ::std::endl;
-					logger.Write_SentBlock(chunk.Get_Data(), chunk.Get_Size());
+					logger.Write_Block(chunk.Get_Data(), chunk.Get_Size());
 				#endif
 				}
 				m_size = static_cast<::boost::uint32_t>(new_size);
@@ -132,10 +132,10 @@ namespace n_implementation
 			{
 				auto & logger = t_ThreadedLogger::Get_Instance();
 				t_LoggerGuard logger_guard(logger);
-				logger.Print_Prefix() << "retirieved " << m_size << " bytes"
+				logger.Print_Prefix() << "retrieved " << m_size << " bytes"
 					<< ", buffer capacity " << Get_Capacity() << " bytes"
 					<< ::std::endl;
-				logger.Write_ReceivedBlock(result.Get_Data(), result.Get_Size());
+				logger.Write_Block(result.Get_Data(), result.Get_Size());
 			}
 		#endif
 			m_size = 0;

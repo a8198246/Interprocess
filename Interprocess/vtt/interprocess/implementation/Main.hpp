@@ -13,4 +13,8 @@
 //#undef _DEBUG_LOGGING
 //#endif
 
+//	folder to store logs in
+//	must exist before starting logging
+#define VTT_INTERPROCESS_SZ_LOG_FOLDER_PATH "c:\\logs"
+
 #endif

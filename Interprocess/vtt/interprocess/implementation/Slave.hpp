@@ -94,7 +94,7 @@ namespace n_implementation
 
 		//	Returns number of bytes written into the buffer.
 		//	To be called from user threads
-		public: auto Recieve_From_Master(_In_ const t_ApplicationId application_id, _Out_writes_bytes_opt_(bc_buffer_capacity) char * p_buffer, _In_ const size_t bc_buffer_capacity) -> size_t
+		public: auto Receive_From_Master(_In_ const t_ApplicationId application_id, _Out_writes_bytes_opt_(bc_buffer_capacity) char * p_buffer, _In_ const size_t bc_buffer_capacity) -> size_t
 		{
 		#ifdef _DEBUG_LOGGING
 			t_ThreadedLogger::Print_Message(__FUNCSIG__);
@@ -167,7 +167,7 @@ namespace n_implementation
 		}
 
 		//	To be called from user threads
-		public: auto RecieveCommon_From_Master(_Out_writes_bytes_opt_(bc_buffer_capacity) char * p_buffer, _In_ const size_t bc_buffer_capacity, _In_ const int timeout_msec) -> size_t
+		public: auto ReceiveCommon_From_Master(_Out_writes_bytes_opt_(bc_buffer_capacity) char * p_buffer, _In_ const size_t bc_buffer_capacity, _In_ const int timeout_msec) -> size_t
 		{
 		#ifdef _DEBUG_LOGGING
 			t_ThreadedLogger::Print_Message(__FUNCSIG__);

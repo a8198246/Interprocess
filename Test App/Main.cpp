@@ -1,6 +1,6 @@
 #define BOOST_ALL_NO_LIB
 
-//#define RUNTIME_DYNAMIC_LINKING
+#define RUNTIME_DYNAMIC_LINKING
 
 #include <vld.h>
 
@@ -46,10 +46,10 @@ int  (VTT_INTERPROCESS_CALLING_CONVENTION *udp_multicast_recieve            )(wc
 #endif
 
 #define APPLICATION_ID_MAX    100
-#define WORK_TIME_SECONDS     15
+#define WORK_TIME_SECONDS     8
 #define BC_MESSAGE_MAX        128
 #define BC_SOCKET_MESSAGE_MAX 512
-#define SEND_RATE             2  // messages will be send once in m_send_rate times
+#define SEND_RATE             10  // messages will be send once in m_send_rate times
 #define INTERVAL_MSECONDS     100 // interval between recive / send attempts
 #define BUFFER_SIZE           VTT_INTERPROCESS_BC_MESSAGE_BUFFER_LIMIT * 100
 #define GROUP                 L"224.0.0.108"

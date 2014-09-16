@@ -38,6 +38,8 @@ interprocess_master_send(_In_ const int application_id, _In_reads_bytes_(bc_data
 				<< " application_id " << application_id
 				<< ", p_data " << ::std::hex << static_cast<void const *>(p_data) << ::std::dec
 				<< ", bc_data " << bc_data << ::std::endl;
+			logger.Print_Prefix() << "block to be send:" << ::std::endl;
+			logger.Write_Block(p_data, bc_data);
 		}
 	#endif
 		if((nullptr != p_data) && (0 < bc_data) && (bc_data <= VTT_INTERPROCESS_BC_MESSAGE_BUFFER_LIMIT))
@@ -95,7 +97,20 @@ interprocess_master_recieve(_Out_writes_bytes_opt_(bc_buffer_capacity) char * p_
 		if((nullptr != p_buffer) && (0 < bc_buffer_capacity))
 		{
 			auto & master = t_Patron::Get_Master();
-			bc_written = static_cast<int>(master.Recieve_From_Slaves(p_buffer, static_cast<size_t>(bc_buffer_capacity), timeout_msec));
+			bc_written = static_cast<int>(master.Receive_From_Slaves(p_buffer, static_cast<size_t>(bc_buffer_capacity), timeout_msec));
+		#ifdef _DEBUG_LOGGING
+			auto & logger = t_ThreadedLogger::Get_Instance();
+			t_LoggerGuard guard(logger);
+			if(0 != bc_written)
+			{
+				logger.Print_Prefix() << "received block:" << ::std::endl;
+				logger.Write_Block(p_buffer, bc_written);
+			}
+			else
+			{
+				logger.Print_Prefix() << "nothing received..." << ::std::endl;
+			}
+		#endif
 		}
 		else
 		{
@@ -142,6 +157,8 @@ interprocess_master_send_to_all(_In_reads_bytes_(bc_data) char const * p_data, _
 			logger.Print_Prefix() << "parameters:"
 				<< " p_data " << ::std::hex << static_cast<void const *>(p_data) << ::std::dec
 				<< ", bc_data " << bc_data << ::std::endl;
+			logger.Print_Prefix() << "block to be send:" << ::std::endl;
+			logger.Write_Block(p_data, bc_data);
 		}
 	#endif
 		if((nullptr != p_data) && (0 < bc_data) && (bc_data <= VTT_INTERPROCESS_BC_MESSAGE_BUFFER_LIMIT))
@@ -192,6 +209,8 @@ interprocess_slave_send(_In_reads_bytes_(bc_data) char const * p_data, _In_range
 			logger.Print_Prefix() << "parameters:"
 				<< " p_data " << ::std::hex << static_cast<void const *>(p_data) << ::std::dec
 				<< ", bc_data " << bc_data << ::std::endl;
+			logger.Print_Prefix() << "block to be send:" << ::std::endl;
+			logger.Write_Block(p_data, bc_data);
 		}
 	#endif
 		if((nullptr != p_data) && (0 < bc_data) && (bc_data <= VTT_INTERPROCESS_BC_MESSAGE_BUFFER_LIMIT))
@@ -249,7 +268,20 @@ interprocess_slave_recieve(_In_ const int application_id, _Out_writes_bytes_opt_
 		if((nullptr != p_buffer) && (0 < bc_buffer_capacity))
 		{
 			auto & slave = t_Patron::Get_Slave();
-			bc_written = static_cast<int>(slave.Recieve_From_Master(application_id, p_buffer, static_cast<size_t>(bc_buffer_capacity)));
+			bc_written = static_cast<int>(slave.Receive_From_Master(application_id, p_buffer, static_cast<size_t>(bc_buffer_capacity)));
+		#ifdef _DEBUG_LOGGING
+			auto & logger = t_ThreadedLogger::Get_Instance();
+			t_LoggerGuard guard(logger);
+			if(0 != bc_written)
+			{
+				logger.Print_Prefix() << "received block:" << ::std::endl;
+				logger.Write_Block(p_buffer, bc_written);
+			}
+			else
+			{
+				logger.Print_Prefix() << "nothing received..." << ::std::endl;
+			}
+		#endif
 		}
 		else
 		{
@@ -304,7 +336,20 @@ interprocess_slave_recieve_common(_Out_writes_bytes_opt_(bc_buffer_capacity) cha
 		if((nullptr != p_buffer) && (0 < bc_buffer_capacity))
 		{
 			auto & slave = t_Patron::Get_Slave();
-			bc_written = static_cast<int>(slave.RecieveCommon_From_Master(p_buffer, static_cast<size_t>(bc_buffer_capacity), timeout_msec));
+			bc_written = static_cast<int>(slave.ReceiveCommon_From_Master(p_buffer, static_cast<size_t>(bc_buffer_capacity), timeout_msec));
+		#ifdef _DEBUG_LOGGING
+			auto & logger = t_ThreadedLogger::Get_Instance();
+			t_LoggerGuard guard(logger);
+			if(0 != bc_written)
+			{
+				logger.Print_Prefix() << "received block:" << ::std::endl;
+				logger.Write_Block(p_buffer, bc_written);
+			}
+			else
+			{
+				logger.Print_Prefix() << "nothing received..." << ::std::endl;
+			}
+		#endif
 		}
 		else
 		{

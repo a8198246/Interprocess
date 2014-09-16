@@ -17,6 +17,9 @@
 #include <system_error>
 #include <cassert>
 #include <string>
+#include <ctime>
+#include <array>
+#include <sys/timeb.h>
 
 #include <boost/thread.hpp>
 #include <boost/lexical_cast.hpp>
@@ -36,8 +39,6 @@ namespace n_implementation
 
 		#pragma region Fields
 
-		private: ::std::string  m_temp_path;
-		private: ::std::string  m_temp_file_path;
 		private: ::boost::mutex m_sync;
 		private: ::DWORD        m_pid = ::GetCurrentProcessId();
 		private: int            m_sent_message_counter      = 0;
@@ -53,79 +54,89 @@ namespace n_implementation
 		public: explicit t_ThreadedLogger(_In_ const bool master)
 		:	m_master(master)
 		{
-			char temp_path[MAX_PATH];
-			auto const cch_temp_path = ::GetTempPathA(MAX_PATH, temp_path);
-			DBG_UNREFERENCED_LOCAL_VARIABLE(cch_temp_path);
-			assert(0 != cch_temp_path);
-			assert(cch_temp_path < MAX_PATH);
-			m_temp_path.assign(temp_path, cch_temp_path);
+			//char temp_path[MAX_PATH];
+			//auto const cch_temp_path = ::GetTempPathA(MAX_PATH, temp_path);
+			//DBG_UNREFERENCED_LOCAL_VARIABLE(cch_temp_path);
+			//assert(0 != cch_temp_path);
+			//assert(cch_temp_path < MAX_PATH);
 
-			auto & log_file_name = m_temp_file_path;
-			log_file_name += m_temp_path;
-			log_file_name += master ? "\\master #" : "\\slave #";
-			log_file_name += ::boost::lexical_cast<::std::string>(m_pid);
+			::std::string log_file_name;
+			log_file_name.assign(VTT_INTERPROCESS_SZ_LOG_FOLDER_PATH);
+			if(master)
+			{
+				log_file_name += "\\interprocess master";
+			}
+			else
+			{
+				log_file_name += "\\interprocess slave pid ";
+				log_file_name += ::boost::lexical_cast<::std::string>(m_pid);
+			}
 			log_file_name += " log.txt";
-			open(log_file_name.c_str(), ::std::ofstream::out | ::std::ofstream::trunc);
+			auto flags = (master ? (::std::ofstream::out | ::std::ofstream::app) : (::std::ofstream::out | ::std::ofstream::trunc));
+			open(log_file_name.c_str(), flags);
 			Print_Prefix() << (master ? "master process" : "slave process") << ::std::endl;
 		}
 
 		private: t_ThreadedLogger(t_ThreadedLogger const &) = delete;
 
 		private: void operator =(t_ThreadedLogger const &) = delete;
-
+		#include<sys/timeb.h>
 		public: auto Print_Prefix(void) -> t_ThreadedLogger &
 		{
-			auto old_width = width();
-			width(20);
-			auto old_fill = fill();
-			fill(' ');
-			operator <<("thread #") << ::GetCurrentThreadId() << " | ";
-			fill(old_fill);
-			width(old_width);
+			//	timestamp with milliseconds
+			{
+				struct timeb tp;
+				ftime(&tp);
+				struct tm lt;
+				localtime_s(&lt, &tp.time);
+				::std::array<char, 256> sz_time;
+				strftime(sz_time.data(), sz_time.size(), "%H:%M:%S", &lt);
+				(*this) << sz_time.data() << ".";
+				this->width(3);
+				this->fill('0');
+				(*this) << tp.millitm;
+			}
+
+			(*this)	<< " pid #";
+			this->width(8);
+			this->fill('0');
+			(*this) << ::std::hex << m_pid;
+
+			(*this)	<< " thread #";
+			this->width(8);
+			this->fill('0');
+			(*this) << ::std::hex << ::GetCurrentThreadId();
+
+			(*this) << ::std::dec << " | ";
 			return(*this);
 		}
 
-		public: void Write_SentBlock(_In_reads_bytes_(bc_data) char const * p_data, _In_ const size_t bc_data)
+		public: void Write_Block(_In_reads_bytes_(bc_data) char const * p_data, _In_ const size_t bc_data)
 		{
 			assert(nullptr != p_data);
 			assert(0 < bc_data);
-			m_temp_file_path.clear();
-			auto & dump_file_name = m_temp_file_path;
-			dump_file_name += m_temp_path;
-			dump_file_name += m_master ? "\\master #" : "\\slave #";
-			dump_file_name += ::boost::lexical_cast<::std::string>(m_pid);
-			dump_file_name += " sent block #";
-			dump_file_name += ::boost::lexical_cast<::std::string>(m_sent_message_counter);
-			dump_file_name += ".bin";
-			Write(dump_file_name, p_data, bc_data);
-			++m_sent_message_counter;
-			m_sent_bytes_counter += static_cast<int>(bc_data);
-		}
+			Print_Prefix();
+			(*this) << "data block of " << bc_data << " bytes size" << ::std::hex;
 
-		public: void Write_ReceivedBlock(_In_reads_bytes_(bc_data) char const * p_data, _In_ const size_t bc_data)
-		{
-			assert(nullptr != p_data);
-			assert(0 < bc_data);
-			m_temp_file_path.clear();
-			auto & dump_file_name = m_temp_file_path;
-			dump_file_name += m_temp_path;
-			dump_file_name += m_master ? "\\master #" : "\\slave #";
-			dump_file_name += ::boost::lexical_cast<::std::string>(m_pid);
-			dump_file_name += " received block #";
-			dump_file_name += ::boost::lexical_cast<::std::string>(m_received_messages_counter);
-			dump_file_name += ".bin";
-			Write(dump_file_name, p_data, bc_data);
-			++m_received_messages_counter;
-			m_received_bytes_counter += static_cast<int>(bc_data);
-		}
+			auto i = static_cast<size_t>(0);
+			do
+			{
+				if((i % 32) == 0)
+				{
+					(*this) << ::std::endl << "\t\t\t\t\t\t\t\t\t\t\t  ";
+				}
+				else if((i % 8) == 0)
+				{
+					(*this) << "   ";
+				}
+				this->width(2);
+				this->fill('0');
+				(*this) << (static_cast<unsigned short>(p_data[i]) & 0x00ff) << " ";
 
-		private: void Write(_In_ ::std::string const & dump_file_name, _In_reads_bytes_(bc_data) char const * p_data, _In_ const size_t bc_data)
-		{
-			assert(nullptr != p_data);
-			assert(0 < bc_data);
-			::std::ofstream dump_file;
-			dump_file.open(dump_file_name.c_str(), ::std::ofstream::out | ::std::ofstream::trunc | ::std::ofstream::binary);
-			dump_file.write(p_data, bc_data);
+				++i;
+			}
+			while(bc_data != i);
+			(*this) << ::std::dec << ::std::endl;
 		}
 
 		public: static void Print_Message(::std::string const & message);
