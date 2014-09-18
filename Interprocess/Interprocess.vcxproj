@@ -69,7 +69,7 @@
     <OutDir>$(SolutionDir)_Output\$(ProjectName)\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)_Output\$(ProjectName)\$(Platform)\$(Configuration)\Work items\</IntDir>
     <IncludePath>$(SolutionDir)..\boost\;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)..\boost\stage\lib\;$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(SolutionDir)..\boost\stage32\lib\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(SolutionDir)_Output\$(ProjectName)\$(Platform)\$(Configuration)\</OutDir>
@@ -81,7 +81,7 @@
     <OutDir>$(SolutionDir)_Output\$(ProjectName)\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)_Output\$(ProjectName)\$(Platform)\$(Configuration)\Work items\</IntDir>
     <IncludePath>$(SolutionDir)..\boost\;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)..\boost\stage\lib\;$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(SolutionDir)..\boost\stage32\lib\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(SolutionDir)_Output\$(ProjectName)\$(Platform)\$(Configuration)\</OutDir>
@@ -101,6 +101,8 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>Precompiled.hpp</PrecompiledHeaderFile>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <SmallerTypeCheck>true</SmallerTypeCheck>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -130,6 +132,8 @@ copy "$(OutDir)*.pdb" "$(ProjectDir)x32\Debug\"</Command>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>Precompiled.hpp</PrecompiledHeaderFile>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <SmallerTypeCheck>true</SmallerTypeCheck>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -165,6 +169,7 @@ copy "$(OutDir)*.pdb" "$(ProjectDir)x64\Debug\"</Command>
       <BufferSecurityCheck>false</BufferSecurityCheck>
       <OmitFramePointers>true</OmitFramePointers>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>false</GenerateDebugInformation>
@@ -201,6 +206,7 @@ copy "$(OutDir)*.lib" "$(ProjectDir)x32\Release\"</Command>
       <BufferSecurityCheck>false</BufferSecurityCheck>
       <OmitFramePointers>true</OmitFramePointers>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>false</GenerateDebugInformation>

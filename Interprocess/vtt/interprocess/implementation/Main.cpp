@@ -12,11 +12,11 @@
 #include <system_error>
 
 #ifdef _DEBUG
-#	pragma comment(lib, "boost_thread-vc120-mt-gd-1_55.lib")
-#	pragma comment(lib, "boost_system-vc120-mt-gd-1_55.lib")
+#	pragma comment(lib, "libboost_system-vc120-mt-sgd-1_56")
+#	pragma comment(lib, "libboost_thread-vc120-mt-sgd-1_56")
 #else
-#	pragma comment(lib, "boost_thread-vc120-mt-1_55.lib")
-#	pragma comment(lib, "boost_system-vc120-mt-1_55.lib")
+#	pragma comment(lib, "libboost_system-vc120-mt-s-1_56")
+#	pragma comment(lib, "libboost_thread-vc120-mt-s-1_56")
 #endif
 
 using namespace n_vtt;

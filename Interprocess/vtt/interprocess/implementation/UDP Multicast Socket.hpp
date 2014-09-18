@@ -68,7 +68,11 @@ namespace n_implementation
 				}
 				while(L'\0' != *it_char);
 				struct ip_mreq multicastRequest;
-				multicastRequest.imr_multiaddr.s_addr = ::inet_addr(multicast_group.c_str());
+				{
+					auto conversion_result = ::inet_pton(AF_INET, multicast_group.c_str(), &(multicastRequest.imr_multiaddr.s_addr));
+					DBG_UNREFERENCED_LOCAL_VARIABLE(conversion_result);
+					assert(1 == conversion_result);
+				}
 				multicastRequest.imr_interface.s_addr = ::htonl(INADDR_ANY);
 				auto option_set = setsockopt(m_socket, IPPROTO_IP, IP_ADD_MEMBERSHIP, reinterpret_cast<char const *>(&multicastRequest), sizeof(multicastRequest));
 				if(SOCKET_ERROR == option_set)

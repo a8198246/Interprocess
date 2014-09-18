@@ -33,8 +33,8 @@ namespace n_implementation
 		protected: t_Broker                        m_Broker;
 		//	slaves to master
 		protected: ::boost::asio::io_service       m_input_service;
-		protected: ::boost::thread                 m_input_service_thread; // runs input service loop which handles writing of data into slaves to master pipe
 		protected: ::boost::asio::io_service::work m_input_service_work;
+		protected: ::boost::thread                 m_input_service_thread; // runs input service loop which handles writing of data into slaves to master pipe
 		//	master to slave
 		protected: ::boost::asio::io_service       m_output_service;
 		protected: ::boost::thread                 m_output_service_thread; // continiously reads data from master to slave pipe and sends it to output service
@@ -47,10 +47,15 @@ namespace n_implementation
 
 		public: t_Slave(void)
 		:	m_input_service_work(m_input_service)
-		,	m_input_service_thread(::boost::bind(&::boost::asio::io_service::run, &m_input_service))
+		,	m_input_service_thread(::boost::bind(&t_Slave::Input_Service_Routine, this))
 		{
 		#ifdef _DEBUG_LOGGING
-			t_ThreadedLogger::Print_Message(__FUNCSIG__);
+			{
+				auto & logger = t_ThreadedLogger::Get_Instance();
+				t_LoggerGuard guard(logger);
+				logger.Print_Prefix() << __FUNCSIG__ << ::std::endl;
+				logger.Print_Prefix() << "input service thread started with id " << m_input_service_thread.get_id() << ::std::endl;
+			}
 		#endif
 		}
 
@@ -66,8 +71,7 @@ namespace n_implementation
 			::boost::this_thread::sleep(::boost::posix_time::seconds(1)); // let's hope that user-mode code in m_input_service_thread and m_output_service_thread will be completed during this period
 		}
 		
-		//	output service thread routine
-		private: void Retrieve_Output_From_Master(void)
+		private: void Output_Service_Routine(void)
 		{
 		#ifdef _DEBUG_LOGGING
 			t_ThreadedLogger::Print_Message(__FUNCSIG__);
@@ -108,7 +112,14 @@ namespace n_implementation
 				{
 					m_pending_output = pipe.Read();
 				}
-				m_output_service_thread = ::boost::thread(::boost::bind(&t_Slave::Retrieve_Output_From_Master, this));
+				m_output_service_thread = ::boost::thread(::boost::bind(&t_Slave::Output_Service_Routine, this));
+			#ifdef _DEBUG_LOGGING
+				{
+					auto & logger = t_ThreadedLogger::Get_Instance();
+					t_LoggerGuard guard(logger);
+					logger.Print_Prefix() << "output service thread started with id " << m_output_service_thread.get_id() << ::std::endl;
+				}
+			#endif
 			}
 			if(application_id != m_application_id)
 			{
@@ -143,6 +154,22 @@ namespace n_implementation
 			}
 			assert(bc_written <= bc_buffer_capacity);
 			return(bc_written);
+		}
+
+		private: void Input_Service_Routine(void)
+		{
+		#ifdef _DEBUG_LOGGING
+			t_ThreadedLogger::Print_Message(__FUNCSIG__);
+		#endif
+			auto ec_executed_handlers = m_input_service.run();
+			DBG_UNREFERENCED_LOCAL_VARIABLE(ec_executed_handlers);
+		#ifdef _DEBUG_LOGGING
+			{
+				auto & logger = t_ThreadedLogger::Get_Instance();
+				t_LoggerGuard guard(logger);
+				logger.Print_Prefix() << "input service thread is quiting after executing " << ec_executed_handlers << " handlers" << ::std::endl;
+			}
+		#endif
 		}
 
 		//	To be called from input service thread

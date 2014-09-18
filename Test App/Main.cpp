@@ -18,11 +18,11 @@
 #include <boost/lexical_cast.hpp>
 
 #ifdef _DEBUG
-#	pragma comment(lib, "boost_thread-vc120-mt-gd-1_55.lib")
-#	pragma comment(lib, "boost_system-vc120-mt-gd-1_55.lib")
+#	pragma comment(lib, "libboost_system-vc120-mt-sgd-1_56")
+#	pragma comment(lib, "libboost_thread-vc120-mt-sgd-1_56")
 #else
-#	pragma comment(lib, "boost_thread-vc120-mt-1_55.lib")
-#	pragma comment(lib, "boost_system-vc120-mt-1_55.lib")
+#	pragma comment(lib, "libboost_system-vc120-mt-s-1_56")
+#	pragma comment(lib, "libboost_thread-vc120-mt-s-1_56")
 #endif
 
 #ifdef RUNTIME_DYNAMIC_LINKING
@@ -242,7 +242,7 @@ class t_Worker
 		++attempt;
 		if(m_is_master)
 		{
-			bc_recieved = static_cast<size_t>(interprocess_master_recieve(m_buffer.data(), static_cast<int>(m_buffer.size()), 100));
+			bc_recieved = static_cast<size_t>(interprocess_master_recieve(m_buffer.data(), 1000, 2000));
 		}
 		else
 		{

@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include "Threaded Logger.hpp"
+
 #include <sal.h>
 
 #include <algorithm>
@@ -31,28 +33,76 @@ namespace n_implementation
 
 		public: t_Chunk(void)
 		{
-			//	Do nothing
+		#ifdef _DEBUG_LOGGING
+			{
+				auto & logger = t_ThreadedLogger::Get_Instance();
+				t_LoggerGuard guard(logger);
+				logger.Print_Prefix() << __FUNCSIG__ << ::std::endl;
+			}
+		#endif
 		}
 
 		public: t_Chunk(_In_reads_bytes_(bc_data) char const * p_data, _In_ const size_t bc_data)
 		:	m_p_data(new char[bc_data])
 		,	m_bc_data(bc_data)
 		{
+		#ifdef _DEBUG_LOGGING
+			{
+				auto & logger = t_ThreadedLogger::Get_Instance();
+				t_LoggerGuard guard(logger);
+				logger.Print_Prefix() << __FUNCSIG__ << ::std::endl;
+				logger.Print_Prefix() << "pointer " << reinterpret_cast<void const *>(p_data) << " size " << bc_data << ::std::endl;
+				logger.Print_Prefix() << "current pointer " << reinterpret_cast<void const *>(m_p_data.get()) << " size " << m_bc_data << ::std::endl;
+			}
+		#endif
 			memcpy(m_p_data.get(), p_data, bc_data);
 		}
 
 		public: t_Chunk(_Inout_ t_Chunk const & that)
 		{
+		#ifdef _DEBUG_LOGGING
+			{
+				auto & logger = t_ThreadedLogger::Get_Instance();
+				t_LoggerGuard guard(logger);
+				logger.Print_Prefix() << __FUNCSIG__ << ::std::endl;
+				logger.Print_Prefix() << "pointer " << reinterpret_cast<void const *>(that.m_p_data.get()) << " size " << that.m_bc_data << ::std::endl;
+			}
+		#endif
 			auto & that_w = const_cast<t_Chunk &>(that);
 			m_p_data.swap(that_w.m_p_data);
 			::std::swap(m_bc_data, that_w.m_bc_data);
+			assert(0 == that.m_bc_data);
+			assert(nullptr == that.m_p_data.get());
 		}
-						
+
+		public: ~t_Chunk(void)
+		{
+		#ifdef _DEBUG_LOGGING
+			{
+				auto & logger = t_ThreadedLogger::Get_Instance();
+				t_LoggerGuard guard(logger);
+				logger.Print_Prefix() << __FUNCSIG__ << ::std::endl;
+				logger.Print_Prefix() << "current pointer " << reinterpret_cast<void const *>(m_p_data.get()) << " size " << m_bc_data << ::std::endl;
+			}
+		#endif
+		}
+
 		public: void operator =(_Inout_ t_Chunk const & that)
 		{
+		#ifdef _DEBUG_LOGGING
+			{
+				auto & logger = t_ThreadedLogger::Get_Instance();
+				t_LoggerGuard guard(logger);
+				logger.Print_Prefix() << __FUNCSIG__ << ::std::endl;
+				logger.Print_Prefix() << "pointer " << reinterpret_cast<void const *>(that.m_p_data.get()) << " size " << that.m_bc_data << ::std::endl;
+				logger.Print_Prefix() << "current pointer " << reinterpret_cast<void const *>(m_p_data.get()) << " size " << m_bc_data << ::std::endl;
+			}
+		#endif
 			auto & that_w = const_cast<t_Chunk &>(that);
 			m_p_data.swap(that_w.m_p_data);
 			::std::swap(m_bc_data, that_w.m_bc_data);
+			assert(0 == that.m_bc_data);
+			assert(nullptr == that.m_p_data.get());
 		}
 
 		public: auto Is_Empty(void) const throw() -> bool
@@ -74,12 +124,6 @@ namespace n_implementation
 		{
 			return(m_bc_data);
 		}
-
-		//public: void Clear(void) throw()
-		//{
-		//	m_p_data.reset();
-		//	m_bc_data = 0;
-		//}
 	};
 }
 }
