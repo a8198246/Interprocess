@@ -9,9 +9,9 @@
 
 #define _DEBUG_LOGGING
 
-//#ifndef _DEBUG
-//#undef _DEBUG_LOGGING
-//#endif
+#ifndef _DEBUG
+#undef _DEBUG_LOGGING
+#endif
 
 //	folder to store logs in
 //	must exist before starting logging
