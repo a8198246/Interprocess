@@ -39,7 +39,7 @@ interprocess_slave_recieve(_In_ const int application_id, _Out_writes_bytes_opt_
 
 //
 int VTT_INTERPROCESS_DLL_API VTT_INTERPROCESS_CALLING_CONVENTION
-interprocess_slave_recieve_common(_Out_writes_bytes_opt_(bc_buffer_capacity) char * p_buffer, _In_ const int bc_buffer_capacity, _In_ const int timeout_msec);
+interprocess_slave_recieve_common(_Out_writes_bytes_opt_(bc_buffer_capacity) char * p_buffer, _In_ const int bc_buffer_capacity, _In_ const int timeout_msec, _In_opt_ long long * p_ticks);
 
 //	прочие методы:
 

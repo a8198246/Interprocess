@@ -34,7 +34,7 @@ int  (VTT_INTERPROCESS_CALLING_CONVENTION *interprocess_master_recieve      )(ch
 void (VTT_INTERPROCESS_CALLING_CONVENTION *interprocess_master_send_to_all  )(char *, const int);
 void (VTT_INTERPROCESS_CALLING_CONVENTION *interprocess_slave_send          )(char const *, const int);
 int  (VTT_INTERPROCESS_CALLING_CONVENTION *interprocess_slave_recieve       )(const int, char *, const int);
-int  (VTT_INTERPROCESS_CALLING_CONVENTION *interprocess_slave_recieve_common)(char *, const int, const int);
+int  (VTT_INTERPROCESS_CALLING_CONVENTION *interprocess_slave_recieve_common)(char *, const int, const int, long long *);
 int  (VTT_INTERPROCESS_CALLING_CONVENTION *udp_multicast_recieve            )(wchar_t const *, const int, char *, const int, const int, int *);
 
 #define VTT_INTERPROCESS_BC_MESSAGE_BUFFER_LIMIT 65535
@@ -194,7 +194,8 @@ class t_Worker
 		else
 		{
 			m_buffer.resize(BUFFER_SIZE);
-			auto bc_recieved = interprocess_slave_recieve_common(m_buffer.data(), static_cast<int>(m_buffer.size()), 1000);
+			long long ticks = 0;
+			auto bc_recieved = interprocess_slave_recieve_common(m_buffer.data(), static_cast<int>(m_buffer.size()), 1000, &ticks);
 			if(0 != bc_recieved)
 			{
 				t_Lock lock(m_sync);
