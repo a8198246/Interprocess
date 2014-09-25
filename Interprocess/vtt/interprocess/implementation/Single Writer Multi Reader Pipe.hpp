@@ -14,7 +14,6 @@
 
 #include <boost/cstdint.hpp>
 #include <boost/thread.hpp>
-#include <boost/scope_exit.hpp>
 
 namespace n_vtt
 {
@@ -39,12 +38,39 @@ namespace n_implementation
 			#pragma endregion
 		};
 
+		protected: template<typename tp_Callable>
+		class t_AtScopeExitExecutor
+		{
+			#pragma region Fields
+
+			private: tp_Callable m_callable;
+
+			#pragma endregion
+
+			private: t_AtScopeExitExecutor(void) = delete;
+
+			private: t_AtScopeExitExecutor(t_AtScopeExitExecutor const &) = delete;
+
+			public: explicit t_AtScopeExitExecutor(tp_Callable callable)
+			:	m_callable(callable)
+			{
+				//	Do nothing...
+			}
+
+			public: ~t_AtScopeExitExecutor(void)
+			{
+				m_callable();
+			}
+
+			private: void operator =(t_AtScopeExitExecutor const &) = delete;
+		};
+
 		protected: typedef t_MultiuserBuffer<tp_Capacity> t_Buffer;
-		
+				
 		private: t_SingleWriterMultiReaderPipe(void) = delete;
 
 		public: explicit t_SingleWriterMultiReaderPipe(_In_ ::std::string name)
-		:	t_Pipe(::std::move(name), sizeof(t_Buffer), true)
+		:	t_Pipe(name, sizeof(t_Buffer), true)
 		{
 			//	Do nothing
 		}
@@ -57,35 +83,31 @@ namespace n_implementation
 		{
 			auto & buffer = m_shared_memory.Obtain<t_Buffer>();
 			volatile const long initial_magic = buffer.m_magic;
-			auto p_ec_readers = &(buffer.m_ec_readers);
-			// variables used in atomic operations must be aligned by 32 bits (4 bytes that is)
-			assert(0 == (reinterpret_cast<ptrdiff_t>(p_ec_readers) % 4));
-			InterlockedIncrement(p_ec_readers);
-			BOOST_SCOPE_EXIT(p_ec_readers, this_)
 			{
-				assert(0 < *p_ec_readers);
-				auto ec_readers = InterlockedCompareExchange(p_ec_readers, 0, 1);
-				if(1 == ec_readers)
+				t_ScopedLock lock(m_sync);
+				if(0 == buffer.m_ec_readers)
 				{
-					this_->m_flag.Reset(); // last reader resets event
+					m_flag.Reset(); // first reader resets event in case if writer already had written something
 				}
-				else if(1 < ec_readers)
-				{
-					InterlockedDecrement(p_ec_readers);
-				}
+				++buffer.m_ec_readers;
 			}
-			BOOST_SCOPE_EXIT_END;
-			auto bc_read = static_cast<size_t>(0);
-			m_flag.Timed_Wait(timeout_msec);
-			//auto const wait_result = m_flag.Timed_Wait(timeout_msec);
-			//if(false != wait_result)
+			auto ScopeExitActions = [&buffer, this](void)
 			{
-				volatile const long new_magic = buffer.m_magic;
-				if(new_magic != initial_magic)
+				t_ScopedLock lock(m_sync);
+				--(buffer.m_ec_readers);
+				if(0 == buffer.m_ec_readers)
 				{
-					bc_read = buffer.Retrieve_Data(p_buffer, bc_buffer_capacity);
+					m_flag.Reset(); // last reader resets event
 				}
-			}			
+			};
+			t_AtScopeExitExecutor<decltype(ScopeExitActions)> at_scope_exit(ScopeExitActions);
+			m_flag.Timed_Wait(timeout_msec);
+			volatile const long new_magic = buffer.m_magic;
+			auto bc_read = static_cast<size_t>(0);
+			if(new_magic != initial_magic)
+			{
+				bc_read = buffer.Retrieve_Data(p_buffer, bc_buffer_capacity);
+			}
 			return(bc_read);
 		}
 

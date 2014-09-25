@@ -46,10 +46,10 @@ int  (VTT_INTERPROCESS_CALLING_CONVENTION *udp_multicast_recieve            )(wc
 #endif
 
 #define APPLICATION_ID_MAX    100
-#define WORK_TIME_SECONDS     8
+#define WORK_TIME_SECONDS     30
 #define BC_MESSAGE_MAX        128
 #define BC_SOCKET_MESSAGE_MAX 512
-#define SEND_RATE             10  // messages will be send once in m_send_rate times
+#define SEND_RATE             20  // messages will be send once in m_send_rate times
 #define INTERVAL_MSECONDS     100 // interval between recive / send attempts
 #define BUFFER_SIZE           VTT_INTERPROCESS_BC_MESSAGE_BUFFER_LIMIT * 100
 #define GROUP                 L"224.0.0.108"
@@ -152,17 +152,17 @@ class t_Worker
 				//	Recieve_From_Soket();
 				//	::boost::this_thread::interruption_point();
 				//}
-				auto need_to_recieve = true;
-				if(need_to_recieve)
-				{
-					Recieve();
-				}
-				auto need_to_send = (rand() % SEND_RATE) == 0;
-				if(need_to_send)
-				{
-					Send();
-				}
-				//Common();
+				//auto need_to_recieve = true;
+				//if(need_to_recieve)
+				//{
+				//	Recieve();
+				//}
+				//auto need_to_send = (rand() % SEND_RATE) == 0;
+				//if(need_to_send)
+				//{
+				//	Send();
+				//}
+				Common();
 				::boost::this_thread::sleep(::boost::get_system_time() + ::boost::posix_time::milliseconds(INTERVAL_MSECONDS));
 			}
 		}
@@ -182,25 +182,41 @@ class t_Worker
 			if(need_to_send)
 			{
 				Generate_Message();
+				::LARGE_INTEGER start_ts;
+				::QueryPerformanceCounter(&start_ts);
+				interprocess_master_send_to_all(m_buffer.data(), static_cast<int>(m_buffer.size()));
+				::LARGE_INTEGER end_ts;
+				::QueryPerformanceCounter(&end_ts);
 				{
 					t_Lock lock(m_sync);
-					::std::cout << "\t >> thread #" << ::boost::this_thread::get_id() << " sends " << m_buffer.size() << " bytes to all the slaves:" << ::std::endl;
-					::std::cout.write(m_buffer.data(), m_buffer.size());
+					::std::cout << "\t >> thread #" << ::boost::this_thread::get_id() << " sent " << m_buffer.size() << " bytes to all the slaves at "
+						<< start_ts.QuadPart << " - " << end_ts.QuadPart << " interval:" << ::std::endl;
+					::std::cout.write(m_buffer.data() + 12, m_buffer.size() - 12);
 					::std::cout.flush();
 				}
-				interprocess_master_send_to_all(m_buffer.data(), static_cast<int>(m_buffer.size()));
 			}
 		}
 		else
 		{
 			m_buffer.resize(BUFFER_SIZE);
-			long long ticks = 0;
-			auto bc_recieved = interprocess_slave_recieve_common(m_buffer.data(), static_cast<int>(m_buffer.size()), 1000, &ticks);
-			if(0 != bc_recieved)
+			::LARGE_INTEGER start_ts;
+			::QueryPerformanceCounter(&start_ts);
+			auto bc_recieved = interprocess_slave_recieve_common(m_buffer.data(), static_cast<int>(m_buffer.size()), 10000, nullptr);
+			::LARGE_INTEGER end_ts;
+			::QueryPerformanceCounter(&end_ts);
 			{
 				t_Lock lock(m_sync);
-				::std::cout << "\t << thread #" << ::boost::this_thread::get_id() << " recieved " << bc_recieved << " bytes:" << ::std::endl;
-				::std::cout.write(m_buffer.data(), bc_recieved);
+				if(0 != bc_recieved)
+				{
+					::std::cout << "\t << thread #" << ::boost::this_thread::get_id() << " recieved " << bc_recieved << " bytes at "
+						<< start_ts.QuadPart << " - " << end_ts.QuadPart << " interval" << ::std::endl;
+					::std::cout.write(m_buffer.data() + 12, bc_recieved - 12);
+				}
+				else
+				{
+					::std::cout << "\t << thread #" << ::boost::this_thread::get_id() << " tried to recieve at "
+						<< start_ts.QuadPart << " - " << end_ts.QuadPart << " interval" << ::std::endl;
+				}
 				::std::cout.flush();
 			}
 		}
