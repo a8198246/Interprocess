@@ -31,8 +31,8 @@ namespace n_implementation
 		protected: t_Broker                        m_Broker;
 		//	master-to-slaves
 		protected: ::boost::asio::io_service       m_input_service;
-		protected: ::boost::thread                 m_input_service_thread; // runs input service loop which handles writing of data into master-to-slave pipes
 		protected: ::boost::asio::io_service::work m_input_service_work;
+		protected: ::boost::thread                 m_input_service_thread; // runs input service loop which handles writing of data into master-to-slave pipes
 		//	slaves-to-master
 		protected: t_Chunk                         m_pending_output;
 
@@ -114,7 +114,6 @@ namespace n_implementation
 			{
 				m_Broker.Get_CommonPipe().Write(p_data, bc_data);
 			}
-			::boost::this_thread::yield();
 		}
 	};
 }

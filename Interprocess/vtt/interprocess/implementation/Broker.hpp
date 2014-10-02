@@ -14,7 +14,6 @@
 
 #include <string>
 #include <map>
-#include <memory>
 
 #include <boost/lexical_cast.hpp>
 
@@ -31,10 +30,8 @@ namespace n_implementation
 		protected: typedef t_MultiWriterSingleReaderPipe<VTT_INTERPROCESS_BC_MESSAGE_BUFFER_LIMIT> t_MasterToSlavePipe;
 
 		protected: typedef t_SingleWriterMultiReaderPipe<VTT_INTERPROCESS_BC_MESSAGE_BUFFER_LIMIT> t_CommonPipe;
-
-		protected: typedef ::std::unique_ptr<t_MasterToSlavePipe> t_pPipe;
-
-		protected: typedef ::std::map<t_ApplicationId, t_pPipe> t_MasterToSlavePipesMap;
+		
+		protected: typedef ::std::map<t_ApplicationId, t_MasterToSlavePipe> t_MasterToSlavePipesMap;
 
 		#pragma region Fields
 
@@ -84,22 +81,14 @@ namespace n_implementation
 			#ifdef _DEBUG_LOGGING
 				t_ThreadedLogger::Print_Message("creating master to slave pipe for application id = " + ::boost::lexical_cast<::std::string>(application_id));
 			#endif
-				it_pair = m_master_to_slaves_pipes_map.insert
+				it_pair = m_master_to_slaves_pipes_map.emplace
 				(
-					t_MasterToSlavePipesMap::value_type
-					(
-						application_id
-					,	t_pPipe
-						(
-							new t_MasterToSlavePipe
-							(
-								VTT_SZ_INTERPROCESS_NAMED_OBJECTS_PREFIX "m to s" + ::boost::lexical_cast<::std::string>(application_id)
-							)
-						)
-					)
+					::std::piecewise_construct
+				,	::std::forward_as_tuple(application_id)
+				,	::std::forward_as_tuple(VTT_SZ_INTERPROCESS_NAMED_OBJECTS_PREFIX "m to s" + ::boost::lexical_cast<::std::string>(application_id))
 				).first;
 			}
-			return(*(it_pair->second.get()));
+			return(it_pair->second);
 		}
 	};
 }

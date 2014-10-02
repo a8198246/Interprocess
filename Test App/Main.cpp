@@ -201,7 +201,7 @@ class t_Worker
 			m_buffer.resize(BUFFER_SIZE);
 			::LARGE_INTEGER start_ts;
 			::QueryPerformanceCounter(&start_ts);
-			auto bc_recieved = interprocess_slave_recieve_common(m_buffer.data(), static_cast<int>(m_buffer.size()), 10000, nullptr);
+			auto bc_recieved = interprocess_slave_recieve_common(m_buffer.data(), static_cast<int>(m_buffer.size()), 20000, nullptr);
 			::LARGE_INTEGER end_ts;
 			::QueryPerformanceCounter(&end_ts);
 			{

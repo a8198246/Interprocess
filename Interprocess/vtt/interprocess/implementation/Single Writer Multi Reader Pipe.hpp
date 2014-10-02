@@ -32,7 +32,6 @@ namespace n_implementation
 		{
 			#pragma region Fields
 
-			volatile long m_ec_readers;
 			volatile long m_magic;
 
 			#pragma endregion
@@ -66,6 +65,12 @@ namespace n_implementation
 		};
 
 		protected: typedef t_MultiuserBuffer<tp_Capacity> t_Buffer;
+
+		#pragma region Fields
+
+		protected: bool m_event_fired_during_last_read = false;
+
+		#pragma endregion
 				
 		private: t_SingleWriterMultiReaderPipe(void) = delete;
 
@@ -82,39 +87,32 @@ namespace n_implementation
 		public: auto Read(_Out_writes_bytes_opt_(bc_buffer_capacity) char * p_buffer, _In_ const size_t bc_buffer_capacity, _In_ const int timeout_msec) -> size_t
 		{
 			auto & buffer = m_shared_memory.Obtain<t_Buffer>();
-			volatile const long initial_magic = buffer.m_magic;
+			if(m_event_fired_during_last_read)
 			{
-				t_ScopedLock lock(m_sync);
-				if(0 == buffer.m_ec_readers)
-				{
-					m_flag.Reset(); // first reader resets event in case if writer already had written something
-				}
-				++buffer.m_ec_readers;
+				m_event_fired_during_last_read = false;
+				::Sleep(1000);
 			}
-			auto ScopeExitActions = [&buffer, this](void)
-			{
-				t_ScopedLock lock(m_sync);
-				--(buffer.m_ec_readers);
-				if(0 == buffer.m_ec_readers)
-				{
-					m_flag.Reset(); // last reader resets event
-				}
-			};
-			t_AtScopeExitExecutor<decltype(ScopeExitActions)> at_scope_exit(ScopeExitActions);
-			m_flag.Timed_Wait(timeout_msec);
+			volatile const long initial_magic = buffer.m_magic;
+			auto wait_result = m_flag.Timed_Wait(timeout_msec);
 			volatile const long new_magic = buffer.m_magic;
 			auto bc_read = static_cast<size_t>(0);
 			if(new_magic != initial_magic)
 			{
 				bc_read = buffer.Retrieve_Data(p_buffer, bc_buffer_capacity);
+				assert(0 < bc_read);
+				m_event_fired_during_last_read = true;
+			}
+			if(wait_result)
+			{
+				m_event_fired_during_last_read = true;
 			}
 			return(bc_read);
 		}
 
 		public: void Write(_In_reads_bytes_(bc_data) char const * p_data, _In_ const size_t bc_data)
 		{
-			//	assuming all the read operations were finished by this time
-			m_flag.Reset(); // resetting event just in case if no readers were present last time
+			assert(nullptr != p_data);
+			assert(0 < bc_data);
 			auto & buffer = m_shared_memory.Obtain<t_Buffer>();
 			buffer.Clear();
 			buffer.Store(p_data, bc_data);
@@ -122,6 +120,8 @@ namespace n_implementation
 			assert(0 == (reinterpret_cast<ptrdiff_t>(&buffer.m_magic) % 4));
 			InterlockedIncrement(&buffer.m_magic);
 			m_flag.Set();
+			::Sleep(500);
+			m_flag.Reset();
 		}
 	};
 }
