@@ -16,17 +16,29 @@ namespace n_interprocess
 {
 namespace n_implementation
 {
-	class t_ConditionalVariable
+	class
+	t_ConditionalVariable
 	{
-		public: t_ConditionalVariable(void) = delete;
+		private:
+		t_ConditionalVariable(void) = delete;
 
-		public: ~t_ConditionalVariable(void) = delete;
+		private:
+		t_ConditionalVariable(t_ConditionalVariable const &) = delete;
 
-		public: t_ConditionalVariable(t_ConditionalVariable const &) = delete;
+		private:
+		t_ConditionalVariable(t_ConditionalVariable &&) = delete;
 
-		public: void operator =(t_ConditionalVariable const &) = delete;
+		private:
+		~t_ConditionalVariable(void) = delete;
 
-		public: static auto Timed_Wait(_Inout_ t_ScopedLock & lock, _In_ t_Event & event, _In_ const int timeout_msec) -> bool
+		private: void
+		operator =(t_ConditionalVariable const &) = delete;
+
+		private: void
+		operator =(t_ConditionalVariable &&) = delete;
+
+		public: static auto
+		Timed_Wait(_Inout_ t_ScopedLock & lock, _In_ t_Event & event, _In_ const int timeout_msec) -> bool
 		{
 			lock.Unlock();
 			auto wait_result = event.Timed_Wait(timeout_msec);
@@ -34,7 +46,8 @@ namespace n_implementation
 			return(wait_result);
 		}
 
-		public: static void Wait(_Inout_ t_ScopedLock & lock, _In_ t_Event & event)
+		public: static void
+		Wait(_Inout_ t_ScopedLock & lock, _In_ t_Event & event)
 		{
 			Timed_Wait(lock, event, INFINITE);
 		}

@@ -19,14 +19,24 @@ namespace n_interprocess
 {
 namespace n_implementation
 {
-	class t_Event
+	class
+	t_Event
 	:	public t_OwnedHandle
 	{
-		friend class t_ConditionalVariable;
+		friend class
+		t_ConditionalVariable;
 
-		public: t_Event(void) = delete;
+		private:
+		t_Event(void) = delete;
 
-		public: explicit t_Event(_Inout_ ::std::string & name, _In_ const bool manual_reset = false)
+		private:
+		t_Event(t_Event const &) = delete;
+
+		private:
+		t_Event(t_Event &&) = delete;
+
+		public: explicit
+		t_Event(_Inout_ ::std::string & name, _In_ const bool manual_reset = false)
 		{
 			name.push_back('e'); // event name must differ from named mutex / file mappings name
 			auto first_try = true;
@@ -50,25 +60,30 @@ namespace n_implementation
 			name.pop_back();
 		}
 
-		public: t_Event(t_Event const &) = delete;
+		private: void
+		operator =(t_Event const &) = delete;
 
-		public: void operator =(t_Event const &) = delete;
+		private: void
+		operator =(t_Event &&) = delete;
 
-		public: void Set(void) throw()
+		public: void
+		Set(void) throw()
 		{
 			auto set = ::SetEvent(m_handle);
 			DBG_UNREFERENCED_LOCAL_VARIABLE(set);
 			assert(FALSE != set);
 		}
 
-		public: void Reset(void) throw()
+		public: void
+		Reset(void) throw()
 		{
 			auto reset = ::ResetEvent(m_handle);
 			DBG_UNREFERENCED_LOCAL_VARIABLE(reset);
 			assert(FALSE != reset);
 		}
 
-		public: auto Timed_Wait(_In_ const int timeout_msec) -> bool
+		public: auto
+		Timed_Wait(_In_ const int timeout_msec) -> bool
 		{
 			auto wait_result = ::WaitForSingleObject(m_handle, timeout_msec);
 			switch(wait_result)
@@ -91,7 +106,8 @@ namespace n_implementation
 			}
 		}
 
-		public: void Wait(void)
+		public: void
+		Wait(void)
 		{
 			auto wait_result = Timed_Wait(INFINITE);
 			DBG_UNREFERENCED_LOCAL_VARIABLE(wait_result);

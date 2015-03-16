@@ -20,10 +20,11 @@ namespace n_interprocess
 namespace n_implementation
 {
 	//	Ready to be a process-shared object.
-	template<::boost::uint32_t tp_Capacity>
-	class t_FixedBuffer
+	template<::boost::uint32_t tp_Capacity> class
+	t_FixedBuffer
 	{
-		protected: typedef ::std::array<char, tp_Capacity> t_buffer;
+		protected: typedef ::std::array<char, tp_Capacity>
+		t_buffer;
 
 		#pragma region Fields
 
@@ -32,32 +33,38 @@ namespace n_implementation
 		
 		#pragma	endregion
 		
-		public: auto Is_Empty(void) const throw() -> bool
+		public: auto
+		Is_Empty(void) const throw() -> bool
 		{
 			return(0 == m_size);
 		}
 
-		public: auto Is_Not_Empty(void) const throw() -> bool
+		public: auto
+		Is_Not_Empty(void) const throw() -> bool
 		{
 			return(0 != m_size);
 		}
 
-		public: auto Get_Size(void) const throw() -> size_t
+		public: auto
+		Get_Size(void) const throw() -> size_t
 		{
 			return(m_size);
 		}
 
-		public: auto Get_Capacity(void) const throw() -> size_t
+		public: auto
+		Get_Capacity(void) const throw() -> size_t
 		{
 			return(tp_Capacity);
 		}
 
-		public: void Clear(void)
+		public: void
+		Clear(void)
 		{
 			m_size = 0;
 		}
 
-		public: void Store(_In_reads_bytes_(bc_data) char const * p_data, _In_ const size_t bc_data)
+		public: void
+		Store(_In_reads_bytes_(bc_data) char const * p_data, _In_ const size_t bc_data)
 		{
 			assert(nullptr != p_data);
 			assert(0 < bc_data);
@@ -70,7 +77,8 @@ namespace n_implementation
 			}
 		}
 
-		public: void Store(_In_ t_Chunk chunk)
+		public: void
+		Store(_In_ t_Chunk chunk)
 		{
 		#ifdef _DEBUG_LOGGING
 			t_ThreadedLogger::Print_Message(__FUNCSIG__);
@@ -107,7 +115,8 @@ namespace n_implementation
 			}
 		}
 
-		public: auto Retrieve_Data(_Out_writes_bytes_opt_(bc_buffer_capacity) char * p_buffer, _In_ const size_t bc_buffer_capacity) -> size_t
+		public: auto
+		Retrieve_Data(_Out_writes_bytes_opt_(bc_buffer_capacity) char * p_buffer, _In_ const size_t bc_buffer_capacity) -> size_t
 		{
 			assert(nullptr != p_buffer);
 			assert(0 < bc_buffer_capacity);
@@ -121,7 +130,8 @@ namespace n_implementation
 			return(bc_written);
 		}
 
-		public: auto Retrieve_Chunk(void) -> t_Chunk
+		public: auto
+		Retrieve_Chunk(void) -> t_Chunk
 		{
 		#ifdef _DEBUG_LOGGING
 			t_ThreadedLogger::Print_Message(__FUNCSIG__);

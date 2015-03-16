@@ -230,6 +230,7 @@ copy "$(OutDir)*.lib" "$(ProjectDir)x64\Release\"</Command>
     <ClInclude Include="vtt\Interprocess.hpp" />
     <ClInclude Include="vtt\interprocess\Application Identifier.hpp" />
     <ClInclude Include="vtt\interprocess\Configuration.hpp" />
+    <ClInclude Include="vtt\interprocess\Event Identifier.hpp" />
     <ClInclude Include="vtt\interprocess\implementation\Broker.hpp" />
     <ClInclude Include="vtt\interprocess\implementation\Chunk.hpp" />
     <ClInclude Include="vtt\interprocess\implementation\Conditional Variable.hpp" />

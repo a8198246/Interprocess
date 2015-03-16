@@ -18,11 +18,11 @@
 #include <boost/lexical_cast.hpp>
 
 #ifdef _DEBUG
-#	pragma comment(lib, "libboost_system-vc120-mt-sgd-1_56")
-#	pragma comment(lib, "libboost_thread-vc120-mt-sgd-1_56")
+#	pragma comment(lib, "libboost_system-vc120-mt-sgd-1_57")
+#	pragma comment(lib, "libboost_thread-vc120-mt-sgd-1_57")
 #else
-#	pragma comment(lib, "libboost_system-vc120-mt-s-1_56")
-#	pragma comment(lib, "libboost_thread-vc120-mt-s-1_56")
+#	pragma comment(lib, "libboost_system-vc120-mt-s-1_57")
+#	pragma comment(lib, "libboost_thread-vc120-mt-s-1_57")
 #endif
 
 #ifdef RUNTIME_DYNAMIC_LINKING
@@ -31,10 +31,10 @@
 
 void (VTT_INTERPROCESS_CALLING_CONVENTION *interprocess_master_send         )(const int, char const *, const int);
 int  (VTT_INTERPROCESS_CALLING_CONVENTION *interprocess_master_recieve      )(char *, const int, const int);
-void (VTT_INTERPROCESS_CALLING_CONVENTION *interprocess_master_send_to_all  )(char *, const int);
+void (VTT_INTERPROCESS_CALLING_CONVENTION *interprocess_master_send_to_all  )(int, char *, const int);
 void (VTT_INTERPROCESS_CALLING_CONVENTION *interprocess_slave_send          )(char const *, const int);
 int  (VTT_INTERPROCESS_CALLING_CONVENTION *interprocess_slave_recieve       )(const int, char *, const int);
-int  (VTT_INTERPROCESS_CALLING_CONVENTION *interprocess_slave_recieve_common)(char *, const int, const int, long long *);
+int  (VTT_INTERPROCESS_CALLING_CONVENTION *interprocess_slave_recieve_common)(int, char *, const int, const int, long long *);
 int  (VTT_INTERPROCESS_CALLING_CONVENTION *udp_multicast_recieve            )(wchar_t const *, const int, char *, const int, const int, int *);
 
 #define VTT_INTERPROCESS_BC_MESSAGE_BUFFER_LIMIT 65535
@@ -54,6 +54,8 @@ int  (VTT_INTERPROCESS_CALLING_CONVENTION *udp_multicast_recieve            )(wc
 #define BUFFER_SIZE           VTT_INTERPROCESS_BC_MESSAGE_BUFFER_LIMIT * 100
 #define GROUP                 L"224.0.0.108"
 #define PORT                  12345
+
+#define EVENT_ID              45
 
 inline void
 ErrorCode_To_String(_In_ const int error_code, _Inout_ ::std::wstring & report)
@@ -91,33 +93,46 @@ ErrorCode_To_String(_In_ const int error_code) -> ::std::wstring
 	return(::std::move(report));
 }
 
-class t_Worker
+class
+t_Worker
 {
-	private: typedef ::boost::mutex t_Mutex;
+	private: typedef ::boost::mutex
+	t_Mutex;
 
-	private: typedef ::boost::lock_guard<t_Mutex> t_Lock;
+	private: typedef ::boost::lock_guard<t_Mutex>
+	t_Lock;
 
-	private: typedef ::boost::thread t_Thread;
+	private: typedef ::boost::thread
+	t_Thread;
 
-	private: typedef ::std::vector<char> t_Buffer;
+	private: typedef ::std::vector<char>
+	t_Buffer;
 
 	#pragma region Fields
 
-	private: static int m_seed;             // shared rand seed used for message generation
-	private: const bool m_is_master = false;
-	private: const int  m_application_id;
-	private: t_Mutex &  m_sync;             // sync for ::std::cout and rand
-	private: t_Buffer   m_buffer;
-	private: t_Thread   m_thread;
-	private: ::DWORD    m_pid = ::GetCurrentProcessId();
-	private: int        m_last_sent_message_index = 0;
+	private: static int           m_seed;             // shared rand seed used for message generation
+	private: const bool           m_is_master = false;
+	private: const int            m_application_id;
+	private: t_Mutex &            m_sync;             // sync for ::std::cout and rand
+	private: t_Buffer             m_buffer;
+	private: t_Thread             m_thread;
+	private: ::DWORD              m_pid = ::GetCurrentProcessId();
+	private: int                  m_last_sent_message_index = 0;
 	private: ::std::map<int, int> m_pid_to_expected_message_index;
 	
 	#pragma endregion
 
-	private: t_Worker(void) = delete;
+	private:
+	t_Worker(void) = delete;
 
-	public: t_Worker(_In_ bool is_master, _In_ const int application_id, _In_ t_Mutex & cout_sync)
+	private:
+	t_Worker(t_Worker const &) = delete;
+
+	private:
+	t_Worker(t_Worker &&) = delete;
+
+	public:
+	t_Worker(_In_ bool is_master, _In_ const int application_id, _In_ t_Mutex & cout_sync)
 	:	m_is_master(is_master)
 	,	m_application_id(application_id)
 	,	m_sync(cout_sync)
@@ -126,17 +141,20 @@ class t_Worker
 		m_thread = ::boost::thread([this](){Routine();});
 	}
 
-	private: t_Worker(t_Worker const &) = delete;
-
-	private: void operator=(t_Worker const &) = delete;
-
 	public: ~t_Worker(void)
 	{
 		m_thread.interrupt();
 		m_thread.join();
 	}
 
-	private: void Routine(void)
+	private: void
+	operator =(t_Worker const &) = delete;
+
+	private: void
+	operator =(t_Worker &&) = delete;
+
+	private: void
+	Routine(void)
 	{
 		{
 			t_Lock lock(m_sync);
@@ -174,7 +192,8 @@ class t_Worker
 		}
 	}
 
-	private: void Common(void)
+	private: void
+	Common(void)
 	{
 		if(m_is_master)
 		{
@@ -184,7 +203,7 @@ class t_Worker
 				Generate_Message();
 				::LARGE_INTEGER start_ts;
 				::QueryPerformanceCounter(&start_ts);
-				interprocess_master_send_to_all(m_buffer.data(), static_cast<int>(m_buffer.size()));
+				interprocess_master_send_to_all(EVENT_ID, m_buffer.data(), static_cast<int>(m_buffer.size()));
 				::LARGE_INTEGER end_ts;
 				::QueryPerformanceCounter(&end_ts);
 				{
@@ -201,20 +220,21 @@ class t_Worker
 			m_buffer.resize(BUFFER_SIZE);
 			::LARGE_INTEGER start_ts;
 			::QueryPerformanceCounter(&start_ts);
-			auto bc_recieved = interprocess_slave_recieve_common(m_buffer.data(), static_cast<int>(m_buffer.size()), 20000, nullptr);
+			auto const event_id = m_application_id;
+			auto bc_received = interprocess_slave_recieve_common(event_id, m_buffer.data(), static_cast<int>(m_buffer.size()), 20000, nullptr);
 			::LARGE_INTEGER end_ts;
 			::QueryPerformanceCounter(&end_ts);
 			{
 				t_Lock lock(m_sync);
-				if(0 != bc_recieved)
+				if(0 != bc_received)
 				{
-					::std::cout << "\t << thread #" << ::boost::this_thread::get_id() << " recieved " << bc_recieved << " bytes at "
+					::std::cout << "\t << thread #" << ::boost::this_thread::get_id() << " received " << bc_received << " bytes at "
 						<< start_ts.QuadPart << " - " << end_ts.QuadPart << " interval" << ::std::endl;
-					::std::cout.write(m_buffer.data() + 12, bc_recieved - 12);
+					::std::cout.write(m_buffer.data() + 12, bc_received - 12);
 				}
 				else
 				{
-					::std::cout << "\t << thread #" << ::boost::this_thread::get_id() << " tried to recieve at "
+					::std::cout << "\t << thread #" << ::boost::this_thread::get_id() << " tried to receive at "
 						<< start_ts.QuadPart << " - " << end_ts.QuadPart << " interval" << ::std::endl;
 				}
 				::std::cout.flush();
@@ -222,34 +242,36 @@ class t_Worker
 		}
 	}
 
-	private: void Recieve_From_Soket(void)
+	private: void
+	Recieve_From_Soket(void)
 	{
 		m_buffer.resize(BUFFER_SIZE);
 		int error_code;
-		size_t bc_recieved = static_cast<size_t>(udp_multicast_recieve(GROUP, PORT, m_buffer.data(), static_cast<int>(m_buffer.size()), 100, &error_code));
-		assert(bc_recieved <= BUFFER_SIZE);
+		size_t bc_received = static_cast<size_t>(udp_multicast_recieve(GROUP, PORT, m_buffer.data(), static_cast<int>(m_buffer.size()), 100, &error_code));
+		assert(bc_received <= BUFFER_SIZE);
 		if(ERROR_SUCCESS != error_code)
 		{
 			throw(::std::system_error(error_code, ::std::system_category(), "udp_multicast_recieve failed"));
 		}
-		if(0 != bc_recieved)
+		if(0 != bc_received)
 		{
 			t_Lock lock(m_sync);
-			::std::cout << "\t << thread #" << ::boost::this_thread::get_id() << " recieved " << bc_recieved << " bytes from UDP socket:" << ::std::endl;
-			::std::cout.write(m_buffer.data(), bc_recieved);
+			::std::cout << "\t << thread #" << ::boost::this_thread::get_id() << " received " << bc_received << " bytes from UDP socket:" << ::std::endl;
+			::std::cout.write(m_buffer.data(), bc_received);
 			::std::cout.flush();
 		}
 		else
 		{
 			t_Lock lock(m_sync);
-			::std::cout << "\t << recieved nothing..." << ::std::endl;
+			::std::cout << "\t << received nothing..." << ::std::endl;
 		}
 	}
 
-	private: void Recieve(void)
+	private: void
+	Recieve(void)
 	{
 		m_buffer.resize(BUFFER_SIZE);
-		size_t bc_recieved = 0;
+		size_t bc_received = 0;
 		static int attempt = 0;
 		if(m_is_master)
 		{
@@ -259,31 +281,31 @@ class t_Worker
 		++attempt;
 		if(m_is_master)
 		{
-			bc_recieved = static_cast<size_t>(interprocess_master_recieve(m_buffer.data(), 1000, 2000));
+			bc_received = static_cast<size_t>(interprocess_master_recieve(m_buffer.data(), 1000, 2000));
 		}
 		else
 		{
-			bc_recieved = static_cast<size_t>(interprocess_slave_recieve(m_application_id, m_buffer.data(), static_cast<int>(m_buffer.size())));
+			bc_received = static_cast<size_t>(interprocess_slave_recieve(m_application_id, m_buffer.data(), static_cast<int>(m_buffer.size())));
 		}
-		assert(bc_recieved <= BUFFER_SIZE);
-		if(0 != bc_recieved)
+		assert(bc_received <= BUFFER_SIZE);
+		if(0 != bc_received)
 		{
-			assert(13 <= bc_recieved); // 4 bytes pid 4 bytes messages number 4 bytes message length + 1 symbol + \n
+			assert(13 <= bc_received); // 4 bytes pid 4 bytes messages number 4 bytes message length + 1 symbol + \n
 			t_Lock lock(m_sync);
 			int offset = 0;
-			while(offset != static_cast<int>(bc_recieved))
+			while(offset != static_cast<int>(bc_received))
 			{
-				//::std::cout << "\t << thread #" << ::boost::this_thread::get_id() << " recieved " << bc_recieved << " bytes:" << ::std::endl;
-				assert(offset + sizeof(int) < static_cast<int>(bc_recieved));
+				//::std::cout << "\t << thread #" << ::boost::this_thread::get_id() << " received " << bc_received << " bytes:" << ::std::endl;
+				assert(offset + sizeof(int) < static_cast<int>(bc_received));
 				auto pid = *reinterpret_cast<int *>(m_buffer.data() + offset);
 				offset += sizeof(int);
 				m_pid_to_expected_message_index.insert(::std::make_pair(pid, 0));
 
-				assert(offset + sizeof(int) < static_cast<int>(bc_recieved));
+				assert(offset + sizeof(int) < static_cast<int>(bc_received));
 				auto message_index = *reinterpret_cast<int *>(m_buffer.data() + offset);
 				offset += sizeof(int);
 
-				assert(offset + sizeof(int) < static_cast<int>(bc_recieved));
+				assert(offset + sizeof(int) < static_cast<int>(bc_received));
 				auto bc_message = *reinterpret_cast<int *>(m_buffer.data() + offset);
 				offset += sizeof(int);
 
@@ -299,14 +321,15 @@ class t_Worker
 				}
 				expected_message_index = message_index + 1;
 				offset += bc_message;
-				assert(offset <= static_cast<int>(bc_recieved));
+				assert(offset <= static_cast<int>(bc_received));
 			}
-			//::std::cout.write(m_buffer.data() + sizeof(int), bc_recieved);
+			//::std::cout.write(m_buffer.data() + sizeof(int), bc_received);
 			//::std::cout.flush();
 		}
 	}
 
-	private: void Send(void)
+	private: void
+	Send(void)
 	{
 		if(m_is_master)
 		{
@@ -333,7 +356,8 @@ class t_Worker
 		}
 	}
 
-	private: void Generate_Message(void)
+	private: void
+	Generate_Message(void)
 	{
 		t_Lock lock(m_sync); // otherwise different threads will spam the same messages
 		srand(m_seed);
@@ -351,7 +375,8 @@ class t_Worker
 
 int t_Worker::m_seed;
 
-int main(int argc, char * args[], char *[])
+int
+main(int argc, char * args[], char *[])
 {
 	setlocale(LC_CTYPE, ".866");
 	srand(42);
@@ -422,7 +447,7 @@ int main(int argc, char * args[], char *[])
 	}
 
 #ifdef RUNTIME_DYNAMIC_LINKING
-	auto unloaded = ::FreeLibrary(h_interprocess_library);
+	auto const unloaded = ::FreeLibrary(h_interprocess_library);
 	DBG_UNREFERENCED_LOCAL_VARIABLE(unloaded);
 	assert(FALSE != unloaded);
 	h_interprocess_library = NULL;

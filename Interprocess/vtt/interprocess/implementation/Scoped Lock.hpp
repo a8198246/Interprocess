@@ -15,7 +15,8 @@ namespace n_interprocess
 {
 namespace n_implementation
 {
-	class t_ScopedLock
+	class
+	t_ScopedLock
 	{
 		#pragma region Fields
 
@@ -24,17 +25,24 @@ namespace n_implementation
 
 		#pragma endregion
 
-		private: t_ScopedLock(void) = delete;
+		private:
+		t_ScopedLock(void) = delete;
 
-		public: explicit t_ScopedLock(t_NamedMutex & mutex)
+		private:
+		t_ScopedLock(t_ScopedLock const &) = delete;
+
+		private:
+		t_ScopedLock(t_ScopedLock &&) = delete;
+
+		public: explicit
+		t_ScopedLock(t_NamedMutex & mutex)
 		:	m_mutex(mutex)
 		{
 			Lock();
 		}
 
-		private: t_ScopedLock(t_ScopedLock const &) = delete;
-
-		public: ~t_ScopedLock(void)
+		public:
+		~t_ScopedLock(void)
 		{
 			if(m_locked)
 			{
@@ -42,16 +50,22 @@ namespace n_implementation
 			}
 		}
 
-		private: void operator =(t_ScopedLock const &) = delete;
+		private: void
+		operator =(t_ScopedLock const &) = delete;
 
-		public: void Lock(void)
+		private: void
+		operator =(t_ScopedLock &&) = delete;
+
+		public: void
+		Lock(void)
 		{
 			assert(!m_locked);
 			m_locked = true;
 			m_mutex.Lock();
 		}
 
-		public: void Unlock(void)
+		public: void
+		Unlock(void)
 		{
 			assert(m_locked);
 			m_mutex.Unlock();

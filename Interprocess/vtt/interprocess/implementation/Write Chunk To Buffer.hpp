@@ -16,7 +16,8 @@ namespace n_interprocess
 {
 namespace n_implementation
 {
-	inline void Write_Chunk_To_Buffer(_In_ t_Chunk recieved, char * p_buffer, _In_ const size_t bc_buffer_capacity, _Inout_ size_t & bc_written, _Inout_ t_Chunk & pending)
+	inline void
+	Write_Chunk_To_Buffer(_In_ t_Chunk recieved, char * p_buffer, _In_ const size_t bc_buffer_capacity, _Inout_ size_t & bc_written, _Inout_ t_Chunk & pending)
 	{
 		assert(pending.Is_Empty());
 		assert(nullptr != p_buffer);

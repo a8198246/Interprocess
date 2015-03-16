@@ -21,13 +21,12 @@ namespace n_interprocess
 {
 namespace n_implementation
 {
-	template<::boost::uint32_t tp_Capacity>
-	class t_SingleWriterMultiReaderPipe
+	template<::boost::uint32_t tp_Capacity> class
+	t_SingleWriterMultiReaderPipe
 	:	public t_Pipe
 	{
-		protected:
-		template<::boost::uint32_t tp_Capacity>
-		struct t_MultiuserBuffer
+		protected: template<::boost::uint32_t tp_Capacity> struct
+		t_MultiuserBuffer
 		:	public t_FixedBuffer<tp_Capacity>
 		{
 			#pragma region Fields
@@ -37,8 +36,8 @@ namespace n_implementation
 			#pragma endregion
 		};
 
-		protected: template<typename tp_Callable>
-		class t_AtScopeExitExecutor
+		protected: template<typename tp_Callable> class
+		t_AtScopeExitExecutor
 		{
 			#pragma region Fields
 
@@ -46,25 +45,37 @@ namespace n_implementation
 
 			#pragma endregion
 
-			private: t_AtScopeExitExecutor(void) = delete;
+			private:
+			t_AtScopeExitExecutor(void) = delete;
 
-			private: t_AtScopeExitExecutor(t_AtScopeExitExecutor const &) = delete;
+			private:
+			t_AtScopeExitExecutor(t_AtScopeExitExecutor const &) = delete;
 
-			public: explicit t_AtScopeExitExecutor(tp_Callable callable)
+			private:
+			t_AtScopeExitExecutor(t_AtScopeExitExecutor &&) = delete;
+
+			public: explicit
+			t_AtScopeExitExecutor(tp_Callable callable)
 			:	m_callable(callable)
 			{
 				//	Do nothing...
 			}
 
-			public: ~t_AtScopeExitExecutor(void)
+			public:
+			~t_AtScopeExitExecutor(void)
 			{
 				m_callable();
 			}
 
-			private: void operator =(t_AtScopeExitExecutor const &) = delete;
+			private: void
+			operator =(t_AtScopeExitExecutor const &) = delete;
+
+			private: void
+			operator =(t_AtScopeExitExecutor &&) = delete;
 		};
 
-		protected: typedef t_MultiuserBuffer<tp_Capacity> t_Buffer;
+		protected: typedef t_MultiuserBuffer<tp_Capacity>
+		t_Buffer;
 
 		#pragma region Fields
 
@@ -72,19 +83,30 @@ namespace n_implementation
 
 		#pragma endregion
 				
-		private: t_SingleWriterMultiReaderPipe(void) = delete;
+		private:
+		t_SingleWriterMultiReaderPipe(void) = delete;
 
-		public: explicit t_SingleWriterMultiReaderPipe(_In_ ::std::string name)
+		private:
+		t_SingleWriterMultiReaderPipe(t_SingleWriterMultiReaderPipe const &) = delete;
+
+		private:
+		t_SingleWriterMultiReaderPipe(t_SingleWriterMultiReaderPipe &&) = delete;
+
+		public: explicit
+		t_SingleWriterMultiReaderPipe(_In_ ::std::string name)
 		:	t_Pipe(name, sizeof(t_Buffer), true)
 		{
 			//	Do nothing
 		}
 
-		private: t_SingleWriterMultiReaderPipe(t_SingleWriterMultiReaderPipe const &) = delete;
+		private: void
+		operator =(t_SingleWriterMultiReaderPipe const &) = delete;
 
-		private: void operator =(t_SingleWriterMultiReaderPipe const &) = delete;
+		private: void
+		operator =(t_SingleWriterMultiReaderPipe &&) = delete;
 		
-		public: auto Read(_Out_writes_bytes_opt_(bc_buffer_capacity) char * p_buffer, _In_ const size_t bc_buffer_capacity, _In_ const int timeout_msec) -> size_t
+		public: auto
+		Read(_Out_writes_bytes_opt_(bc_buffer_capacity) char * p_buffer, _In_ const size_t bc_buffer_capacity, _In_ const int timeout_msec) -> size_t
 		{
 			auto & buffer = m_shared_memory.Obtain<t_Buffer>();
 			if(m_event_fired_during_last_read)
@@ -109,7 +131,8 @@ namespace n_implementation
 			return(bc_read);
 		}
 
-		public: void Write(_In_reads_bytes_(bc_data) char const * p_data, _In_ const size_t bc_data)
+		public: void
+		Write(_In_reads_bytes_(bc_data) char const * p_data, _In_ const size_t bc_data)
 		{
 			assert(nullptr != p_data);
 			assert(0 < bc_data);

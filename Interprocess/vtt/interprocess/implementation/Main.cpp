@@ -12,11 +12,11 @@
 #include <system_error>
 
 #ifdef _DEBUG
-#	pragma comment(lib, "libboost_system-vc120-mt-sgd-1_56")
-#	pragma comment(lib, "libboost_thread-vc120-mt-sgd-1_56")
+#	pragma comment(lib, "libboost_system-vc120-mt-sgd-1_57")
+#	pragma comment(lib, "libboost_thread-vc120-mt-sgd-1_57")
 #else
-#	pragma comment(lib, "libboost_system-vc120-mt-s-1_56")
-#	pragma comment(lib, "libboost_thread-vc120-mt-s-1_56")
+#	pragma comment(lib, "libboost_system-vc120-mt-s-1_57")
+#	pragma comment(lib, "libboost_thread-vc120-mt-s-1_57")
 #endif
 
 using namespace n_vtt;
@@ -24,7 +24,12 @@ using namespace n_interprocess;
 using namespace n_implementation;
 
 void VTT_INTERPROCESS_CALLING_CONVENTION
-interprocess_master_send(_In_ const int application_id, _In_reads_bytes_(bc_data) char const * p_data, _In_range_(0, VTT_INTERPROCESS_BC_MESSAGE_BUFFER_LIMIT) const int bc_data)
+interprocess_master_send
+(
+	_In_                                                    const int    application_id
+,	_In_reads_bytes_(bc_data)                               char const * p_data
+,	_In_range_(0, VTT_INTERPROCESS_BC_MESSAGE_BUFFER_LIMIT) const int    bc_data
+)
 {
 	try
 	{
@@ -77,7 +82,12 @@ interprocess_master_send(_In_ const int application_id, _In_reads_bytes_(bc_data
 }
 
 int VTT_INTERPROCESS_CALLING_CONVENTION
-interprocess_master_recieve(_Out_writes_bytes_opt_(bc_buffer_capacity) char * p_buffer, _In_ const int bc_buffer_capacity, _In_ const int timeout_msec)
+interprocess_master_recieve
+(
+	_Out_writes_bytes_opt_(bc_buffer_capacity) char *    p_buffer
+,	_In_                                       const int bc_buffer_capacity
+,	_In_                                       const int timeout_msec
+)
 {
 	auto bc_received = 0;
 	try
@@ -144,7 +154,12 @@ interprocess_master_recieve(_Out_writes_bytes_opt_(bc_buffer_capacity) char * p_
 }
 
 void VTT_INTERPROCESS_CALLING_CONVENTION
-interprocess_master_send_to_all(_In_reads_bytes_(bc_data) char const * p_data, _In_range_(0, VTT_INTERPROCESS_BC_MESSAGE_BUFFER_LIMIT) const int bc_data)
+interprocess_master_send_to_all
+(
+	_In_                                                    const int    event_id
+,	_In_reads_bytes_(bc_data)                               char const * p_data
+,	_In_range_(0, VTT_INTERPROCESS_BC_MESSAGE_BUFFER_LIMIT) const int    bc_data
+)
 {
 	try
 	{
@@ -164,7 +179,7 @@ interprocess_master_send_to_all(_In_reads_bytes_(bc_data) char const * p_data, _
 		if((nullptr != p_data) && (0 < bc_data) && (bc_data <= VTT_INTERPROCESS_BC_MESSAGE_BUFFER_LIMIT))
 		{
 			auto & master = t_Patron::Get_Master();
-			master.Send_To_AllSlaves(p_data, bc_data);
+			master.Send_To_AllSlaves(event_id, p_data, bc_data);
 		}
 		else
 		{
@@ -196,7 +211,11 @@ interprocess_master_send_to_all(_In_reads_bytes_(bc_data) char const * p_data, _
 }
 
 void VTT_INTERPROCESS_CALLING_CONVENTION
-interprocess_slave_send(_In_reads_bytes_(bc_data) char const * p_data, _In_range_(0, VTT_INTERPROCESS_BC_MESSAGE_BUFFER_LIMIT) const int bc_data)
+interprocess_slave_send
+(
+	_In_reads_bytes_(bc_data)                               char const * p_data
+,	_In_range_(0, VTT_INTERPROCESS_BC_MESSAGE_BUFFER_LIMIT) const int    bc_data
+)
 {
 	try
 	{
@@ -248,7 +267,12 @@ interprocess_slave_send(_In_reads_bytes_(bc_data) char const * p_data, _In_range
 }
 
 int VTT_INTERPROCESS_CALLING_CONVENTION
-interprocess_slave_recieve(_In_ const int application_id, _Out_writes_bytes_opt_(bc_buffer_capacity) char * p_buffer, _In_ const int bc_buffer_capacity)
+interprocess_slave_recieve
+(
+	_In_                                       const int application_id
+,	_Out_writes_bytes_opt_(bc_buffer_capacity) char *    p_buffer
+,	_In_                                       const int bc_buffer_capacity
+)
 {
 	auto bc_received = 0;
 	try
@@ -315,7 +339,14 @@ interprocess_slave_recieve(_In_ const int application_id, _Out_writes_bytes_opt_
 }
 
 int VTT_INTERPROCESS_CALLING_CONVENTION
-interprocess_slave_recieve_common(_Out_writes_bytes_opt_(bc_buffer_capacity) char * p_buffer, _In_ const int bc_buffer_capacity, _In_ const int timeout_msec, _In_opt_ long long * p_ticks)
+interprocess_slave_recieve_common
+(
+	_In_                                       const int   event_id
+,	_Out_writes_bytes_opt_(bc_buffer_capacity) char *      p_buffer
+,	_In_                                       const int   bc_buffer_capacity
+,	_In_                                       const int   timeout_msec
+,	_In_opt_                                   long long * p_ticks
+)
 {
 	auto bc_received = 0;
 	try
@@ -336,7 +367,7 @@ interprocess_slave_recieve_common(_Out_writes_bytes_opt_(bc_buffer_capacity) cha
 		if((nullptr != p_buffer) && (0 < bc_buffer_capacity))
 		{
 			auto & slave = t_Patron::Get_Slave();
-			bc_received = static_cast<int>(slave.ReceiveCommon_From_Master(p_buffer, static_cast<size_t>(bc_buffer_capacity), timeout_msec));
+			bc_received = static_cast<int>(slave.ReceiveCommon_From_Master(event_id, p_buffer, static_cast<size_t>(bc_buffer_capacity), timeout_msec));
 		#ifdef _DEBUG_LOGGING
 			auto & logger = t_ThreadedLogger::Get_Instance();
 			t_LoggerGuard guard(logger);
@@ -393,23 +424,23 @@ interprocess_slave_recieve_common(_Out_writes_bytes_opt_(bc_buffer_capacity) cha
 int VTT_INTERPROCESS_CALLING_CONVENTION
 udp_multicast_recieve
 (
-	_In_z_ wchar_t const *                            psz_host
-,	_In_range_(0, 65535) const int                    port
-,	_Out_writes_bytes_opt_(bc_buffer_capacity) char * p_buffer
-,	_In_ const int                                    bc_buffer_capacity
-,	_In_ const int                                    timeout_msec
-,	_Out_ int *                                       p_error_code
+	_In_z_                                     wchar_t const * psz_host
+,	_In_range_(0, 65535)                       const int       port
+,	_Out_writes_bytes_opt_(bc_buffer_capacity) char *          p_buffer
+,	_In_                                       const int       bc_buffer_capacity
+,	_In_                                       const int       timeout_msec
+,	_Out_opt_                                  int * const     p_error_code
 )
 {
 	auto bc_received = 0;
 	int error_code;
-	if((nullptr != psz_host) && (L'\0' != *psz_host) && (0 <= port) && (port <= 65535) && (nullptr != p_buffer) && (0 < bc_buffer_capacity))
+	if((nullptr != psz_host) && (L'\0' != psz_host[0]) && (0 <= port) && (port <= 65535) && (nullptr != p_buffer) && (0 < bc_buffer_capacity))
 	{
 		try
 		{
 			n_system::n_windows::t_SocketsUser sockets_user;
 			t_UDPMulticastSocket socket(psz_host, static_cast<unsigned short>(port));
-			bc_received = socket.Recieve(p_buffer, bc_buffer_capacity, timeout_msec);
+			bc_received = socket.Receive(p_buffer, bc_buffer_capacity, timeout_msec);
 			error_code = ERROR_SUCCESS;
 		}
 		catch(::std::system_error & e)

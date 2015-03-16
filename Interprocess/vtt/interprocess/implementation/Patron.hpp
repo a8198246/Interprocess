@@ -17,14 +17,16 @@ namespace n_interprocess
 {
 namespace n_implementation
 {
-	class t_Patron
+	class
+	t_Patron
 	:	public t_StaticInstace<t_Patron>
 	{
-		template<typename>
-		friend class t_StaticInstace;
+		template<typename> friend class
+		t_StaticInstace;
 
 	#ifdef _DEBUG_LOGGING
-		friend class t_ThreadedLogger;
+		friend class
+		t_ThreadedLogger;
 	#endif
 
 		#pragma region Fields
@@ -37,13 +39,15 @@ namespace n_implementation
 
 		#pragma endregion
 
-		private: t_Patron(void)
+		private:
+		t_Patron(void)
 		{
 			//	Do nothing
 		}
 
 	#ifdef _DEBUG_LOGGING
-		public: static void Init_Logger(_In_ const bool master)
+		public: static void
+		Init_Logger(_In_ const bool master)
 		{
 			auto & patron = Get_Instace();
 			if(!patron.m_p_logger)
@@ -53,7 +57,8 @@ namespace n_implementation
 		}
 	#endif
 
-		public: static auto Get_Master(void) -> t_Master &
+		public: static auto
+		Get_Master(void) -> t_Master &
 		{
 			auto & patron = Get_Instace();
 		#ifdef _DEBUG_LOGGING
@@ -75,7 +80,8 @@ namespace n_implementation
 			return(*patron.m_p_master);
 		}
 
-		public: static auto Get_Slave(void) -> t_Slave &
+		public: static auto
+		Get_Slave(void) -> t_Slave &
 		{
 			auto & patron = Get_Instace();
 		#ifdef _DEBUG_LOGGING
@@ -97,7 +103,8 @@ namespace n_implementation
 			return(*patron.m_p_slave);
 		}
 
-		private: static void Explicit_Cleanup(void)
+		private: static void
+		Explicit_Cleanup(void)
 		{
 			auto & patron = Get_Instace();
 		#ifdef _DEBUG_LOGGING
@@ -118,7 +125,8 @@ namespace n_implementation
 
 #ifdef _DEBUG_LOGGING
 
-	inline auto t_ThreadedLogger::Get_Instance(void) -> t_ThreadedLogger &
+	inline auto t_ThreadedLogger::
+	Get_Instance(void) -> t_ThreadedLogger &
 	{
 		assert(nullptr != t_Patron::Get_Instace().m_p_logger.get());
 		return(*t_Patron::Get_Instace().m_p_logger);

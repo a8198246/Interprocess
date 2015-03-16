@@ -15,7 +15,8 @@ namespace n_interprocess
 {
 namespace n_implementation
 {
-	class t_OwnedHandle
+	class
+	t_OwnedHandle
 	{
 		#pragma region Fields
 
@@ -23,31 +24,42 @@ namespace n_implementation
 
 		#pragma endregion
 
-		public: t_OwnedHandle(void) throw()
+		public:
+		t_OwnedHandle(void) throw()
 		{
 			//	Do nothing
 		}
 
-		public: t_OwnedHandle(t_OwnedHandle const &) = delete;
+		private:
+		t_OwnedHandle(t_OwnedHandle const &) = delete;
+
+		private:
+		t_OwnedHandle(t_OwnedHandle &&) = delete;
 
 		public: ~t_OwnedHandle(void) throw()
 		{
 			if(Is_Initialized())
 			{
-				auto closed = ::CloseHandle(m_handle);
+				auto const closed = ::CloseHandle(m_handle);
 				DBG_UNREFERENCED_LOCAL_VARIABLE(closed);
 				assert(FALSE != closed);
 			}
 		}
 
-		public: void operator =(t_OwnedHandle const &) = delete;
+		private: void
+		operator =(t_OwnedHandle const &) = delete;
 
-		public: auto Is_Initialized(void) const throw() -> bool
+		private: void
+		operator =(t_OwnedHandle &&) = delete;
+
+		public: auto
+		Is_Initialized(void) const throw() -> bool
 		{
 			return(NULL != m_handle);
 		}
 
-		public: auto Is_Not_Initialized(void) const throw() -> bool
+		public: auto
+		Is_Not_Initialized(void) const throw() -> bool
 		{
 			return(NULL == m_handle);
 		}

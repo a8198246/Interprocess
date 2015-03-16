@@ -10,6 +10,7 @@
 #include "Threaded Logger.hpp"
 
 #include "../Application Identifier.hpp"
+#include "../Event Identifier.hpp"
 
 #include <cassert>
 
@@ -24,11 +25,12 @@ namespace n_interprocess
 {
 namespace n_implementation
 {
-	class t_Master
+	class
+	t_Master
 	{
 		#pragma region Fields
 
-		protected: t_Broker                        m_Broker;
+		protected: t_Broker                        m_broker;
 		//	master-to-slaves
 		protected: ::boost::asio::io_service       m_input_service;
 		protected: ::boost::asio::io_service::work m_input_service_work;
@@ -38,28 +40,45 @@ namespace n_implementation
 
 		#pragma endregion
 
-		public: t_Master(void)
+		public:
+		t_Master(void)
 		:	m_input_service_work(m_input_service)
 		,	m_input_service_thread(::boost::bind(&::boost::asio::io_service::run, &m_input_service))
 		{
 		#ifdef _DEBUG_LOGGING
 			t_ThreadedLogger::Print_Message(__FUNCSIG__);
 		#endif
+			m_broker.Start_Waiting_For_Slaves();
 		}
+
+		private:
+		t_Master(t_Master const &) = delete;
+
+		private:
+		t_Master(t_Master &&) = delete;
 		
-		public: ~t_Master(void)
+		public:
+		~t_Master(void)
 		{
 		#ifdef _DEBUG_LOGGING
 			t_ThreadedLogger::Print_Message(__FUNCSIG__);
 		#endif
+			m_broker.Stop_Waiting_For_Slaves();
 			m_input_service.stop();
 		//	m_input_service_thread.join(); // this will cause a deadlock since threads started from dll will be waiting for it to unload
 			::boost::this_thread::sleep(::boost::posix_time::seconds(1)); // let's hope that user-mode code in m_input_service_thread will be completed during this period
 		}
 
+		private: void
+		operator =(t_Master const &) = delete;
+
+		private: void
+		operator =(t_Master &&) = delete;
+
 		//	Returns number of bytes written into the buffer.
 		//	To be called from user threads
-		public: auto Receive_From_Slaves(_Out_writes_bytes_opt_(bc_buffer_capacity) char * p_buffer, _In_ const size_t bc_buffer_capacity, _In_ const int timeout_msec) -> size_t
+		public: auto
+		Receive_From_Slaves(_Out_writes_bytes_opt_(bc_buffer_capacity) char * p_buffer, _In_ const size_t bc_buffer_capacity, _In_ const int timeout_msec) -> size_t
 		{
 		#ifdef _DEBUG_LOGGING
 			t_ThreadedLogger::Print_Message(__FUNCSIG__);
@@ -75,7 +94,7 @@ namespace n_implementation
 			else
 			{
 				assert(m_pending_output.Is_Empty());
-				auto & pipe = m_Broker.Get_SlavesToMasterPipe();
+				auto & pipe = m_broker.Get_SlavesToMasterPipe();
 				Write_Chunk_To_Buffer(pipe.Read(timeout_msec), p_buffer, bc_buffer_capacity, bc_written, m_pending_output);
 			}
 			assert(bc_written <= bc_buffer_capacity);
@@ -83,17 +102,19 @@ namespace n_implementation
 		}
 
 		//	To be called from input service thread
-		private: void Handle_Input_To_Slave(_In_ const t_ApplicationId application_id, _In_ t_Chunk chunk)
+		private: void
+		Handle_Input_To_Slave(_In_ const t_ApplicationId application_id, _In_ t_Chunk chunk)
 		{
 		#ifdef _DEBUG_LOGGING
 			t_ThreadedLogger::Print_Message(__FUNCSIG__);
 		#endif
-			auto & pipe = m_Broker.Get_MasterToSlavePipe(application_id);
+			auto & pipe = m_broker.Get_MasterToSlavePipe(application_id);
 			pipe.Write(chunk);
 		}
 
 		//	To be called from user threads
-		public: void Send_To_Slave(_In_ const t_ApplicationId application_id, _In_reads_bytes_(bc_data) char const * p_data, _In_ const size_t bc_data)
+		public: void
+		Send_To_Slave(_In_ const t_ApplicationId application_id, _In_reads_bytes_(bc_data) char const * p_data, _In_ const size_t bc_data)
 		{
 		#ifdef _DEBUG_LOGGING
 			t_ThreadedLogger::Print_Message(__FUNCSIG__);
@@ -104,15 +125,19 @@ namespace n_implementation
 		}
 
 		//	To be called from user threads
-		public: void Send_To_AllSlaves(_In_reads_bytes_(bc_data) char const * p_data, _In_ const size_t bc_data)
+		public: void
+		Send_To_AllSlaves(_In_ const t_EventId event_id, _In_reads_bytes_(bc_data) char const * p_data, _In_ const size_t bc_data)
 		{
 		#ifdef _DEBUG_LOGGING
 			t_ThreadedLogger::Print_Message(__FUNCSIG__);
 		#endif
 			assert(nullptr != p_data);
 			assert(0 < bc_data);
+			::boost::lock_guard<::boost::mutex> lock(m_broker.Get_CommonPipesSync());
+			auto p_common_pipe = m_broker.Get_CommonPipeForWritingPointer(event_id);
+			if(nullptr != p_common_pipe)
 			{
-				m_Broker.Get_CommonPipe().Write(p_data, bc_data);
+				p_common_pipe->Write(p_data, bc_data);
 			}
 		}
 	};

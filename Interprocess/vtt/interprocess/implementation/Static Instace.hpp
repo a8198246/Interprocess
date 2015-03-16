@@ -5,8 +5,8 @@
 
 namespace n_vtt
 {
-	template<typename tp_Derived>
-	class t_StaticInstace
+	template<typename tp_Derived> class
+	t_StaticInstace
 	{
 		#pragma region Fields
 
@@ -14,7 +14,8 @@ namespace n_vtt
 
 		#pragma endregion
 
-		public: static auto Get_Instace(void) throw() -> tp_Derived &
+		public: static auto
+		Get_Instace(void) throw() -> tp_Derived &
 		{
 			return(m_instance);
 		}

@@ -17,32 +17,43 @@ namespace n_system
 {
 namespace n_windows
 {
-	class t_SocketsUser
+	class
+	t_SocketsUser
 	{
-		public: t_SocketsUser(void)
+		public:
+		t_SocketsUser(void)
 		{
 			::WSADATA wsa_data;
-			auto sockets_version = MAKEWORD(2, 2);
-			auto result = ::WSAStartup(sockets_version, &wsa_data);
-			if(ERROR_SUCCESS != result)
+			auto const sockets_version = MAKEWORD(2, 2);
+			auto const initialization_result = ::WSAStartup(sockets_version, &wsa_data);
+			if(ERROR_SUCCESS != initialization_result)
 			{
-				throw(::std::system_error(static_cast<int>(result), ::std::system_category(), "failed to initialize Windows Sockets"));
+				throw(::std::system_error(static_cast<int>(initialization_result), ::std::system_category(), "failed to initialize Windows Sockets"));
 			}
 		}
 
-		private: t_SocketsUser(t_SocketsUser const &) = delete;
+		private:
+		t_SocketsUser(t_SocketsUser const &) = delete;
 
-		public: ~t_SocketsUser(void)
+		private:
+		t_SocketsUser(t_SocketsUser &&) = delete;
+
+		public:
+		~t_SocketsUser(void)
 		{
-			auto cleanuped = ::WSACleanup();
+			auto const cleanuped = ::WSACleanup();
 			if(SOCKET_ERROR == cleanuped)
 			{
-				auto last_error = ::WSAGetLastError();
+				auto const last_error = ::WSAGetLastError();
 				DBG_UNREFERENCED_PARAMETER(last_error);
 			}
 		}
 
-		private: void operator =(t_SocketsUser const &) = delete;
+		private: void
+		operator =(t_SocketsUser const &) = delete;
+
+		private: void
+		operator =(t_SocketsUser &&) = delete;
 	};
 }
 }

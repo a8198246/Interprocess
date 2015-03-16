@@ -19,7 +19,8 @@ namespace n_interprocess
 {
 namespace n_implementation
 {
-	class t_UDPMulticastSocket
+	class
+	t_UDPMulticastSocket
 	{
 		#pragma region Fields
 
@@ -29,16 +30,24 @@ namespace n_implementation
 
 		#pragma endregion
 
-		private: t_UDPMulticastSocket(void) = delete;
+		private:
+		t_UDPMulticastSocket(void) = delete;
 
-		public: explicit t_UDPMulticastSocket(_In_z_ const wchar_t * m_psz_host, _In_ const unsigned short port)
+		private:
+		t_UDPMulticastSocket(t_UDPMulticastSocket const &) = delete;
+
+		private:
+		t_UDPMulticastSocket(t_UDPMulticastSocket &&) = delete;
+
+		public: explicit
+		t_UDPMulticastSocket(_In_z_ const wchar_t * m_psz_host, _In_ const unsigned short port)
 		{
 			//	create socket
 			{
 				m_socket = ::socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP);
 				if(INVALID_SOCKET == m_socket)
 				{
-					auto last_error = ::WSAGetLastError();
+					auto const last_error = ::WSAGetLastError();
 					throw(::std::system_error(static_cast<int>(last_error), ::std::system_category(), "failed to create a socket"));
 				}
 			}
@@ -49,10 +58,10 @@ namespace n_implementation
 				localAddr.sin_family      = AF_INET;
 				localAddr.sin_addr.s_addr = ::htonl(INADDR_ANY);
 				localAddr.sin_port        = ::htons(port);
-				auto bind_result = bind(m_socket, reinterpret_cast<sockaddr *>(&localAddr), sizeof(sockaddr_in));
+				auto const bind_result = bind(m_socket, reinterpret_cast<sockaddr *>(&localAddr), sizeof(sockaddr_in));
 				if(SOCKET_ERROR == bind_result)
 				{
-					auto last_error = ::WSAGetLastError();
+					auto const last_error = ::WSAGetLastError();
 					Close();
 					throw(::std::system_error(static_cast<int>(last_error), ::std::system_category(), "failed to bind a socket to local port"));
 				}
@@ -74,10 +83,10 @@ namespace n_implementation
 					assert(1 == conversion_result);
 				}
 				multicastRequest.imr_interface.s_addr = ::htonl(INADDR_ANY);
-				auto option_set = setsockopt(m_socket, IPPROTO_IP, IP_ADD_MEMBERSHIP, reinterpret_cast<char const *>(&multicastRequest), sizeof(multicastRequest));
+				auto const option_set = setsockopt(m_socket, IPPROTO_IP, IP_ADD_MEMBERSHIP, reinterpret_cast<char const *>(&multicastRequest), sizeof(multicastRequest));
 				if(SOCKET_ERROR == option_set)
 				{
-					auto last_error = ::WSAGetLastError();
+					auto const last_error = ::WSAGetLastError();
 					Close();
 					throw(::std::system_error(static_cast<int>(last_error), ::std::system_category(), "failed to set socket options"));
 				}
@@ -87,27 +96,31 @@ namespace n_implementation
 				auto selection_result = ::WSAEventSelect(m_socket, m_net_event, FD_READ);
 				if(SOCKET_ERROR == selection_result)
 				{
-					auto last_error = ::WSAGetLastError();
+					auto const last_error = ::WSAGetLastError();
 					Close();
 					throw(::std::system_error(static_cast<int>(last_error), ::std::system_category(), "failed to set net event"));
 				}
 			}
 		}
 
-		private: t_UDPMulticastSocket(t_UDPMulticastSocket const &) = delete;
-
-		public: ~t_UDPMulticastSocket(void)
+		public:
+		~t_UDPMulticastSocket(void)
 		{
 			Close();
 		}
 
-		private: void operator =(t_UDPMulticastSocket const &) = delete;
+		private: void
+		operator =(t_UDPMulticastSocket const &) = delete;
 
-		protected: void Close(void)
+		private: void
+		operator =(t_UDPMulticastSocket &&) = delete;
+
+		protected: void
+		Close(void)
 		{
 			if(INVALID_SOCKET != m_socket)
 			{
-				auto closed = ::closesocket(m_socket);
+				auto const closed = ::closesocket(m_socket);
 				m_socket = INVALID_SOCKET;
 				if(ERROR_SUCCESS != closed)
 				{
@@ -117,16 +130,17 @@ namespace n_implementation
 			}
 			if(WSA_INVALID_EVENT != m_net_event)
 			{
-				auto closed = ::WSACloseEvent(m_net_event);
+				auto const closed = ::WSACloseEvent(m_net_event);
 				DBG_UNREFERENCED_LOCAL_VARIABLE(closed);
 				assert(FALSE != closed);
 			}
 		}
 
-		public: auto Recieve(char * p_buffer, _In_ const int bc_buffer, _In_ const int timeout_msec) -> int
+		public: auto
+		Receive(char * p_buffer, _In_ const int bc_buffer, _In_ const int timeout_msec) -> int
 		{
 			auto bc_written = 0;
-			auto wait_result = ::WSAWaitForMultipleEvents(1, &m_net_event, 1, timeout_msec, FALSE);
+			auto const wait_result = ::WSAWaitForMultipleEvents(1, &m_net_event, 1, timeout_msec, FALSE);
 			switch(wait_result)
 			{
 				case WSA_WAIT_EVENT_0:
@@ -134,11 +148,11 @@ namespace n_implementation
 					bc_written = ::recvfrom(m_socket, p_buffer, bc_buffer, 0, static_cast<sockaddr*>(nullptr), 0);
 					if(SOCKET_ERROR == bc_written)
 					{
-						auto last_error = ::WSAGetLastError();
-						throw(::std::system_error(static_cast<int>(last_error), ::std::system_category(), "failed to recieve data"));
+						auto const last_error = ::WSAGetLastError();
+						throw(::std::system_error(static_cast<int>(last_error), ::std::system_category(), "failed to receive data"));
 					}
 					{
-						auto reset = ::WSAResetEvent(m_net_event);
+						auto const reset = ::WSAResetEvent(m_net_event);
 						DBG_UNREFERENCED_LOCAL_VARIABLE(reset);
 						assert(FALSE != reset);
 					}
@@ -146,7 +160,7 @@ namespace n_implementation
 				}
 				case WSA_WAIT_FAILED:
 				{
-					auto last_error = ::WSAGetLastError();
+					auto const last_error = ::WSAGetLastError();
 					throw(::std::system_error(static_cast<int>(last_error), ::std::system_category(), "failed to wait for net event"));
 				}
 				default:

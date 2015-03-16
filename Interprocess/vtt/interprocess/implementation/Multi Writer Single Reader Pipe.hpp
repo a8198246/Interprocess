@@ -23,35 +23,49 @@ namespace n_interprocess
 {
 namespace n_implementation
 {
-	template<::boost::uint32_t tp_Capacity>
-	class t_MultiWriterSingleReaderPipe
+	template<::boost::uint32_t tp_Capacity> class
+	t_MultiWriterSingleReaderPipe
 	:	public t_Pipe
 	{
-		protected: typedef t_FixedBuffer<tp_Capacity> t_Buffer;
+		protected: typedef t_FixedBuffer<tp_Capacity>
+		t_Buffer;
 		
-		private: t_MultiWriterSingleReaderPipe(void) = delete;
+		private:
+		t_MultiWriterSingleReaderPipe(void) = delete;
 
-		public: explicit t_MultiWriterSingleReaderPipe(_In_ ::std::string name)
+		private:
+		t_MultiWriterSingleReaderPipe(t_MultiWriterSingleReaderPipe const &) = delete;
+
+		private:
+		t_MultiWriterSingleReaderPipe(t_MultiWriterSingleReaderPipe &&) = delete;
+
+		public: explicit
+		t_MultiWriterSingleReaderPipe(_In_ ::std::string name)
 		:	t_Pipe(::std::move(name), sizeof(t_Buffer), false)
 		{
 			//	Do nothing
 		}
 
-		private: t_MultiWriterSingleReaderPipe(t_MultiWriterSingleReaderPipe const &) = delete;
+		private: void
+		operator =(t_MultiWriterSingleReaderPipe const &) = delete;
 
-		private: void operator =(t_MultiWriterSingleReaderPipe const &) = delete;
+		private: void
+		operator =(t_MultiWriterSingleReaderPipe &&) = delete;
 
-		public: auto Is_Empty(void) const throw() -> bool
+		public: auto
+		Is_Empty(void) const throw() -> bool
 		{
 			return(m_shared_memory.Obtain<t_Buffer>().Is_Empty());
 		}
 
-		public: auto Is_Not_Empty(void) const throw() -> bool
+		public: auto
+		Is_Not_Empty(void) const throw() -> bool
 		{
 			return(m_shared_memory.Obtain<t_Buffer>().Is_Not_Empty());
 		}
 
-		public: auto Read(_In_ const int timeout_msec) -> t_Chunk
+		public: auto
+		Read(_In_ const int timeout_msec) -> t_Chunk
 		{
 			t_ScopedLock lock(m_sync);
 			if(Is_Empty())
@@ -68,7 +82,8 @@ namespace n_implementation
 			}
 		}
 
-		public: auto Read(void) -> t_Chunk
+		public: auto
+		Read(void) -> t_Chunk
 		{
 			t_ScopedLock lock(m_sync);
 			while(Is_Empty())
@@ -79,7 +94,8 @@ namespace n_implementation
 			return(m_shared_memory.Obtain<t_Buffer>().Retrieve_Chunk());
 		}
 
-		public: void Write(_In_ t_Chunk chunk)
+		public: void
+		Write(_In_ t_Chunk chunk)
 		{
 			t_ScopedLock lock(m_sync);
 			m_shared_memory.Obtain<t_Buffer>().Store(chunk);

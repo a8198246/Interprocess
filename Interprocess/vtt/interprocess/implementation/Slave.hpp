@@ -10,6 +10,7 @@
 #include "Threaded Logger.hpp"
 
 #include "../Application Identifier.hpp"
+#include "../Event Identifier.hpp"
 
 #include <cassert>
 #include <stdexcept>
@@ -26,18 +27,19 @@ namespace n_interprocess
 {
 namespace n_implementation
 {
-	class t_Slave
+	class
+	t_Slave
 	{
 		#pragma region Fields
 
-		protected: t_Broker                        m_Broker;
+		protected: t_Broker                        m_broker;
 		//	slaves to master
 		protected: ::boost::asio::io_service       m_input_service;
 		protected: ::boost::asio::io_service::work m_input_service_work;
 		protected: ::boost::thread                 m_input_service_thread; // runs input service loop which handles writing of data into slaves to master pipe
 		//	master to slave
 		protected: ::boost::asio::io_service       m_output_service;
-		protected: ::boost::thread                 m_output_service_thread; // continiously reads data from master to slave pipe and sends it to output service
+		protected: ::boost::thread                 m_output_service_thread; // continuously reads data from master to slave pipe and sends it to output service
 		protected: t_Chunk                         m_pending_output;
 
 		private: volatile t_ApplicationId          m_application_id = 0;
@@ -45,7 +47,8 @@ namespace n_implementation
 
 		#pragma endregion
 
-		public: t_Slave(void)
+		public:
+		t_Slave(void)
 		:	m_input_service_work(m_input_service)
 		,	m_input_service_thread(::boost::bind(&::boost::asio::io_service::run, &m_input_service))
 		{
@@ -59,7 +62,14 @@ namespace n_implementation
 		#endif
 		}
 
-		public: ~t_Slave(void)
+		private:
+		t_Slave(t_Slave const &) = delete;
+		
+		private:
+		t_Slave(t_Slave &&) = delete;
+
+		public:
+		~t_Slave(void)
 		{
 		#ifdef _DEBUG_LOGGING
 			t_ThreadedLogger::Print_Message(__FUNCSIG__);
@@ -70,14 +80,21 @@ namespace n_implementation
 		//	m_output_service_thread.join(); // this will cause a deadlock since threads started from dll will be waiting for it to unload
 			::boost::this_thread::sleep(::boost::posix_time::seconds(1)); // let's hope that user-mode code in m_input_service_thread and m_output_service_thread will be completed during this period
 		}
+
+		private: void
+		operator =(t_Slave const &) = delete;
 		
-		private: void Output_Service_Routine(void)
+		private: void
+		operator =(t_Slave &&) = delete;
+		
+		private: void
+		Output_Service_Routine(void)
 		{
 		#ifdef _DEBUG_LOGGING
 			t_ThreadedLogger::Print_Message(__FUNCSIG__);
 		#endif
 			assert(m_application_id_set);
-			auto & pipe = m_Broker.Get_MasterToSlavePipe(m_application_id);
+			auto & pipe = m_broker.Get_MasterToSlavePipe(m_application_id);
 			for(;;)
 			{
 				auto chunk = pipe.Read();
@@ -86,7 +103,8 @@ namespace n_implementation
 		}
 
 		//	To be called from user threads
-		private: void Handle_Ouput_From_Master(_In_ t_Chunk chunk)
+		private: void
+		Handle_Ouput_From_Master(_In_ t_Chunk chunk)
 		{
 		#ifdef _DEBUG_LOGGING
 			t_ThreadedLogger::Print_Message(__FUNCSIG__);
@@ -98,7 +116,8 @@ namespace n_implementation
 
 		//	Returns number of bytes written into the buffer.
 		//	To be called from user threads
-		public: auto Receive_From_Master(_In_ const t_ApplicationId application_id, _Out_writes_bytes_opt_(bc_buffer_capacity) char * p_buffer, _In_ const size_t bc_buffer_capacity) -> size_t
+		public: auto
+		Receive_From_Master(_In_ const t_ApplicationId application_id, _Out_writes_bytes_opt_(bc_buffer_capacity) char * p_buffer, _In_ const size_t bc_buffer_capacity) -> size_t
 		{
 		#ifdef _DEBUG_LOGGING
 			t_ThreadedLogger::Print_Message(__FUNCSIG__);
@@ -107,7 +126,7 @@ namespace n_implementation
 			{
 				m_application_id = application_id;
 				m_application_id_set = true;
-				auto & pipe = m_Broker.Get_MasterToSlavePipe(m_application_id); // this will initialize the pipe
+				auto & pipe = m_broker.Get_MasterToSlavePipe(m_application_id); // this will initialize the pipe
 				if(pipe.Is_Not_Empty())
 				{
 					m_pending_output = pipe.Read();
@@ -156,7 +175,8 @@ namespace n_implementation
 			return(bc_written);
 		}
 
-		//private: void Input_Service_Routine(void)
+		//private: void
+		//Input_Service_Routine(void)
 		//{
 		//#ifdef _DEBUG_LOGGING
 		//	t_ThreadedLogger::Print_Message(__FUNCSIG__);
@@ -173,17 +193,19 @@ namespace n_implementation
 		//}
 
 		//	To be called from input service thread
-		private: void Handle_Input_To_Master(_In_ t_Chunk chunk)
+		private: void
+		Handle_Input_To_Master(_In_ t_Chunk chunk)
 		{
 		#ifdef _DEBUG_LOGGING
 			t_ThreadedLogger::Print_Message(__FUNCSIG__);
 		#endif
-			auto & pipe = m_Broker.Get_SlavesToMasterPipe();
+			auto & pipe = m_broker.Get_SlavesToMasterPipe();
 			pipe.Write(chunk);
 		}
 
 		//	To be called from user threads
-		public: void Send_To_Master(_In_reads_bytes_(bc_data) char const * p_data, _In_ const size_t bc_data)
+		public: void
+		Send_To_Master(_In_reads_bytes_(bc_data) char const * p_data, _In_ const size_t bc_data)
 		{
 		#ifdef _DEBUG_LOGGING
 			t_ThreadedLogger::Print_Message(__FUNCSIG__);
@@ -194,14 +216,15 @@ namespace n_implementation
 		}
 
 		//	To be called from user threads
-		public: auto ReceiveCommon_From_Master(_Out_writes_bytes_opt_(bc_buffer_capacity) char * p_buffer, _In_ const size_t bc_buffer_capacity, _In_ const int timeout_msec) -> size_t
+		public: auto
+		ReceiveCommon_From_Master(_In_ const t_EventId event_id, _Out_writes_bytes_opt_(bc_buffer_capacity) char * p_buffer, _In_ const size_t bc_buffer_capacity, _In_ const int timeout_msec) -> size_t
 		{
 		#ifdef _DEBUG_LOGGING
 			t_ThreadedLogger::Print_Message(__FUNCSIG__);
 		#endif
 			assert(nullptr != p_buffer);
 			assert(0 < bc_buffer_capacity);
-			auto bc_written = m_Broker.Get_CommonPipe().Read(p_buffer, bc_buffer_capacity, timeout_msec);
+			auto const bc_written = m_broker.Get_CommonPipeForReading(event_id).Read(p_buffer, bc_buffer_capacity, timeout_msec);
 			assert(bc_written <= bc_buffer_capacity);
 			return(bc_written);
 		}

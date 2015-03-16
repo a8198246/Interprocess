@@ -20,14 +20,24 @@ namespace n_interprocess
 namespace n_implementation
 {
 	//	Replacement for broken boost::interprocess::named_mutex
-	class t_NamedMutex
+	class
+	t_NamedMutex
 	:	public t_OwnedHandle
 	{
-		friend class t_ConditionalVariable;
+		friend class
+		t_ConditionalVariable;
 
-		public: t_NamedMutex(void) = delete;
+		private:
+		t_NamedMutex(void) = delete;
 
-		public: t_NamedMutex(_Inout_ ::std::string & name)
+		private:
+		t_NamedMutex(t_NamedMutex const &) = delete;
+
+		private:
+		t_NamedMutex(t_NamedMutex &&) = delete;
+
+		public:
+		t_NamedMutex(_Inout_ ::std::string & name)
 		{
 			assert(!name.empty());
 			name.push_back('m'); // name must differ from event / mappings names
@@ -45,24 +55,27 @@ namespace n_implementation
 				}
 				else
 				{
-					auto last_error = ::GetLastError();
+					auto const last_error = ::GetLastError();
 					throw(::std::system_error(static_cast<int>(last_error), ::std::system_category(), "failed to create interprocess named mutex: UNEXPECTED"));
 				}
 			}
 			name.pop_back();
 		}
 
-		public: t_NamedMutex(t_NamedMutex const &) = delete;
+		private: void
+		operator =(t_NamedMutex const &) = delete;
 
-		public: void operator =(t_NamedMutex const &) = delete;
+		private: void
+		operator =(t_NamedMutex &&) = delete;
 
-		//	returns true if lock was acquired at the specified preriod of time
+		//	returns true if lock was acquired at the specified period of time
 		//	returns false if a timeout occurred and lock was not acquired
-		public: auto Timed_Lock(_In_ const int timeout_msec) -> bool
+		public: auto
+		Timed_Lock(_In_ const int timeout_msec) -> bool
 		{
 			assert(Is_Initialized());
-			auto result = ::WaitForSingleObject(m_handle, timeout_msec);
-			switch(result)
+			auto const wait_result = ::WaitForSingleObject(m_handle, timeout_msec);
+			switch(wait_result)
 			{
 				case WAIT_ABANDONED:
 				case WAIT_OBJECT_0:
@@ -75,22 +88,24 @@ namespace n_implementation
 				}
 				default:
 				{
-					throw(::std::system_error(static_cast<int>(result), ::std::system_category(), "failed to lock interprocess named mutex: UNEXPECTED"));
+					throw(::std::system_error(static_cast<int>(wait_result), ::std::system_category(), "failed to lock interprocess named mutex: UNEXPECTED"));
 				}
 			}
 		}
 
-		public: void Lock(void)
+		public: void
+		Lock(void)
 		{
-			auto locked = Timed_Lock(INFINITE);
+			auto const locked = Timed_Lock(INFINITE);
 			DBG_UNREFERENCED_LOCAL_VARIABLE(locked);
 			assert(locked);
 		}
 
-		public: void Unlock(void) throw()
+		public: void
+		Unlock(void) throw()
 		{
 			assert(Is_Initialized());
-			auto released = ::ReleaseMutex(m_handle);
+			auto const released = ::ReleaseMutex(m_handle);
 			DBG_UNREFERENCED_LOCAL_VARIABLE(released);
 			assert(FALSE != released);
 		}

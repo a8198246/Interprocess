@@ -30,12 +30,15 @@ namespace n_interprocess
 {
 namespace n_implementation
 {
-	class t_LoggerGuard;
+	class
+	t_LoggerGuard;
 
-	class t_ThreadedLogger
+	class
+	t_ThreadedLogger
 	:	public ::std::ofstream
 	{
-		friend class t_LoggerGuard;
+		friend class
+		t_LoggerGuard;
 
 		#pragma region Fields
 
@@ -49,9 +52,17 @@ namespace n_implementation
 
 		#pragma endregion
 
-		private: t_ThreadedLogger(void) = delete;
+		private:
+		t_ThreadedLogger(void) = delete;
 
-		public: explicit t_ThreadedLogger(_In_ const bool master)
+		private:
+		t_ThreadedLogger(t_ThreadedLogger const &) = delete;
+
+		private:
+		t_ThreadedLogger(t_ThreadedLogger &&) = delete;
+
+		public: explicit
+		t_ThreadedLogger(_In_ const bool master)
 		:	m_master(master)
 		{
 			//char temp_path[MAX_PATH];
@@ -77,13 +88,16 @@ namespace n_implementation
 			Print_Prefix() << (master ? "master process" : "slave process") << ::std::endl;
 		}
 
-		private: t_ThreadedLogger(t_ThreadedLogger const &) = delete;
+		private: void
+		operator =(t_ThreadedLogger const &) = delete;
 
-		private: void operator =(t_ThreadedLogger const &) = delete;
-		#include<sys/timeb.h>
-		public: auto Print_Prefix(void) -> t_ThreadedLogger &
+		private: void
+		operator =(t_ThreadedLogger &&) = delete;
+		
+		public: auto
+		Print_Prefix(void) -> t_ThreadedLogger &
 		{
-			//	timestamp with milliseconds
+			//	time stamp with milliseconds
 			{
 				struct timeb tp;
 				ftime(&tp);
@@ -111,7 +125,8 @@ namespace n_implementation
 			return(*this);
 		}
 
-		public: void Write_Block(_In_reads_bytes_(bc_data) char const * p_data, _In_ const size_t bc_data)
+		public: void
+		Write_Block(_In_reads_bytes_(bc_data) char const * p_data, _In_ const size_t bc_data)
 		{
 			assert(nullptr != p_data);
 			assert(0 < bc_data);
@@ -139,22 +154,30 @@ namespace n_implementation
 			(*this) << ::std::dec << ::std::endl;
 		}
 
-		public: static void Print_Message(::std::string const & message);
+		public: static void
+		Print_Message(::std::string const & message);
 
-		public: static void Print_InvalidFunctionParameterError(void);
+		public: static void
+		Print_InvalidFunctionParameterError(void);
 
-		public: static void Print_Exception(::std::system_error & e);
+		public: static void
+		Print_Exception(::std::system_error & e);
 
-		public: static void Print_Exception(::std::logic_error & e);
+		public: static void
+		Print_Exception(::std::logic_error & e);
 
-		public: static void Print_Exception(::std::exception & e);
+		public: static void
+		Print_Exception(::std::exception & e);
 
-		public: static void Print_UnknownException(void);
+		public: static void
+		Print_UnknownException(void);
 
-		public: static auto Get_Instance(void) -> t_ThreadedLogger &;
+		public: static auto
+		Get_Instance(void) -> t_ThreadedLogger &;
 	};
 
-	class t_LoggerGuard
+	class
+	t_LoggerGuard
 	{
 		#pragma region Fields
 
@@ -164,56 +187,72 @@ namespace n_implementation
 
 		private: t_LoggerGuard(void) = delete;
 
-		public: explicit t_LoggerGuard(t_ThreadedLogger & logger)
+		public: explicit
+		t_LoggerGuard(t_ThreadedLogger & logger)
 		:	m_logger(logger)
 		{
 			m_logger.m_sync.lock();
 		}
 
-		private: t_LoggerGuard(t_LoggerGuard const &) = delete;
+		private:
+		t_LoggerGuard(t_LoggerGuard const &) = delete;
 
-		public: ~t_LoggerGuard(void)
+		private:
+		t_LoggerGuard(t_LoggerGuard &&) = delete;
+
+		public:
+		~t_LoggerGuard(void)
 		{
 			m_logger.m_sync.unlock();
 		}
 
-		private: void operator =(t_LoggerGuard const &) = delete;
+		private: void
+		operator =(t_LoggerGuard const &) = delete;
+
+		private: void
+		operator =(t_LoggerGuard &&) = delete;
 	};
 
-	inline void t_ThreadedLogger::Print_Message(::std::string const & message)
+	inline void t_ThreadedLogger::
+	Print_Message(::std::string const & message)
 	{
 		auto & logger = t_ThreadedLogger::Get_Instance();
 		t_LoggerGuard guard(logger);
 		logger.Print_Prefix() << message << ::std::endl;
 	}
 
-	inline void t_ThreadedLogger::Print_InvalidFunctionParameterError(void)
+	inline void t_ThreadedLogger::
+	Print_InvalidFunctionParameterError(void)
 	{
 		Print_Message("function parameter is invalid");
 	}
 
-	inline void t_ThreadedLogger::Print_Exception(::std::system_error & e)
+	inline void t_ThreadedLogger::
+	Print_Exception(::std::system_error & e)
 	{
 		auto & logger = t_ThreadedLogger::Get_Instance();
 		t_LoggerGuard guard(logger);
 		logger.Print_Prefix() << "system_error exception \"" << e.what() << "\" " << e.code() << ::std::endl;
 	}
 
-	inline void t_ThreadedLogger::Print_Exception(::std::logic_error & e)
+	inline void t_ThreadedLogger::
+	Print_Exception(::std::logic_error & e)
 	{
 		auto & logger = t_ThreadedLogger::Get_Instance();
 		t_LoggerGuard guard(logger);
 		logger.Print_Prefix() << "logic_error exception \"" << e.what() << "\"" << ::std::endl;
 	}
 
-	inline void t_ThreadedLogger::Print_Exception(::std::exception & e)
+	inline void t_ThreadedLogger::
+	Print_Exception(::std::exception & e)
 	{
 		auto & logger = t_ThreadedLogger::Get_Instance();
 		t_LoggerGuard guard(logger);
 		logger.Print_Prefix() << "exception \"" << e.what() << "\"" << ::std::endl;
 	}
 	
-	inline void t_ThreadedLogger::Print_UnknownException(void)
+	inline void t_ThreadedLogger::
+	Print_UnknownException(void)
 	{
 		Print_Message("unknown exception...");
 	}

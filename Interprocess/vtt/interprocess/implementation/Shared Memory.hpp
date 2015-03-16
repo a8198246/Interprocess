@@ -21,7 +21,8 @@ namespace n_interprocess
 {
 namespace n_implementation
 {
-	class t_SharedMemoty
+	class
+	t_SharedMemory
 	:	public t_OwnedHandle
 	{
 		#pragma region Fields
@@ -33,9 +34,17 @@ namespace n_implementation
 
 		#pragma endregion
 
-		private: t_SharedMemoty(void) = delete;
+		private:
+		t_SharedMemory(void) = delete;
 
-		public: t_SharedMemoty(_Inout_ ::std::string & name, _In_ t_NamedMutex & sync, _In_ const size_t bc_capacity)
+		private:
+		t_SharedMemory(t_SharedMemory const &) = delete;
+
+		private:
+		t_SharedMemory(t_SharedMemory &&) = delete;
+
+		public:
+		t_SharedMemory(_Inout_ ::std::string & name, _In_ t_NamedMutex & sync, _In_ const size_t bc_capacity)
 	#ifdef _DEBUG
 		:	m_bc_memory(bc_capacity)
 	#endif
@@ -61,11 +70,8 @@ namespace n_implementation
 			name.pop_back();
 		}
 
-		private: t_SharedMemoty(t_SharedMemoty const &) = delete;
-
-		private: void operator =(t_SharedMemoty const &) = delete;
-
-		public: ~t_SharedMemoty(void)
+		public:
+		~t_SharedMemory(void)
 		{
 			if(Is_Initialized())
 			{
@@ -76,8 +82,14 @@ namespace n_implementation
 			}
 		}
 
-		public: template<typename tp_Object>
-		auto Obtain(void) throw() -> tp_Object &
+		private: void
+		operator =(t_SharedMemory const &) = delete;
+
+		private: void
+		operator =(t_SharedMemory &&) = delete;
+
+		public: template<typename tp_Object> auto
+		Obtain(void) throw() -> tp_Object &
 		{
 			assert(Is_Initialized());
 			assert(nullptr != m_p_memory);
@@ -85,8 +97,8 @@ namespace n_implementation
 			return(*static_cast<tp_Object *>(m_p_memory));
 		}
 
-		public: template<typename tp_Object>
-		auto Obtain(void) const throw() -> tp_Object const &
+		public: template<typename tp_Object> auto
+		Obtain(void) const throw() -> tp_Object const &
 		{
 			assert(Is_Initialized());
 			assert(nullptr != m_p_memory);

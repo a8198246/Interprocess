@@ -20,9 +20,11 @@ namespace n_implementation
 {
 	//	Helper class to fake move behavior with copy semantics.
 	//	A workaround for the lack of support for move semantics in boost::asio
-	class t_Chunk
+	class
+	t_Chunk
 	{
-		protected: typedef ::boost::scoped_array<char> t_pData;
+		protected: typedef ::boost::scoped_array<char>
+		t_pData;
 
 		#pragma region Fields
 
@@ -31,7 +33,8 @@ namespace n_implementation
 
 		#pragma endregion
 
-		public: t_Chunk(void)
+		public:
+		t_Chunk(void)
 		{
 		#ifdef _DEBUG_LOGGING
 			{
@@ -42,7 +45,8 @@ namespace n_implementation
 		#endif
 		}
 
-		public: t_Chunk(_In_reads_bytes_(bc_data) char const * p_data, _In_ const size_t bc_data)
+		public:
+		t_Chunk(_In_reads_bytes_(bc_data) char const * p_data, _In_ const size_t bc_data)
 		:	m_p_data(new char[bc_data])
 		,	m_bc_data(bc_data)
 		{
@@ -58,7 +62,8 @@ namespace n_implementation
 			memcpy(m_p_data.get(), p_data, bc_data);
 		}
 
-		public: t_Chunk(_Inout_ t_Chunk const & that)
+		public:
+		t_Chunk(_Inout_ t_Chunk const & that)
 		{
 		#ifdef _DEBUG_LOGGING
 			{
@@ -75,7 +80,8 @@ namespace n_implementation
 			assert(nullptr == that.m_p_data.get());
 		}
 
-		public: ~t_Chunk(void)
+		public:
+		~t_Chunk(void)
 		{
 		#ifdef _DEBUG_LOGGING
 			{
@@ -87,7 +93,8 @@ namespace n_implementation
 		#endif
 		}
 
-		public: void operator =(_Inout_ t_Chunk const & that)
+		public: void
+		operator =(_Inout_ t_Chunk const & that)
 		{
 		#ifdef _DEBUG_LOGGING
 			{
@@ -105,22 +112,26 @@ namespace n_implementation
 			assert(nullptr == that.m_p_data.get());
 		}
 
-		public: auto Is_Empty(void) const throw() -> bool
+		public: auto
+		Is_Empty(void) const throw() -> bool
 		{
 			return(0 == m_bc_data);
 		}
 
-		public: auto Is_Not_Empty(void) const throw() -> bool
+		public: auto
+		Is_Not_Empty(void) const throw() -> bool
 		{
 			return(0 != m_bc_data);
 		}
 
-		public: auto Get_Data(void) const throw() -> char const *
+		public: auto
+		Get_Data(void) const throw() -> char const *
 		{
 			return(m_p_data.get());
 		}
 
-		public: auto Get_Size(void) const throw() -> size_t const &
+		public: auto
+		Get_Size(void) const throw() -> size_t const &
 		{
 			return(m_bc_data);
 		}
