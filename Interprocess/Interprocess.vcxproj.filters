@@ -30,6 +30,7 @@
     <ClInclude Include="vtt\interprocess\Export Control.hpp" />
     <ClInclude Include="vtt\interprocess\Interface.hpp" />
     <ClInclude Include="vtt\interprocess\implementation\Threaded Logger.hpp" />
+    <ClInclude Include="vtt\interprocess\Event Identifier.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="vtt\interprocess\implementation\Main.cpp" />
