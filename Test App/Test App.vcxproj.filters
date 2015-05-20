@@ -2,8 +2,15 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="Precompiled.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Readme.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Main Windows SDK Control.hpp" />
+    <ClInclude Include="Main Boost Control.hpp" />
+    <ClInclude Include="Main.hpp" />
+    <ClInclude Include="Precompiled.hpp" />
   </ItemGroup>
 </Project>

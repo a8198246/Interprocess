@@ -28,21 +28,23 @@
 #define _WIN32_IE      0x0800
 #define NTDDI_VERSION  NTDDI_WIN7
 
+#define BOOST_ALL_NO_LIB
+
+#include <vld.h>
+
 #include <sal.h>
 
 #include <Windows.h>
 #include <Winsock2.h>
 #include <Ws2tcpip.h>
 
+#include <boost/lexical_cast.hpp>
+
 #include <iostream>
 #include <string>
 #include <utility>
 #include <vector>
 #include <algorithm>
-
-#include <boost/lexical_cast.hpp>
-
-#include <vld.h>
 
 #pragma comment(lib, "Ws2_32.lib")
 
@@ -134,9 +136,9 @@ class t_Worker
 		//	fill address struct
 		{
 			::memset(&m_addr, 0, sizeof(m_addr));
-			m_addr.sin_family      = AF_INET;
-			m_addr.sin_addr.s_addr = ::inet_addr(GROUP);
-			m_addr.sin_port        = ::htons(PORT);
+			m_addr.sin_family = AF_INET;
+			::inet_pton(AF_INET, GROUP, &m_addr.sin_addr.s_addr);
+			m_addr.sin_port = ::htons(PORT);
 		}
 	}
 

@@ -11,9 +11,7 @@
 
 #include <string>
 #include <utility>
-
-#include <boost/cstdint.hpp>
-#include <boost/thread.hpp>
+#include <cstdint>
 
 namespace n_vtt
 {
@@ -21,11 +19,11 @@ namespace n_interprocess
 {
 namespace n_implementation
 {
-	template<::boost::uint32_t tp_Capacity> class
+	template<::std::uint32_t tp_Capacity> class
 	t_SingleWriterMultiReaderPipe
 	:	public t_Pipe
 	{
-		protected: template<::boost::uint32_t tp_Capacity> struct
+		protected: template<::std::uint32_t tp_Capacity> struct
 		t_MultiuserBuffer
 		:	public t_FixedBuffer<tp_Capacity>
 		{

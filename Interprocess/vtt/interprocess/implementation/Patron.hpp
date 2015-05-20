@@ -8,6 +8,8 @@
 #include "Static Instace.hpp"
 #include "Threaded Logger.hpp"
 
+#include <boost/thread/mutex.hpp>
+
 #include <memory>
 #include <stdexcept>
 
@@ -33,6 +35,7 @@ namespace n_implementation
 
 		protected: ::std::unique_ptr<t_Master>         m_p_master;
 		protected: ::std::unique_ptr<t_Slave>          m_p_slave;
+		protected: ::boost::mutex                      m_slave_creation_sync;
 	#ifdef _DEBUG_LOGGING
 		protected: ::std::unique_ptr<t_ThreadedLogger> m_p_logger;
 	#endif
@@ -70,7 +73,7 @@ namespace n_implementation
 		#endif
 			if(!patron.m_p_master)
 			{
-				if(patron.m_p_slave.get() != nullptr)
+				if(patron.m_p_slave)
 				{
 					throw(::std::logic_error("Trying to act as Interprocess Master while already have Slave role."));
 				}
@@ -91,14 +94,17 @@ namespace n_implementation
 				logger.Print_Prefix() << __FUNCSIG__ << ::std::endl;
 			}
 		#endif
-			if(!patron.m_p_slave)
 			{
-				if(patron.m_p_master.get() != nullptr)
+				::boost::lock_guard<::boost::mutex> lock(patron.m_slave_creation_sync);
+				if(!patron.m_p_slave)
 				{
-					throw(::std::logic_error("Trying to act as Interprocess Slave while already have Master role."));
+					if(patron.m_p_master)
+					{
+						throw(::std::logic_error("Trying to act as Interprocess Slave while already have Master role."));
+					}
+					patron.m_p_slave.reset(new t_Slave());
+					atexit(Explicit_Cleanup);
 				}
-				patron.m_p_slave.reset(new t_Slave());
-				atexit(Explicit_Cleanup);
 			}
 			return(*patron.m_p_slave);
 		}

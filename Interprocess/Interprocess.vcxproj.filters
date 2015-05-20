@@ -7,16 +7,12 @@
     <ClInclude Include="vtt\interprocess\implementation\Conditional Variable.hpp" />
     <ClInclude Include="vtt\interprocess\implementation\Event.hpp" />
     <ClInclude Include="vtt\interprocess\implementation\Fixed Buffer.hpp" />
-    <ClInclude Include="vtt\interprocess\implementation\Main Boost Control.hpp" />
-    <ClInclude Include="vtt\interprocess\implementation\Main Windows SDK Control.hpp" />
-    <ClInclude Include="vtt\interprocess\implementation\Main.hpp" />
     <ClInclude Include="vtt\interprocess\implementation\Master.hpp" />
     <ClInclude Include="vtt\interprocess\implementation\Multi Writer Single Reader Pipe.hpp" />
     <ClInclude Include="vtt\interprocess\implementation\Named Mutex.hpp" />
     <ClInclude Include="vtt\interprocess\implementation\Owned Handle.hpp" />
     <ClInclude Include="vtt\interprocess\implementation\Patron.hpp" />
     <ClInclude Include="vtt\interprocess\implementation\Pipe.hpp" />
-    <ClInclude Include="vtt\interprocess\implementation\Precompiled.hpp" />
     <ClInclude Include="vtt\interprocess\implementation\Scoped Lock.hpp" />
     <ClInclude Include="vtt\interprocess\implementation\Shared Memory.hpp" />
     <ClInclude Include="vtt\interprocess\implementation\Single Writer Multi Reader Pipe.hpp" />
@@ -31,16 +27,20 @@
     <ClInclude Include="vtt\interprocess\Interface.hpp" />
     <ClInclude Include="vtt\interprocess\implementation\Threaded Logger.hpp" />
     <ClInclude Include="vtt\interprocess\Event Identifier.hpp" />
+    <ClInclude Include="Main.hpp" />
+    <ClInclude Include="Main Windows SDK Control.hpp" />
+    <ClInclude Include="Main Boost Control.hpp" />
+    <ClInclude Include="Precompiled.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="vtt\interprocess\implementation\Main.cpp" />
-    <ClCompile Include="vtt\interprocess\implementation\Precompiled.cpp" />
+    <ClCompile Include="Main.cpp" />
+    <ClCompile Include="Precompiled.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Readme.txt" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="vtt\interprocess\implementation\Interface.x32.def" />
-    <None Include="vtt\interprocess\implementation\Interface.x64.def" />
+    <None Include="Interface.x32.def" />
+    <None Include="Interface.x64.def" />
   </ItemGroup>
 </Project>

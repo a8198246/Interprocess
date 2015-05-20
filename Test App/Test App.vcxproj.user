@@ -11,8 +11,7 @@
     <LocalDebuggerCommand>$(SolutionDir)_Build\$(ProjectName).exe</LocalDebuggerCommand>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
     <LocalDebuggerWorkingDirectory>$(SolutionDir)_Build\</LocalDebuggerWorkingDirectory>
-    <LocalDebuggerCommandArguments>
-    </LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>2</LocalDebuggerCommandArguments>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LocalDebuggerCommand>$(SolutionDir)_Build\$(ProjectName).exe</LocalDebuggerCommand>

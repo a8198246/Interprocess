@@ -1,0 +1,9 @@
+LIBRARY
+EXPORTS
+	interprocess_master_receive
+	interprocess_master_send
+	interprocess_master_send_to_all
+	interprocess_slave_receive
+	interprocess_slave_send
+	interprocess_slave_receive_common
+	udp_multicast_receive

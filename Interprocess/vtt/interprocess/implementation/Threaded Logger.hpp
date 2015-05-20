@@ -12,6 +12,10 @@
 
 #include <Windows.h>
 
+#include <boost/lexical_cast.hpp>
+
+#include <boost/thread/mutex.hpp>
+
 #include <fstream>
 #include <stdexcept>
 #include <system_error>
@@ -20,9 +24,6 @@
 #include <ctime>
 #include <array>
 #include <sys/timeb.h>
-
-#include <boost/thread.hpp>
-#include <boost/lexical_cast.hpp>
 
 namespace n_vtt
 {

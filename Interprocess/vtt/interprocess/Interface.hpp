@@ -24,11 +24,11 @@ interprocess_master_send
 
 //	Прием блока данных, посланных из ведомых процессов.
 int VTT_INTERPROCESS_DLL_API VTT_INTERPROCESS_CALLING_CONVENTION
-interprocess_master_recieve
+interprocess_master_receive
 (
-	_Out_writes_bytes_opt_(bc_buffer_capacity) char *    p_buffer
-,	_In_                                       const int bc_buffer_capacity
-,	_In_                                       const int timeout_msec
+	_Out_writes_bytes_opt_(bc_buffer_capacity) char * const p_buffer
+,	_In_                                       const int    bc_buffer_capacity
+,	_In_                                       const int    timeout_msec
 );
 
 //	Передача блока данных всем ведомым процессам, ожидающим событие с идентификатором event_id.
@@ -53,16 +53,16 @@ interprocess_slave_send
 
 //	Прием блока данных, посланных из ведущего процесса в процесс с идентификатором application_id.
 int VTT_INTERPROCESS_DLL_API VTT_INTERPROCESS_CALLING_CONVENTION
-interprocess_slave_recieve
+interprocess_slave_receive
 (
-	_In_                                       const int application_id
-,	_Out_writes_bytes_opt_(bc_buffer_capacity) char *    p_buffer
-,	_In_                                       const int bc_buffer_capacity
+	_In_                                       const int    application_id
+,	_Out_writes_bytes_opt_(bc_buffer_capacity) char * const p_buffer
+,	_In_                                       const int    bc_buffer_capacity
 );
 
 //	Прием блока данных, посланных из ведущего процесса и относящихся к событию с идентификатором event_id.
 int VTT_INTERPROCESS_DLL_API VTT_INTERPROCESS_CALLING_CONVENTION
-interprocess_slave_recieve_common
+interprocess_slave_receive_common
 (
 	_In_                                       const int   event_id
 ,	_Out_writes_bytes_opt_(bc_buffer_capacity) char *      p_buffer
@@ -76,7 +76,7 @@ interprocess_slave_recieve_common
 
 //	Прием UDP мультикаст сообщения.
 int VTT_INTERPROCESS_DLL_API VTT_INTERPROCESS_CALLING_CONVENTION
-udp_multicast_recieve
+udp_multicast_receive
 (
 	_In_z_                                     wchar_t const * psz_host
 ,	_In_range_(0, 65535)                       const int       port

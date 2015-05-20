@@ -15,7 +15,7 @@
 #include <string>
 #include <utility>
 
-#include <boost/thread.hpp>
+#include <boost/thread/thread.hpp>
 
 namespace n_vtt
 {

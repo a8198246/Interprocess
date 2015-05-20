@@ -12,14 +12,16 @@
 #include "../Application Identifier.hpp"
 #include "../Event Identifier.hpp"
 
-#include <cassert>
-#include <stdexcept>
-
-#include <boost/thread.hpp>
-#include <boost/cstdint.hpp>
 #include <boost/asio.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/bind.hpp>
+
+#include <boost/thread/thread.hpp>
+#include <boost/thread/mutex.hpp>
+
+#include <stdexcept>
+#include <map>
+#include <cassert>
 
 namespace n_vtt
 {
@@ -30,6 +32,9 @@ namespace n_implementation
 	class
 	t_Slave
 	{
+		protected: typedef ::std::map<t_ApplicationId, t_Chunk>
+		t_PendingOutputsFromMaster;
+
 		#pragma region Fields
 
 		protected: t_Broker                        m_broker;
@@ -38,12 +43,8 @@ namespace n_implementation
 		protected: ::boost::asio::io_service::work m_input_service_work;
 		protected: ::boost::thread                 m_input_service_thread; // runs input service loop which handles writing of data into slaves to master pipe
 		//	master to slave
-		protected: ::boost::asio::io_service       m_output_service;
-		protected: ::boost::thread                 m_output_service_thread; // continuously reads data from master to slave pipe and sends it to output service
-		protected: t_Chunk                         m_pending_output;
-
-		private: volatile t_ApplicationId          m_application_id = 0;
-		private: volatile bool                     m_application_id_set = false;
+		protected: t_PendingOutputsFromMaster      m_pending_outputs;
+		protected: ::boost::mutex                  m_outputs_sync;
 
 		#pragma endregion
 
@@ -76,8 +77,6 @@ namespace n_implementation
 		#endif
 			m_input_service.stop();
 		//	m_input_service_thread.join(); // this will cause a deadlock since threads started from dll will be waiting for it to unload
-			m_output_service_thread.interrupt();
-		//	m_output_service_thread.join(); // this will cause a deadlock since threads started from dll will be waiting for it to unload
 			::boost::this_thread::sleep(::boost::posix_time::seconds(1)); // let's hope that user-mode code in m_input_service_thread and m_output_service_thread will be completed during this period
 		}
 
@@ -87,33 +86,6 @@ namespace n_implementation
 		private: void
 		operator =(t_Slave &&) = delete;
 		
-		private: void
-		Output_Service_Routine(void)
-		{
-		#ifdef _DEBUG_LOGGING
-			t_ThreadedLogger::Print_Message(__FUNCSIG__);
-		#endif
-			assert(m_application_id_set);
-			auto & pipe = m_broker.Get_MasterToSlavePipe(m_application_id);
-			for(;;)
-			{
-				auto chunk = pipe.Read();
-				m_output_service.post(::boost::bind(&t_Slave::Handle_Ouput_From_Master, this, chunk));
-			}
-		}
-
-		//	To be called from user threads
-		private: void
-		Handle_Ouput_From_Master(_In_ t_Chunk chunk)
-		{
-		#ifdef _DEBUG_LOGGING
-			t_ThreadedLogger::Print_Message(__FUNCSIG__);
-		#endif
-			assert(m_application_id_set);
-			assert(m_pending_output.Is_Empty());
-			m_pending_output = chunk;
-		}
-
 		//	Returns number of bytes written into the buffer.
 		//	To be called from user threads
 		public: auto
@@ -122,54 +94,27 @@ namespace n_implementation
 		#ifdef _DEBUG_LOGGING
 			t_ThreadedLogger::Print_Message(__FUNCSIG__);
 		#endif
-			if(!m_application_id_set)
+			t_Broker::t_MasterToSlavePipe * p_pipe;
+			t_Chunk * p_pending_output;
 			{
-				m_application_id = application_id;
-				m_application_id_set = true;
-				auto & pipe = m_broker.Get_MasterToSlavePipe(m_application_id); // this will initialize the pipe
-				if(pipe.Is_Not_Empty())
-				{
-					m_pending_output = pipe.Read();
-				}
-				m_output_service_thread = ::boost::thread(::boost::bind(&t_Slave::Output_Service_Routine, this));
-			#ifdef _DEBUG_LOGGING
-				{
-					auto & logger = t_ThreadedLogger::Get_Instance();
-					t_LoggerGuard guard(logger);
-					logger.Print_Prefix() << "output service thread started with id " << m_output_service_thread.get_id() << ::std::endl;
-				}
-			#endif
+				::boost::lock_guard<::boost::mutex> lock(m_outputs_sync);
+				p_pipe = &m_broker.Get_MasterToSlavePipe(application_id);
+				p_pending_output = &m_pending_outputs[application_id];
 			}
-			if(application_id != m_application_id)
-			{
-				throw
-				(
-					::std::logic_error
-					(
-						"during attempt to read master process output an application ID specified "
-						"(" + ::boost::lexical_cast<::std::string>(application_id) + ")"
-						" differs from the application ID specified in previous such attempt "
-						"(" + ::boost::lexical_cast<::std::string>(m_application_id) + ")"
-					)
-				);
-			}
-			size_t bc_written = 0;
+			size_t bc_written(0);
 			for(;;)
 			{
-				Write_Chunk_To_Buffer(m_pending_output, p_buffer, bc_buffer_capacity, bc_written, m_pending_output);
+				Write_Chunk_To_Buffer(*p_pending_output, p_buffer, bc_buffer_capacity, bc_written, *p_pending_output);
 				if(bc_written == bc_buffer_capacity)
 				{
 					break;
 				}
-				m_output_service.run_one();
-				if(m_pending_output.Is_Empty())
-				{
-					m_output_service.poll_one();
-				}
-				if(m_pending_output.Is_Empty())
+				assert(p_pending_output->Is_Empty());
+				if(p_pipe->Is_Empty())
 				{
 					break;
 				}
+				*p_pending_output = p_pipe->Read(0);
 			}
 			assert(bc_written <= bc_buffer_capacity);
 			return(bc_written);

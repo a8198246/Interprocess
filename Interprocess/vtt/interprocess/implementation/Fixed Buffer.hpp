@@ -9,9 +9,8 @@
 #include <sal.h>
 
 #include <array>
+#include <cstdint>
 #include <memory.h>
-
-#include <boost/cstdint.hpp>
 
 namespace n_vtt
 {
@@ -20,7 +19,7 @@ namespace n_interprocess
 namespace n_implementation
 {
 	//	Ready to be a process-shared object.
-	template<::boost::uint32_t tp_Capacity> class
+	template<::std::uint32_t tp_Capacity> class
 	t_FixedBuffer
 	{
 		protected: typedef ::std::array<char, tp_Capacity>
@@ -28,8 +27,8 @@ namespace n_implementation
 
 		#pragma region Fields
 
-		protected: t_buffer                   m_buffer;
-		protected: volatile ::boost::uint32_t m_size;
+		protected: t_buffer                 m_buffer;
+		protected: volatile ::std::uint32_t m_size;
 		
 		#pragma	endregion
 		
@@ -73,7 +72,7 @@ namespace n_implementation
 			if(new_size <= tp_Capacity)
 			{
 				memcpy(m_buffer.data() + m_size, p_data, bc_data);
-				m_size = static_cast<::boost::uint32_t>(new_size);
+				m_size = static_cast<::std::uint32_t>(new_size);
 			}
 		}
 
@@ -100,7 +99,7 @@ namespace n_implementation
 					logger.Write_Block(chunk.Get_Data(), chunk.Get_Size());
 				#endif
 				}
-				m_size = static_cast<::boost::uint32_t>(new_size);
+				m_size = static_cast<::std::uint32_t>(new_size);
 			}
 			else
 			{
@@ -116,7 +115,7 @@ namespace n_implementation
 		}
 
 		public: auto
-		Retrieve_Data(_Out_writes_bytes_opt_(bc_buffer_capacity) char * p_buffer, _In_ const size_t bc_buffer_capacity) -> size_t
+		Retrieve_Data(char * p_buffer, _In_ const size_t bc_buffer_capacity) -> size_t
 		{
 			assert(nullptr != p_buffer);
 			assert(0 < bc_buffer_capacity);

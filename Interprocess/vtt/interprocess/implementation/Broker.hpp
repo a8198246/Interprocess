@@ -20,6 +20,7 @@
 
 #include <boost/bind.hpp>
 #include <boost/lexical_cast.hpp>
+
 #include <boost/thread/thread.hpp>
 #include <boost/thread/mutex.hpp>
 
@@ -32,10 +33,10 @@ namespace n_implementation
 	class
 	t_Broker
 	{
-		protected: typedef t_MultiWriterSingleReaderPipe<VTT_INTERPROCESS_BC_MESSAGE_BUFFER_LIMIT * VTT_INTERPROCESS_SLAVE_TO_MASTER_MESSAGE_BUFFER_SIZE_MAGNITUDE>
+		public: typedef t_MultiWriterSingleReaderPipe<VTT_INTERPROCESS_BC_MESSAGE_BUFFER_LIMIT * VTT_INTERPROCESS_SLAVE_TO_MASTER_MESSAGE_BUFFER_SIZE_MAGNITUDE>
 		t_SlavesToMasterPipe;
 
-		protected: typedef t_MultiWriterSingleReaderPipe<VTT_INTERPROCESS_BC_MESSAGE_BUFFER_LIMIT>
+		public: typedef t_MultiWriterSingleReaderPipe<VTT_INTERPROCESS_BC_MESSAGE_BUFFER_LIMIT>
 		t_MasterToSlavePipe;
 		
 		protected: typedef ::std::map<t_ApplicationId, t_MasterToSlavePipe>

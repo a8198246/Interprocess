@@ -12,12 +12,12 @@
 #include "../Application Identifier.hpp"
 #include "../Event Identifier.hpp"
 
-#include <cassert>
-
-#include <boost/thread.hpp>
-#include <boost/cstdint.hpp>
 #include <boost/asio.hpp>
 #include <boost/bind.hpp>
+
+#include <boost/thread/thread.hpp>
+
+#include <cassert>
 
 namespace n_vtt
 {
