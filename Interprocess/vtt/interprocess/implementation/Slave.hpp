@@ -119,24 +119,7 @@ namespace n_implementation
 			assert(bc_written <= bc_buffer_capacity);
 			return(bc_written);
 		}
-
-		//private: void
-		//Input_Service_Routine(void)
-		//{
-		//#ifdef _DEBUG_LOGGING
-		//	t_ThreadedLogger::Print_Message(__FUNCSIG__);
-		//#endif
-		//	auto ec_executed_handlers = m_input_service.run();
-		//	DBG_UNREFERENCED_LOCAL_VARIABLE(ec_executed_handlers);
-		//#ifdef _DEBUG_LOGGING
-		//	{
-		//		auto & logger = t_ThreadedLogger::Get_Instance();
-		//		t_LoggerGuard guard(logger);
-		//		logger.Print_Prefix() << "input service thread is quiting after executing " << ec_executed_handlers << " handlers" << ::std::endl;
-		//	}
-		//#endif
-		//}
-
+		
 		//	To be called from input service thread
 		private: void
 		Handle_Input_To_Master(_In_ t_Chunk chunk)
@@ -169,7 +152,7 @@ namespace n_implementation
 		#endif
 			assert(nullptr != p_buffer);
 			assert(0 < bc_buffer_capacity);
-			auto const bc_written = m_broker.Get_CommonPipeForReading(event_id).Read(p_buffer, bc_buffer_capacity, timeout_msec);
+			auto const bc_written = m_broker.Get_CommonPipeForReading(event_id)->Read(p_buffer, bc_buffer_capacity, timeout_msec);
 			assert(bc_written <= bc_buffer_capacity);
 			return(bc_written);
 		}

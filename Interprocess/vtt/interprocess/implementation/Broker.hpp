@@ -42,7 +42,7 @@ namespace n_implementation
 		protected: typedef ::std::map<t_ApplicationId, t_MasterToSlavePipe>
 		t_MasterToSlavePipesMap;
 
-		protected: typedef t_SingleWriterMultiReaderPipe<VTT_INTERPROCESS_BC_MESSAGE_BUFFER_LIMIT>
+		public: typedef t_SingleWriterMultiReaderPipe<VTT_INTERPROCESS_BC_MESSAGE_BUFFER_LIMIT>
 		t_CommonPipe;
 
 		protected: typedef ::std::unique_ptr<t_CommonPipe>
@@ -64,8 +64,6 @@ namespace n_implementation
 		protected: t_EventsIds             m_events_ids;
 		protected: ::boost::thread         m_notifications_thread;
 		protected: ::boost::mutex          m_common_pipes_map_sync;
-		// to be used by slave processes
-		protected: t_CommonPipePointer     m_p_common_pipe;
 
 		#pragma endregion
 
@@ -211,14 +209,14 @@ namespace n_implementation
 		}
 		
 		public: auto
-		Get_CommonPipeForReading(_In_ const int event_id) -> t_CommonPipe &
+		Get_CommonPipeForReading(_In_ const int event_id) -> ::std::unique_ptr<t_CommonPipe>
 		{
 		#ifdef _DEBUG_LOGGING
 			t_ThreadedLogger::Print_Message(__FUNCSIG__);
 		#endif
-			m_p_common_pipe = ::std::make_unique<t_CommonPipe>(Make_CommonPipeName(event_id));
+			auto p_common_pipe = ::std::make_unique<t_CommonPipe>(Make_CommonPipeName(event_id));
 			m_notifications_from_listening_slaves.Write(t_Chunk(reinterpret_cast<char const *>(&event_id), sizeof(event_id)));
-			return(*m_p_common_pipe);
+			return(::std::move(p_common_pipe));
 		}
 
 		protected: static auto
