@@ -342,11 +342,11 @@ interprocess_slave_receive
 int VTT_INTERPROCESS_CALLING_CONVENTION
 interprocess_slave_receive_common
 (
-	_In_                                       const int         event_id
-,	_Out_writes_bytes_opt_(bc_buffer_capacity) char * const      p_buffer
-,	_In_                                       const int         bc_buffer_capacity
-,	_In_                                       const int         timeout_msec
-,	_In_opt_                                   long long * const p_ticks
+	_In_                                       const int          event_id
+,	_Out_writes_bytes_opt_(bc_buffer_capacity) char * const       p_buffer
+,	_In_                                       const int          bc_buffer_capacity
+,	_In_                                       const int          timeout_msec
+,	_Out_opt_                                   long long * const p_ticks
 )
 {
 	auto bc_received = 0;

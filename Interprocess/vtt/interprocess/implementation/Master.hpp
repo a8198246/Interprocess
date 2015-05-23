@@ -85,20 +85,20 @@ namespace n_implementation
 		#endif
 			assert(nullptr != p_buffer);
 			assert(0 < bc_buffer_capacity);
-			size_t bc_written = 0;
+			size_t bc_received(0);
 			auto have_pending_output_from_prvious_call_to_this_function = m_pending_output.Is_Not_Empty();
 			if(have_pending_output_from_prvious_call_to_this_function)
 			{
-				Write_Chunk_To_Buffer(m_pending_output, p_buffer, bc_buffer_capacity, bc_written, m_pending_output);
+				Write_Chunk_To_Buffer(m_pending_output, p_buffer, bc_buffer_capacity, bc_received, m_pending_output);
 			}
 			else
 			{
 				assert(m_pending_output.Is_Empty());
 				auto & pipe = m_broker.Get_SlavesToMasterPipe();
-				Write_Chunk_To_Buffer(pipe.Read(timeout_msec), p_buffer, bc_buffer_capacity, bc_written, m_pending_output);
+				Write_Chunk_To_Buffer(pipe.Read(timeout_msec), p_buffer, bc_buffer_capacity, bc_received, m_pending_output);
 			}
-			assert(bc_written <= bc_buffer_capacity);
-			return(bc_written);
+			assert(bc_received <= bc_buffer_capacity);
+			return(bc_received);
 		}
 
 		//	To be called from input service thread

@@ -101,11 +101,11 @@ namespace n_implementation
 				p_pipe = &m_broker.Get_MasterToSlavePipe(application_id);
 				p_pending_output = &m_pending_outputs[application_id];
 			}
-			size_t bc_written(0);
+			size_t bc_received(0);
 			for(;;)
 			{
-				Write_Chunk_To_Buffer(*p_pending_output, p_buffer, bc_buffer_capacity, bc_written, *p_pending_output);
-				if(bc_written == bc_buffer_capacity)
+				Write_Chunk_To_Buffer(*p_pending_output, p_buffer, bc_buffer_capacity, bc_received, *p_pending_output);
+				if(bc_received == bc_buffer_capacity)
 				{
 					break;
 				}
@@ -116,8 +116,8 @@ namespace n_implementation
 				}
 				*p_pending_output = p_pipe->Read(0);
 			}
-			assert(bc_written <= bc_buffer_capacity);
-			return(bc_written);
+			assert(bc_received <= bc_buffer_capacity);
+			return(bc_received);
 		}
 		
 		//	To be called from input service thread
@@ -152,9 +152,9 @@ namespace n_implementation
 		#endif
 			assert(nullptr != p_buffer);
 			assert(0 < bc_buffer_capacity);
-			auto const bc_written = m_broker.Get_CommonPipeForReading(event_id)->Read(p_buffer, bc_buffer_capacity, timeout_msec);
-			assert(bc_written <= bc_buffer_capacity);
-			return(bc_written);
+			auto const bc_received = m_broker.Get_CommonPipeForReading(event_id)->Read(p_buffer, bc_buffer_capacity, timeout_msec);
+			assert(bc_received <= bc_buffer_capacity);
+			return(bc_received);
 		}
 	};
 }
