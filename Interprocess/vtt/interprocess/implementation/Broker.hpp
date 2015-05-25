@@ -54,7 +54,15 @@ namespace n_implementation
 		protected: typedef ::std::deque<t_EventId>
 		t_EventsIds;
 
+		protected: typedef ::std::pair<int, t_EventId>
+		t_msAgeEventIdPair;
+
+		protected: typedef ::std::deque<t_msAgeEventIdPair>
+		t_FiredEventsIds;
+
 		#pragma region Fields
+
+		protected: static const int m_common_pipes_test_interval = 100;
 
 		protected: t_SlavesToMasterPipe    m_slaves_to_master_pipe;
 		protected: t_MasterToSlavePipesMap m_master_to_slaves_pipes_map;
@@ -62,6 +70,7 @@ namespace n_implementation
 		// to be used by master processes
 		protected: t_CommonPipesMap        m_common_pipes_map; 
 		protected: t_EventsIds             m_events_ids;
+		protected: t_FiredEventsIds        m_fired_events_ids;
 		protected: ::boost::thread         m_notifications_thread;
 		protected: ::boost::mutex          m_common_pipes_map_sync;
 
@@ -82,7 +91,7 @@ namespace n_implementation
 
 		private:
 		t_Broker(t_Broker &&) = delete;
-
+		
 		private: void
 		operator =(t_Broker const &) = delete;
 
@@ -125,7 +134,8 @@ namespace n_implementation
 		{
 			for(;;)
 			{
-				Pull_Notifications(100);
+				Pull_Notifications(m_common_pipes_test_interval);
+				Reset_PendingCommonPipeFlags();
 				::boost::this_thread::interruption_point();
 			}
 		}
@@ -133,10 +143,12 @@ namespace n_implementation
 		protected: void
 		Pull_Notifications(_In_ const int timeout_msec)
 		{
+		#ifdef _DEBUG_LOGGING
+			t_ThreadedLogger::Print_Message(__FUNCSIG__);
+		#endif
 			auto notifications = m_notifications_from_listening_slaves.Read(timeout_msec);
 			if(notifications.Is_Not_Empty())
 			{
-				::boost::lock_guard<::boost::mutex> lock(m_common_pipes_map_sync);
 				auto const event_ids_count = notifications.Get_Size() / sizeof(t_EventId);
 				auto const event_ids_begin = reinterpret_cast<t_EventId const *>(notifications.Get_Data());
 				auto const event_ids_end = event_ids_begin + event_ids_count;
@@ -147,11 +159,14 @@ namespace n_implementation
 					auto const pipe_iterator = m_common_pipes_map.find(event_id);
 					if(m_common_pipes_map.end() == pipe_iterator)
 					{
+						::boost::lock_guard<::boost::mutex> lock(m_common_pipes_map_sync);
 						if(m_common_pipes_map.size() == VTT_INTERPROCESS_EVENTS_QUEUE_SIZE_LIMIT)
 						{
 							auto const oldest_event_id = m_events_ids.front();
 							m_events_ids.pop_front();
-							m_common_pipes_map.erase(oldest_event_id);
+							auto const common_pipe_to_be_erased_iterator = m_common_pipes_map.find(oldest_event_id);
+							common_pipe_to_be_erased_iterator->second.Reset_Flag();
+							m_common_pipes_map.erase(common_pipe_to_be_erased_iterator);
 						}
 						m_events_ids.push_back(event_id);
 						m_common_pipes_map.emplace
@@ -163,6 +178,38 @@ namespace n_implementation
 					}
 					++event_id_iterator;
 				}
+			}
+		}
+
+		protected: void
+		Reset_PendingCommonPipeFlags(void)
+		{
+		#ifdef _DEBUG_LOGGING
+			t_ThreadedLogger::Print_Message(__FUNCSIG__);
+		#endif
+			::boost::lock_guard<::boost::mutex> lock(m_common_pipes_map_sync);
+			if(!m_fired_events_ids.empty())
+			{
+				bool continue_iterating;
+				auto fired_event_id_iterator = m_fired_events_ids.begin();
+				do
+				{
+					auto & current_fired_event_id_ms_age = fired_event_id_iterator->first;
+					auto const current_fired_event_id = fired_event_id_iterator->second;
+					++fired_event_id_iterator;
+					continue_iterating = (m_fired_events_ids.end() != fired_event_id_iterator);
+					current_fired_event_id_ms_age += m_common_pipes_test_interval;
+					if(500 <= current_fired_event_id_ms_age)
+					{
+						auto const pipe_iterator = m_common_pipes_map.find(current_fired_event_id);
+						if(m_common_pipes_map.end() != pipe_iterator)
+						{
+							pipe_iterator->second.Reset_Flag();
+						}
+						m_fired_events_ids.pop_front();
+					}
+				}
+				while(continue_iterating);
 			}
 		}
 
@@ -191,6 +238,7 @@ namespace n_implementation
 			return(m_common_pipes_map_sync);
 		}
 
+		//	m_common_pipes_map_sync should be locked before calling this method.
 		public: auto
 		Get_CommonPipeForWritingPointer(_In_ const int event_id) -> t_CommonPipe *
 		{
@@ -200,6 +248,7 @@ namespace n_implementation
 			auto const pipe_iterator = m_common_pipes_map.find(event_id);
 			if(m_common_pipes_map.end() != pipe_iterator)
 			{
+				m_fired_events_ids.emplace_back(0, event_id);
 				return(&pipe_iterator->second);
 			}
 			else
@@ -207,7 +256,7 @@ namespace n_implementation
 				return(nullptr);
 			}
 		}
-		
+				
 		public: auto
 		Get_CommonPipeForReading(_In_ const int event_id) -> ::std::unique_ptr<t_CommonPipe>
 		{

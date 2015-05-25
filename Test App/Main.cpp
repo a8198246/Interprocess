@@ -16,6 +16,10 @@
 #include <iomanip>
 #include <iostream>
 #include <cassert>
+#include <string>
+#include <ctime>
+#include <array>
+#include <sys/timeb.h>
 
 #ifdef _DEBUG
 #	pragma comment(lib, "libboost_system-vc120-mt-sgd-1_58")
@@ -56,6 +60,9 @@ int  (VTT_INTERPROCESS_CALLING_CONVENTION *udp_multicast_receive            )(wc
 #define PORT                  12345
 
 #define EVENT_ID              45
+
+#define DELAY_1               2000
+#define DELAY_2               5000
 
 inline void
 ErrorCode_To_String(_In_ const int error_code, _Inout_ ::std::wstring & report)
@@ -108,6 +115,15 @@ ConsoleHandler(::DWORD dwType)
 	return TRUE;
 }
 
+void LogTime(struct timeb tp)
+{
+	struct tm lt;
+	localtime_s(&lt, &tp.time);
+	::std::array<char, 256> sz_time;
+	strftime(sz_time.data(), sz_time.size(), "%H:%M:%S", &lt);
+	::std::cout << sz_time.data() << "." << ::std::setw(3) << ::std::setfill('0') << tp.millitm;
+}
+
 class
 t_Worker
 {
@@ -133,9 +149,11 @@ t_Worker
 	private: t_Mutex &            m_sync;             // sync for ::std::cout and rand
 	private: t_Buffer             m_buffer;
 	private: ::std::string        m_last_message_text;
-	private: ::std::map<int, int> m_appid_to_expected_received_message_index;
 	private: ::std::map<int, int> m_appid_to_sent_message_couter;
-	private: int                  m_common_sent_message_counter = 0;
+	private: ::std::map<int, int> m_event_id_to_sent_common_message_couter;
+	private: ::std::map<int, int> m_appid_to_expected_received_message_index;
+	private: int                  m_expected_received_common_message_counter = 0;
+
 	private: t_Thread             m_thread;
 
 	#pragma endregion
@@ -184,19 +202,19 @@ t_Worker
 		{
 			while(g_continue_running)
 			{
-				auto need_to_recieve = true;
+				auto need_to_recieve = false;
 				if(need_to_recieve)
 				{
 					Recieve();
 				}
 
-				auto need_to_send = (rand() % (m_is_master ? SEND_RATE : (SEND_RATE * 20))) == 0;
+				auto need_to_send = false && (rand() % (m_is_master ? SEND_RATE : (SEND_RATE * 20))) == 0;
 				if(need_to_send)
 				{
 					Send();
 				}
 
-				auto need_to_use_common = false;
+				auto need_to_use_common = true;
 				if(need_to_use_common)
 				{
 					Common();
@@ -228,43 +246,91 @@ t_Worker
 			auto need_to_send = (rand() % SEND_RATE) == 0;
 			if(need_to_send)
 			{
-				Generate_Message(m_common_sent_message_counter);
-				++m_common_sent_message_counter;
-				::LARGE_INTEGER start_ts;
-				::QueryPerformanceCounter(&start_ts);
-				interprocess_master_send_to_all(EVENT_ID, m_buffer.data(), static_cast<int>(m_buffer.size()));
-				::LARGE_INTEGER end_ts;
-				::QueryPerformanceCounter(&end_ts);
+				for(auto i = 0; i < 3; ++i)
 				{
-					t_Lock lock(m_sync);
-					::std::cout << "\t >> thread #" << ::boost::this_thread::get_id() << " sent " << m_buffer.size() << " bytes to all the slaves at "
-						<< start_ts.QuadPart << " - " << end_ts.QuadPart << " interval:" << ::std::endl;
-					::std::cout.write(m_buffer.data() + 12, m_buffer.size() - 12);
-					::std::cout.flush();
+					auto const event_id = 2 + i;
+					auto & common_sent_message_counter = m_event_id_to_sent_common_message_couter[event_id];
+					Generate_Message(common_sent_message_counter);
+					//::LARGE_INTEGER start_ts;
+					//::QueryPerformanceCounter(&start_ts);
+					struct timeb start_ts;
+					ftime(&start_ts);
+					interprocess_master_send_to_all(event_id, m_buffer.data(), static_cast<int>(m_buffer.size()));
+					//::LARGE_INTEGER end_ts;
+					//::QueryPerformanceCounter(&end_ts);
+					struct timeb finish_ts;
+					ftime(&finish_ts);
+					{
+						t_Lock lock(m_sync);
+						::std::cout << " >> "
+							"thread #" << ::boost::this_thread::get_id() << " "
+							"sent event #"  << event_id << " "
+							"message #" << common_sent_message_counter << " "
+							"of " << m_buffer.size() << " bytes to all the slaves at ";
+							LogTime(start_ts);
+							::std::cout << " - ";
+							LogTime(finish_ts);
+							::std::cout << " interval: ";
+						::std::cout.write(m_buffer.data() + 12, m_buffer.size() - 12);
+						::std::cout << ::std::endl;
+					}
+					++common_sent_message_counter;
 				}
+
+				Sleep(2000);
 			}
 		}
 		else
 		{
 			m_buffer.resize(BUFFER_SIZE);
-			::LARGE_INTEGER start_ts;
-			::QueryPerformanceCounter(&start_ts);
+			//::LARGE_INTEGER start_ts;
+			//::QueryPerformanceCounter(&start_ts);
+			struct timeb start_ts;
+			ftime(&start_ts);
 			auto const event_id = m_appid;
 			auto bc_received = interprocess_slave_receive_common(event_id, m_buffer.data(), static_cast<int>(m_buffer.size()), 20000, nullptr);
-			::LARGE_INTEGER end_ts;
-			::QueryPerformanceCounter(&end_ts);
+			//::LARGE_INTEGER end_ts;
+			//::QueryPerformanceCounter(&end_ts);
+			struct timeb finish_ts;
+			ftime(&finish_ts);
 			{
 				t_Lock lock(m_sync);
-				if(0 != bc_received)
+				if(12 < bc_received)
 				{
-					::std::cout << "\t << thread #" << ::boost::this_thread::get_id() << " received " << bc_received << " bytes at "
-						<< start_ts.QuadPart << " - " << end_ts.QuadPart << " interval" << ::std::endl;
+					auto const & header(*reinterpret_cast<::std::array<int, 3> const *>(m_buffer.data()));
+					auto const received_message_index(header[1]);
+					if(received_message_index != m_expected_received_common_message_counter)
+					{
+						::std::cout << "ERROR: common message index mismatch, expected " << m_expected_received_common_message_counter << " got " << received_message_index << ::std::endl;
+					}
+					m_expected_received_common_message_counter = received_message_index + 1;
+					::std::cout << " << thread #" << ::boost::this_thread::get_id() << " received "
+						"event #" << m_appid << " "
+						"message #" << received_message_index << " "
+						"of " << bc_received << " bytes size at ";
+					LogTime(start_ts);
+					::std::cout << " - ";
+					LogTime(finish_ts);
+					::std::cout << " interval: ";
 					::std::cout.write(m_buffer.data() + 12, bc_received - 12);
+					::std::cout << ::std::endl;
+				}
+				else if(0 < bc_received)
+				{
+					::std::cout << " << thread #" << ::boost::this_thread::get_id() << " received "
+						"message #" << "?" << " of " << bc_received << " bytes size at ";
+					LogTime(start_ts);
+					::std::cout << " - ";
+					LogTime(finish_ts);
+					::std::cout << " interval" << ::std::endl;
 				}
 				else
 				{
-					::std::cout << "\t << thread #" << ::boost::this_thread::get_id() << " tried to receive at "
-						<< start_ts.QuadPart << " - " << end_ts.QuadPart << " interval" << ::std::endl;
+					::std::cout << " << thread #" << ::boost::this_thread::get_id() << " tried to receive at ";
+					LogTime(start_ts);
+					::std::cout << " - ";
+					LogTime(finish_ts);
+					::std::cout  << " interval" << ::std::endl;
 				}
 				::std::cout.flush();
 			}
@@ -479,6 +545,6 @@ main(int argc, char * args[], char *[])
 	assert(FALSE != unloaded);
 	h_interprocess_library = NULL;
 #endif
-	getchar();
+	//getchar();
 	return(0);
 }

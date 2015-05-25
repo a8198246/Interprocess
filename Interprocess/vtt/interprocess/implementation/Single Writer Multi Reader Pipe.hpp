@@ -110,7 +110,7 @@ namespace n_implementation
 			if(m_event_fired_during_last_read)
 			{
 				m_event_fired_during_last_read = false;
-				::Sleep(1000);
+				::Sleep(1000); // we need to guarantee that event is reset by master process, which should take 500 ms
 			}
 			volatile const long initial_magic = buffer.m_magic;
 			auto wait_result = m_flag.Timed_Wait(timeout_msec);
@@ -141,7 +141,11 @@ namespace n_implementation
 			assert(0 == (reinterpret_cast<ptrdiff_t>(&buffer.m_magic) % 4));
 			InterlockedIncrement(&buffer.m_magic);
 			m_flag.Set();
-			::Sleep(500);
+		}
+
+		public: void
+		Reset_Flag(void)
+		{
 			m_flag.Reset();
 		}
 	};
